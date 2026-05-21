@@ -1,0 +1,15 @@
+#+OPTIONS: toc:nil
+
+* AI Skills
+
+A collection of [[https://opencode.ai/docs/skills][opencode skill]] definitions encoding
+recurring project conventions and workflows.
+
+Symlink =skills/= to =~/.agents/skills/= or =~/.config/opencode/skills/=
+for global discovery.
+
+** Available skills
+
+| Name        | Description                                       |
+|-------------+---------------------------------------------------|
+| python-dev  | Python project conventions for my projects          |
