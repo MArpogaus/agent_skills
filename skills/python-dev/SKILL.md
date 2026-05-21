@@ -951,6 +951,88 @@ def _consistency_resample(...) -> ...:
 def plot_reliability_diagram(...) -> plt.Figure:
     ...
 ```
+---
+
+## Emacs & org-babel conventions
+
+### README.org as primary source
+
+- `README.org` is the single source of truth for project documentation.
+- `README.md` is auto-generated from `.org` via Emacs org-export
+  (pandoc / ox-md) and is **not tracked** in git — add it to
+  `.gitignore`.
+- `pyproject.toml` does NOT include `readme = "README.md"` in the
+  working tree; the user adds it back before release builds.
+
+### Code block conventions
+
+Blocks use `:session` to share Python state when stepping through
+in Emacs.  Each logical code unit gets its own block with a
+`#+NAME:` for cross-referencing.
+
+```org
+#+NAME: block-name
+#+begin_src python :session :tangle <path> :exports <mode>
+  ... code ...
+#+end_src
+```
+
+| `:exports` value | Behaviour                        |
+|------------------+----------------------------------|
+| `code`           | show code only (suppress results)|
+| `results`        | show results only                |
+| `both`           | show code and results            |
+| `nil`            | show nothing (hidden blocks)     |
+
+- Use `:exports code` when results are uninteresting
+  (e.g. import blocks, plot creation).
+- Use `:exports both` when results add value (e.g. a `print()`,
+  a DataFrame head, a notebook-style output).
+- Use `:exports nil` for bash install blocks and other
+  non-essential snippets.
+- Use `:tangle <file>` on blocks that contribute to a runnable
+  script.  Multiple blocks with the same `:tangle` target are
+  concatenated in order.
+- Blocks without `:tangle` are for interactive inspection only
+  and do not end up in the tangled file.
+
+### Example structure (from this repo)
+
+```
+*** Quick start
+
+**** Imports
+#+NAME: imports
+#+begin_src python :session :tangle examples/minimal.py :exports code
+  ...
+#+end_src
+
+**** Reliability diagram
+#+NAME: reliability
+#+begin_src python :session :tangle examples/minimal.py :exports code
+  ...
+#+end_src
+```
+
+Tangled output concatenates all `:tangle` blocks into a single
+runnable script preserving order.
+
+### `.dir-locals.el`
+
+Projects may include a `.dir-locals.el` for Emacs directory-local
+variables:
+
+```elisp
+((nil . ((conda-project-env-path . "<env-name>"))))
+```
+
+### `#+RESULTS:` blocks
+
+Every named code block can have a matching `#+RESULTS:` block
+that caches the output for export.  Use these sparingly — only
+when the output is illustrative (DataFrame head, plot SVG link,
+terminal output).
+
 ## Key references
 
 - Skeleton template:
