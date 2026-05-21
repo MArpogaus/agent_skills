@@ -24,11 +24,17 @@ generic config improvements back to the skeleton template.
 ### Two-branch flow
 
 - **`main`** — clean history, only `init` + merge commits from `dev`.
-  The `init` commit contains exactly `.gitignore` and
-  `.pre-commit-config.yaml`.
+  The `init` commit contains exactly `.gitignore` (and
+  `.pre-commit-config.yaml` if it already exists at that point).
+  Nothing else.  Message is literally: `init` (no body).
 
 - **`dev`** — main working branch.  All feature work, commits, and
   PRs target `dev`.  Never commit directly to `main`.
+
+- **Sketch and redo** when the first attempt gets it wrong:
+  `git update-ref -d HEAD` to remove the root commit (only safe
+  before any branch/push), then `git add` only the intended files
+  and `git commit -m "init"`.
 
 ### Commit messages
 
