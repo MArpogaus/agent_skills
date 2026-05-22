@@ -7,6 +7,8 @@ description: >
 license: MIT
 compatibility: opencode
 metadata:
+  requires:
+    - git-conventions
   stack: python
 ---
 

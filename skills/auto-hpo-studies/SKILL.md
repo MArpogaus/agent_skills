@@ -7,6 +7,9 @@ description: >
 license: MIT
 compatibility: opencode
 metadata:
+  requires:
+    - ml-project
+    - git-conventions
   stack: ml
   audience: researchers
 ---

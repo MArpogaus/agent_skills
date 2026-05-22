@@ -8,6 +8,9 @@ description: >
 license: MIT
 compatibility: opencode
 metadata:
+  requires:
+    - git-conventions
+    - python-dev
   audience: researchers
   stack: ml
 ---

@@ -6,6 +6,7 @@ description: >
 license: MIT
 compatibility: opencode
 metadata:
+  requires: []
   stack: git
 ---
 
