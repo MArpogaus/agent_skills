@@ -191,10 +191,22 @@ strength, training duration.
 
 ### 6 — Launch training run
 
-Start the training pipeline in the background so the agent can
-monitor it:
+Before launch, write a row to the study log with status `launched`:
+
+```markdown
+| N | Date | <param>: <old>→<new> | <old> | — | — | — | launched |
+```
+
+Then start the training pipeline in the background:
 
 ```bash
+# Write status file for resume detection
+echo "running" > /tmp/hpo_<target-id>_status
+echo "<target-id>" > /tmp/hpo_<target-id>_target
+echo "<N>" > /tmp/hpo_<target-id>_iter
+echo "<param-name>:<old-value>-><new-value>" > /tmp/hpo_<target-id>_change
+
+# Launch
 nohup <run-command> > logs/iter<N>_<target-id>.log 2>&1 &
 PID=$!
 echo $PID > /tmp/hpo_iter<N>.pid
@@ -207,10 +219,13 @@ invoke the top-level command that runs all of them.
 
 ### 7 — Monitor with sleep-based polling
 
-After launching, poll for completion:
+After launching, poll for completion.  This is the longest step —
+the agent must sleep and wait, not spin.
+
+**Shell-based polling (PID available):**
 
 ```bash
-# Basic PID-based polling
+# Poll until process exits
 while kill -0 $PID 2>/dev/null; do
     sleep 30
 done
@@ -220,52 +235,56 @@ wait $PID
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
     echo "Run failed with exit code $EXIT_CODE"
+    echo "failed" > /tmp/hpo_<target-id>_status
     # Handle failure: revert config, log error, continue
 fi
 ```
 
-For agents with tool-based process control (no shell PID access),
-use a file-based handoff:
+**File-based polling (agent has no PID access):**
+
+The launch command (step 6) already set the status file to
+`running`.  The training script must write `completed` on exit:
 
 ```bash
-# At launch:
-echo "running" > /tmp/hpo_<target-id>_status
+# Must be appended to the end of <run-command> or a wrapper:
 <run-command> > logs/iter<N>.log 2>&1
-echo "done" > /tmp/hpo_<target-id>_status
+echo "completed" > /tmp/hpo_<target-id>_status
 ```
 
-Then poll by reading the status file:
+Poll by reading the status file:
 
 ```python
 import time
 import pathlib
 
 status_file = pathlib.Path("/tmp/hpo_<target-id>_status")
-while status_file.read_text().strip() != "done":
+while status_file.read_text().strip() == "running":
     time.sleep(30)
 ```
 
-**Polling interval:** 30–60 seconds for typical ML training runs
-(minutes to hours).  Adjust based on expected run duration.
+**Polling interval:** 30–60 seconds for runs of minutes to hours.
+Adjust based on expected duration.
 
-**Progress check inside the loop:** periodically tail the log file
-to detect stalls (no new output after N minutes):
+**Stall detection:** check log file growth each cycle:
 
 ```python
-import time
-
 log_file = pathlib.Path("logs/iter<N>.log")
 last_size = log_file.stat().st_size
 
-while status_file.read_text().strip() != "done":
+while status_file.read_text().strip() == "running":
     time.sleep(60)
     current_size = log_file.stat().st_size
     if current_size == last_size:
-        # No progress for 60s — may be stalled
-        # Consider: check process, escalate, or abort
+        # No output appended for 60s — possible stall.
+        # Check if process is alive, abort if hung.
         pass
     last_size = current_size
 ```
+
+On stall suspicion: check exit code, check GPU utilisation with
+`nvidia-smi`, check log tail for error messages.  If hung, abort
+(`kill <PID>`), write `failed` to status file, revert config,
+and try different params.
 
 ### 8 — Read new metrics from MLflow
 
@@ -277,6 +296,9 @@ Validate the run completed successfully:
 - `best_epoch` is reasonable (> 5, not equal to `max_epochs` if
   early stopping was expected to trigger).
 - The run has the expected tags.
+
+If validation fails (NaN, no metrics, wrong tags), write `failed`
+to status file and treat as run failure in step 9.
 
 ### 9 — Compare
 
@@ -292,9 +314,11 @@ improvement = old_val_loss - new_val_loss  # negative = better
 | NaN result | Revert, log issue |
 
 When reverting: restore the config file to its pre-edit state
-(e.g. `git checkout -- <config-file>`).
+(e.g. `git checkout -- <config-file>`), update study log row
+status to `reverted`, and try a different param.
 
-After keeping: commit with message:
+After keeping: update the study log row with metrics and status
+`committed`:
 
 ```
 feat(hpo): <target-id> iter<N> — <param> <old>→<new> (val: <old>→<new>)
@@ -316,13 +340,120 @@ Evaluate against the user-defined criteria.  Typical rules:
 If stopping criterion met:
 1. Write a summary to the study log: best config, best metric,
    iteration history.
-2. Commit:
+2. Clean up status files: `rm -f /tmp/hpo_<target-id>*`
+3. Commit:
    ```
    feat(hpo): <target-id> — optimisation complete (val_loss: <best>)
    ```
-3. Report results to the user.
+4. Report results to the user.
 
-If not met, return to step 2.
+If not met, clean up status files from this iteration and return
+to step 2.  The next iteration will write fresh status files.
+
+---
+
+## Resume after interruption
+
+The loop is designed to survive agent interruptions (timeout, session
+end, crash).  When the skill loads and finds an existing study, the
+first action is to determine the current state and continue from
+exactly where it left off.
+
+### State sources
+
+| Source | What it tells you |
+|--------|--------------------|
+| `hpo_study.md` exists? | Study was started. If missing, ask user for definition (step 1). |
+| Git log last commit | `git log --oneline -1 --grep="feat(hpo): <target-id>"` — the last committed iteration number. |
+| Status file | `/tmp/hpo_<target-id>_status` — `running`, `completed`, or missing. |
+| Working tree diff | `git diff params/` — uncommitted config changes from the current iteration. |
+| MLflow last run | Query most recent run for this target — may have metrics from an uncommitted iteration. |
+
+### Resume decision tree
+
+Read the sources in order, then branch:
+
+```
+Does hpo_study.md exist?
+├── No → study never started. Go to step 1 (ask user for definition).
+└── Yes → check status file.
+       └── Status file says "running" → training process may still be alive.
+            ├── PID exists and process is running → resume monitoring (step 7).
+            │    Poll the log file, wait for completion.
+            └── PID gone / process dead → run finished or crashed.
+                 Check MLflow for new metrics.
+                 ├── Metrics found → go to step 8 (read + compare).
+                 └── No metrics / NaN → run failed. Revert config,
+                      log failure in study log, start new iteration
+                      with different params (step 4).
+
+       Status file says "completed" → run finished but loop was interrupted
+       before commit.  Go to step 8 (read metrics → compare → commit).
+
+       No status file → loop was interrupted between commit and next launch.
+            Check git log for last HPO commit:
+            ├── Last row in study log has a commit hash →
+            │    previous iteration complete.  Check stopping criteria
+            │    (step 10), then start new iteration (step 2).
+            └── Study log empty / no commits →
+                 study defined but nothing run yet.  Go to step 2.
+```
+
+### Status file protocol
+
+Write the status file at every state transition so the resume
+logic always has a deterministic signal:
+
+```bash
+# In launch (step 6):
+echo "running" > /tmp/hpo_<target-id>_status
+echo "<target-id>" > /tmp/hpo_<target-id>_target
+echo "<N>" > /tmp/hpo_<target-id>_iter
+echo "<param-name>:<old-value>-><new-value>" > /tmp/hpo_<target-id>_change
+
+# In monitoring (step 7), on completion:
+echo "completed" > /tmp/hpo_<target-id>_status
+
+# In compare (step 9), if NaN/failure:
+echo "failed" > /tmp/hpo_<target-id>_status
+
+# Before next launch, clean up:
+rm -f /tmp/hpo_<target-id>_status /tmp/hpo_<target-id>_iter \
+      /tmp/hpo_<target-id>_change
+```
+
+### Restoring the config after crash
+
+If the agent was interrupted mid-iteration (config edited, run not
+yet committed), the working tree shows the uncommitted config diff.
+Before resuming, check:
+
+```bash
+git diff params/
+```
+
+- If diff exists and status file says `running` → this config was
+  launched, keep it and monitor.
+- If diff exists and status file is missing → config was edited
+  but never launched.  Revert and start fresh:
+  `git checkout -- params/<target>/<model>.yaml`
+- No diff → clean state, proceed normally.
+
+### Study log row format
+
+Write the row **before** launch and fill in metrics + commit hash
+after the run completes.  This leaves a trace even if interrupted:
+
+```markdown
+| # | Date | Param change | Old val | New val | Δ val_loss | Commit | Status |
+|---|------|-------------|---------|---------|------------|--------|--------|
+| 1 | 2026-05-22 | lr: 0.001→0.0005 | — | — | — | — | launched |
+| 1 | 2026-05-22 | lr: 0.001→0.0005 | -98.16 | -130.84 | -32.68 | abc1234 | committed |
+```
+
+The `Status` column lets the resume logic immediately identify
+incomplete rows.  After interruption, scan the table for the last
+row with `Status` ≠ `committed` and decide what to do.
 
 ---
 
@@ -356,15 +487,23 @@ for r in runs:
 
 ## Logging conventions
 
-The study log (e.g. `hpo_study.md`) is a living document:
+The study log (e.g. `hpo_study.md`) is a living document and the
+**primary resume source**:
 
 1. **Header** — written once at start: target definition, search
    space, stopping criteria, baseline.
-2. **Progress table** — one row appended per iteration:
-   `| # | Date | Param changed | Old val | New val | Δ val_loss | Commit |`
+2. **Progress table** — one row per iteration with a `Status`
+   column.  The row is written at launch (status: `launched`) and
+   updated on completion (status: `committed` or `reverted` or
+   `failed`):
+   ```
+   | # | Date | Param changed | Old val | New val | Δ val_loss | Commit | Status |
+   ```
 3. **Each iteration is a git commit**, so `git log` alone serves
    as the complete iteration history.  The study log duplicates
-   key information for quick human reading.
+   key information for quick human reading and interruption recovery.
+4. **On resume**, scan for the last row where `Status` ≠ `committed`
+   to determine the next action (see Resume after interruption).
 
 ---
 
@@ -377,7 +516,9 @@ The study log (e.g. `hpo_study.md`) is a living document:
 | NaN after 3 different attempts | Declare this model/variant unstable for this target. Document in study log. |
 | Δ < 0.1 for 5 consecutive iterations | Plateau reached. Stop optimisation for this target. |
 | val_loss improves but train_loss stays flat | Continue — val_loss is the primary metric. |
-| User interrupts the loop | The last commit is the restore point. Resume from `git log` tail. |
+| Agent interrupted mid-iteration | On reload: check status file → `running`: resume monitoring; `completed`: read metrics + commit; missing: check study log last row status. See "Resume after interruption" section. |
+| Study log row has `launched` status from prior session | Check status file → `running`: resume monitoring; `completed`: read MLflow metrics; missing/failed: revert config, mark row `failed`, start new iteration. |
+| Study log row has metrics but no commit hash | Run was completed but not committed. Run compare (step 9) and commit. |
 
 ---
 
