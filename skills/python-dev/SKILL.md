@@ -3,7 +3,7 @@ name: python-dev
 description: >
   Python project conventions: setuptools, ruff I/E/F/D/UP,
   NumPy docstrings, pdoc, pytest xdist, uv, commitizen,
-  pre-commit, matplotlib figure patterns, skeleton.git flow.
+  matplotlib figure patterns, and skeleton-based project setup.
 license: Apache-2.0
 compatibility: opencode
 metadata:
@@ -21,80 +21,64 @@ generic config improvements back to the skeleton template.
 
 ## Git workflow
 
-### Two-branch flow
+This skill covers Python-specific conventions.  For git workflow
+(two-branch flow, conventional commits, pre-commit hooks,
+dependabot, tagging/releases), load the `git-conventions` skill.
 
-- **`main`** — clean history, only `init` + merge commits from `dev`.
-  The `init` commit contains exactly `.gitignore` (and
-  `.pre-commit-config.yaml` if it already exists at that point).
-  Nothing else.  Message is literally: `init` (no body).
+### Skeleton repo
 
-- **`dev`** — main working branch.  All feature work, commits, and
-  PRs target `dev`.  Never commit directly to `main`.
+A skeleton template is maintained at a public Git hosting
+platform (see [Key references](#key-references) for the URL).
+It serves as the single source of truth for project conventions
+across all Python projects.
 
-- **Sketch and redo** when the first attempt gets it wrong:
-  `git update-ref -d HEAD` to remove the root commit (only safe
-  before any branch/push), then `git add` only the intended files
-  and `git commit -m "init"`.
+### Initial project setup
 
-### Commit messages
-
-Conventional commits, small and meaningful:
-
-```
-<type>: <short description (max 68 chars)>
-
-[optional body wrapped at 72 chars]
-```
-
-| Type     | Usage                           |
-|----------|---------------------------------|
-| `feat`   | new user-facing feature         |
-| `fix`    | bug fix                         |
-| `docs`   | documentation only              |
-| `style`  | formatting, no logic change     |
-| `refactor`| code restructure, no behaviour change |
-| `test`   | adding or updating tests        |
-| `ci`     | CI / workflow changes           |
-| `chore`  | tooling, dependencies, config   |
-
-**Guidelines**:
-- Description must not exceed 68 characters.
-- Body text wrapped at 72 characters.
-- Each commit is a single logical change — no "and also fix X"
-  mixed in.
-- Use imperative present tense: "add" not "added" / "adds".
-
-**Good**:
-```
-feat: implement the thing
-
-Describe the approach in the body.  Keep focus on what
-and why, not on external references.
-```
-
-**Bad**:
-```
-fixed stuff and added some tests and also updated readme
-```
+1. **Clone the skeleton** to the desired project location:
+   ```
+   git clone <skeleton-url> <new-project>
+   cd <new-project>
+   ```
+2. **Remove the `.git` folder** to detach from upstream:
+   ```
+   rm -rf .git
+   ```
+3. **Re-initialise** with just `.gitignore` and
+   `.pre-commit-config.yaml` staged:
+   ```
+   git init
+   git add .gitignore .pre-commit-config.yaml
+   git commit -m "init"
+   ```
+4. **Create `dev` branch** and switch to it:
+   ```
+   git branch dev
+   git checkout dev
+   ```
+5. **Adapt files** for the new project — `pyproject.toml` metadata,
+   package directories, source module names, and any project-
+   specific dependencies.
+6. **Commit the adaptations** on `dev`.
+7. **Start implementation.**
 
 ### Skeleton update flow
 
 When making a generic config improvement that could benefit
 future projects (e.g. updating pre-commit hook revs, adding
 dependabot, improving CI workflows, refining ruff rules), also
-apply the same change to the skeleton template at:
-
-```
-~/Projekte/python-project-skeleton/
-```
+apply the same change to the skeleton repository.
 
 This keeps the skeleton evergreen and avoids repeating the
 same update across every project.
 
 Procedure:
-1. Change config in current project on `dev`.
-2. Cherry-pick / copy the same change to the skeleton.
-3. Commit skeleton update separately with message like:
+1. Clone the skeleton if not already present:
+   ```
+   git clone <skeleton-url>
+   ```
+2. Change config in current project on `dev`.
+3. Cherry-pick / copy the same change to the skeleton.
+4. Commit skeleton update separately with message like:
    `chore: bump pre-commit ruff rev to v0.11.10`
    or
    `ci: add dependabot config`
@@ -1035,8 +1019,7 @@ terminal output).
 
 ## Key references
 
-- Skeleton template:
-  https://github.com/MArpogaus/minimal_python_project_skeleton
+- Skeleton template: `<skeleton-url>` (public repo URL)
 - Conventional commits:
   https://www.conventionalcommits.org/
 - Ruff rules:
