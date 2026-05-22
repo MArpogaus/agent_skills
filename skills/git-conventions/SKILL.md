@@ -48,6 +48,10 @@ Conventional commits, small and meaningful:
 | `chore`    | tooling, dependencies, config   |
 
 **Guidelines**:
+- **One file, one change** — each commit should modify files
+  that serve a single purpose.  If you edit a config file and
+  add a new feature in the same batch, split them: first commit
+  the config change, then the feature.
 - **One logical change per commit** — never bundle unrelated
   changes.  If a commit needs "and also" in its message, split it.
 - **Keep commits small** — prefer multiple small commits over one
