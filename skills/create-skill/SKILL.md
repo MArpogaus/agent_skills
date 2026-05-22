@@ -3,7 +3,7 @@ name: create-skill
 description: >
   Guide to create a new opencode skill: determine requirements, domain,
   workflows, conventions, and generate the SKILL.md file.
-license: Apache-2.0
+license: MIT
 compatibility: opencode
 metadata:
   stack: meta
@@ -15,6 +15,12 @@ This skill guides you through creating a new skill — a reusable
 SKILL.md that agents can load on demand. The result must be
 generic (no private/project/env-specific details) yet contain
 all necessary specifics for the domain.
+
+## Working directory
+
+All skills live in `~/Projekte/agent_skills/skills/<name>/SKILL.md`.
+That repo is symlinked to `~/.agents/skills/`.  **Always edit files
+in the repo** (`~/Projekte/agent_skills/`), not through the symlink.
 
 ## Procedure
 
@@ -51,14 +57,16 @@ cover. Collect at minimum:
 | What commands should the skill document? | CLI commands for verification |
 | Any key references (docs, standards, repos)? | Sources of truth |
 
-### 4. Choose frontmatter fields
+### 4. Set frontmatter
 
-Ask the user about optional frontmatter:
+Always use these defaults — **do not ask the user**:
 
-- `license` (default: `Apache-2.0`)
-- `compatibility` (default: `opencode`)
-- `metadata` — a string-to-string map for additional tags
-  (e.g. `audience: maintainers`, `stack: python`)
+| Field | Value |
+|-------|-------|
+| `license` | `MIT` |
+| `compatibility` | `opencode` |
+
+Optionally ask about `metadata` — a string-to-string map (e.g. `audience: maintainers`, `stack: python`).
 
 ### 5. Generate the skill
 
@@ -95,3 +103,10 @@ After writing, verify:
       information is hardcoded
 - [ ] The skill uses existing patterns from nearby skills
 - [ ] The file is named `SKILL.md` (all caps)
+
+### 8. Register in repo
+
+After creating the skill file:
+- [ ] Add the skill to the table in `README.org`
+- [ ] `git add` the new skill directory and any changed files
+- [ ] Commit with message: `feat: add <name> skill definition`
