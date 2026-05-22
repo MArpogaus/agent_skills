@@ -19,3 +19,4 @@ All skills are licensed under MIT — see =LICENSE=.
 | create-skill           | Guide for generating new opencode skills         |
 | latex-paper-revision   | LaTeX paper revision and enhancement workflow    |
 | ml-project             | Research ML project conventions (DVC, MLflow, HPO) |
+| auto-hpo-studies       | Automated HPO study workflow: phased sweeps via DVC repro, MLflow tracking, hpo_study.md logging |
