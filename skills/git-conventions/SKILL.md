@@ -27,9 +27,63 @@ metadata:
   before any branch/push), then `git add` only the intended files
   and `git commit -m "init"`.
 
+## Commit workflow (plan-first)
+
+Before making any edits, the agent **must** plan the commit
+structure:
+
+### 1. Identify commit boundaries
+
+List each logical change as a separate commit.  A commit is one
+atomic unit: one concern, one purpose.  Examples of separate
+commits:
+
+- `chore: add .pre-commit-config.yaml`
+- `feat: implement user login endpoint`
+- `refactor: extract auth middleware`
+- `docs: update API usage examples`
+
+If a task spans multiple concerns, write them down as ordered
+commit descriptions **before touching any file**.
+
+### 2. Work one commit at a time
+
+1. **Stage** — edit only the files needed for *this* commit.
+   If a file needs changes for two different commits (e.g. add a
+   function in one commit and use it in the next), make the change
+   for the *current* commit only.  Use `git diff` to verify only
+   intended lines are changed.
+2. **Commit** — write the conventional commit message.
+3. **Verify** — run `git status` to confirm a clean working tree
+   before starting the next commit.
+4. **Repeat** — move to the next planned commit.
+
+### 3. Handling scope creep
+
+If mid-work you discover an unrelated fix is needed:
+- **Do not** bundle it with the current commit.
+- Stage and commit the current change first.
+- Then make the unrelated fix as its own commit.
+- If the unrelated fix is urgent, stop current work entirely,
+  commit the in-progress change (with `WIP:` prefix if unfinished),
+  handle the fix, then resume.
+
+### 4. When edits target a single file for multiple reasons
+
+If one file needs changes for two separate purposes (e.g. add an
+import and also fix a typo), use `git add -p` to stage only the
+relevant hunks for each commit:
+
+```bash
+git add -p path/to/file   # stage only hunks for commit A
+git commit -m "<type>: <msg>"
+git add -p path/to/file   # stage remaining hunks for commit B
+git commit -m "<type>: <msg>"
+```
+
 ## Commit messages
 
-Conventional commits, small and meaningful:
+Conventional commits:
 
 ```
 <type>: <short description (max 68 chars)>
@@ -49,10 +103,6 @@ Conventional commits, small and meaningful:
 | `chore`    | tooling, dependencies, config   |
 
 **Guidelines**:
-- **One file, one change** — each commit should modify files
-  that serve a single purpose.  If you edit a config file and
-  add a new feature in the same batch, split them: first commit
-  the config change, then the feature.
 - **One logical change per commit** — never bundle unrelated
   changes.  If a commit needs "and also" in its message, split it.
 - **Keep commits small** — prefer multiple small commits over one
@@ -63,6 +113,8 @@ Conventional commits, small and meaningful:
 - Description must not exceed 68 characters.
 - Body text wrapped at 72 characters.
 - Use imperative present tense: "add" not "added" / "adds".
+- **Commit boundary rule**: if you cannot describe the commit in
+  a single `type: description` line, it is too large — split it.
 
 ## Pre-commit hooks
 
