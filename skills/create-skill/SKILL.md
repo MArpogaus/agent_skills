@@ -1,0 +1,97 @@
+---
+name: create-skill
+description: >
+  Guide to create a new opencode skill: determine requirements, domain,
+  workflows, conventions, and generate the SKILL.md file.
+license: Apache-2.0
+compatibility: opencode
+metadata:
+  stack: meta
+---
+
+# Skill: Create a New opencode Skill
+
+This skill guides you through creating a new skill — a reusable
+SKILL.md that agents can load on demand. The result must be
+generic (no private/project/env-specific details) yet contain
+all necessary specifics for the domain.
+
+## Procedure
+
+### 1. Determine skill name
+
+Use the `question` tool to ask the user for the name. It must:
+- Be 1–64 characters
+- Be lowercase alphanumeric with single hyphen separators
+- Not start or end with `-`
+- Not contain consecutive `--`
+- Match regex: `^[a-z0-9]+(-[a-z0-9]+)*$`
+
+Validate the name against this regex. If invalid, ask again.
+
+### 2. Determine description
+
+Ask the user for a short description (1–1024 characters). It should
+be specific enough that an agent can decide whether to load this
+skill. Examples:
+- "Linting, formatting, and type-checking Python projects with ruff and mypy"
+- "Guide for writing commit messages following conventional commits"
+
+### 3. Gather domain information
+
+Ask the user structured questions about what the skill should
+cover. Collect at minimum:
+
+| Question | Purpose |
+|----------|---------|
+| What task or domain does this skill cover? | Scope definition |
+| What tools / runtimes are involved? | e.g. Python, Node, Docker, LaTeX |
+| What workflows or step sequences are needed? | Ordered procedure |
+| What conventions, style rules, or config files exist? | Precision rules |
+| What commands should the skill document? | CLI commands for verification |
+| Any key references (docs, standards, repos)? | Sources of truth |
+
+### 4. Choose frontmatter fields
+
+Ask the user about optional frontmatter:
+
+- `license` (default: `Apache-2.0`)
+- `compatibility` (default: `opencode`)
+- `metadata` — a string-to-string map for additional tags
+  (e.g. `audience: maintainers`, `stack: python`)
+
+### 5. Generate the skill
+
+Create `skills/<name>/SKILL.md` with:
+
+- Required YAML frontmatter (`name`, `description`)
+- Optional frontmatter fields
+- Clear sections (phases, steps, conventions, references)
+- Generic phrasing — no hardcoded paths, project names, or
+  environment-specific details. Use placeholders like
+  `<project>`, `<package>`, `<your-org>` where needed.
+- Code blocks with examples that use the tools available to
+  the agent (Read, Edit, Write, Bash, Glob, Grep, etc.)
+
+### 6. File structure
+
+Each skill lives in its own directory:
+
+```
+skills/<name>/
+└── SKILL.md
+```
+
+No other files are needed. The directory name must match the
+`name` field in frontmatter.
+
+### 7. Verification
+
+After writing, verify:
+- [ ] Frontmatter is valid YAML and includes `name` + `description`
+- [ ] `name` matches the regex `^[a-z0-9]+(-[a-z0-9]+)*$`
+- [ ] `description` is between 1 and 1024 characters
+- [ ] No private, project-specific, or environment-specific
+      information is hardcoded
+- [ ] The skill uses existing patterns from nearby skills
+- [ ] The file is named `SKILL.md` (all caps)
