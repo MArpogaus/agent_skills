@@ -3,7 +3,7 @@ name: latex-paper-revision
 description: >
   LaTeX paper revision workflow: structural analysis, content generation,
   language polishing, figure/table integration, and final cleanup.
-license: Apache-2.0
+license: MIT
 compatibility: opencode
 metadata:
   stack: latex

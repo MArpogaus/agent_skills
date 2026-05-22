@@ -3,7 +3,7 @@ name: git-conventions
 description: >
   Git workflow conventions: two-branch flow, conventional commits,
   pre-commit hooks, dependabot, tagging, and releases.
-license: Apache-2.0
+license: MIT
 compatibility: opencode
 metadata:
   stack: git

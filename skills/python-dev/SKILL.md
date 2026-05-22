@@ -4,7 +4,7 @@ description: >
   Python project conventions: setuptools, ruff I/E/F/D/UP,
   NumPy docstrings, pdoc, pytest xdist, uv, commitizen,
   matplotlib figure patterns, and skeleton-based project setup.
-license: Apache-2.0
+license: MIT
 compatibility: opencode
 metadata:
   stack: python
