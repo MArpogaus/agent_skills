@@ -8,8 +8,14 @@ recurring project conventions and workflows.
 Symlink =skills/= to =~/.agents/skills/= or =~/.config/opencode/skills/=
 for global discovery.
 
+All skills are licensed under MIT — see =LICENSE=.
+
 ** Available skills
 
-| Name        | Description                                       |
-|-------------+---------------------------------------------------|
-| python-dev  | Python project conventions for my projects          |
+| Name                   | Description                                      |
+|------------------------+--------------------------------------------------|
+| python-dev             | Python conventions: setuptools, ruff, pytest, uv |
+| git-conventions        | Git workflow: two-branch, conventional commits   |
+| create-skill           | Guide for generating new opencode skills         |
+| latex-paper-revision   | LaTeX paper revision and enhancement workflow    |
+| ml-project             | Research ML project conventions (DVC, MLflow, HPO) |
