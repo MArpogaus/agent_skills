@@ -19,4 +19,4 @@ All skills are licensed under MIT — see =LICENSE=.
 | create-skill           | Guide for generating new opencode skills         |
 | latex-paper-revision   | LaTeX paper revision and enhancement workflow    |
 | ml-project             | Research ML project conventions (DVC, MLflow, HPO) |
-| auto-hpo-studies       | Autonomous HPO loop: define plan, then update-params repro commit repeat until convergence |
+| auto-hpo-studies       | Autonomous HPO loop: define target, iterate update-config run monitor commit until convergence. Uses MLflow, sleep-based polling |

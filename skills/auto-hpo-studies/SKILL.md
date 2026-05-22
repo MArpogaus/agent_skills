@@ -1,9 +1,9 @@
 ---
 name: auto-hpo-studies
 description: >
-  Long-running autonomous HPO: define plan in hpo_study.md, then loop
-  update-params repro commit repeat until validation loss converges.
-  Track every iteration as a git commit with val_loss diff.
+  Autonomous hyperparameter optimization loop: define target and search
+  space, then iterate update-config run monitor log commit until convergence.
+  Uses MLflow for tracking, sleep-based polling for long-running tasks.
 license: MIT
 compatibility: opencode
 metadata:
@@ -13,346 +13,376 @@ metadata:
 
 ## When to use
 
-Load when running a multi-iteration hyperparameter optimisation study
-where an agent autonomously iterates: read metrics, diagnose, tweak
-config, DVC repro, check result, commit, repeat.  The study plan and
-every iteration result live in `hpo_study.md`.
+Load when running a multi-iteration HPO study where an agent
+autonomously iterates: tweak a config parameter, launch a training
+run, monitor via sleep-based polling until completion, compare
+results via MLflow, commit if improved, and repeat until convergence.
 
 ---
 
 ## Prerequisite skills
 
-This skill covers the HPO loop.  Load these companion skills for
-supporting conventions:
-
-- **ml-project** — DVC `foreach` layout, per-target configs,
-  MLflow tracking, `hpo_study.md` as structured log, Feather I/O.
-- **git-conventions** — two-branch flow (`main`/`dev`), conventional
-  commits (`feat(hpo):` prefix), pre-commit hooks, one-commit-per-step.
-- **python-dev** — YAML config editing, ruff formatting, numpy docstrings,
-  `uv run` for ad-hoc analysis scripts.
+- **ml-project** — provides the project-specific ML conventions:
+  pipeline structure, config format, training script interface,
+  experiment naming.  Load this skill *first*, then auto-hpo-studies
+  on top.
+- **git-conventions** — branching, conventional commits.
 
 ---
 
-## Study plan (written once at the start)
+## Overview
 
-Before the first iteration, write a structured plan at the top of
-`hpo_study.md`.  The plan is the agent's brief for the entire run:
+The agent runs an autonomous loop after the user defines the target.
+No manual intervention between iterations.
 
-```markdown
-# HPO Study: <project-name>
-
-## Plan
-
-| Field | Value |
-|-------|-------|
-| Targets | `dla`, `ofen_g_koks`, `ofen_f_koks`, `pl2` |
-| Models | `bernstein_nf`, `spline_nf`, `normal_baseline`, `lognormal_baseline` |
-| Base config | `params/models/<target>/<model>.yaml` |
-| Metric | `min_val_loss` (lower is better) |
-| Direction | minimise NLL (negative → better calibration) |
-
-## Search space (params to vary)
-
-| Param | Initial | Range | Step / strategy |
-|-------|---------|-------|-----------------|
-| `initial_learning_rate` | `0.001` | `1e-4` – `1e-2` | log-scale halving |
-| `lr_schedule` | `constant` | `{constant, cosine_decay}` | binary |
-| `num_parameters` | `8` | `4` – `24` | +4 per step |
-| `hidden_units` | `[128, 128]` | `[64,64]` – `[256,256]` | widen dims |
-| `dropout` | `0.0` | `0.0` – `0.3` | +0.05 per step |
-| `batch_norm` | `false` | `{false, true}` | binary |
-| `max_epochs` | `200` | `100` – `500` | +100 per step |
-| `early_stopping_patience` | `10` | `10` – `50` | +10 per step |
-
-## Stopping criteria (any of)
-
-1. `min_val_loss` target reached (e.g. `-180` for DLA spline).
-2. 5 consecutive iterations without `val_loss` improvement.
-3. All params at search-space boundary.
-4. Clear overfitting (val_loss rising while train_loss still falling).
-
-## Progress
-
-| # | Date | Model | Target | Params changed | Train loss | Val loss | Δ val_loss | Commit |
-|---|------|-------|--------|----------------|------------|----------|------------|--------|
-|   |      |       |        |                |            |          |            |        |
 ```
-
-Commit the plan before starting:
-```
-feat(hpo): <target> -- initial study plan
+┌─────────────────────────────────────────────────────────┐
+│ 1. Define target (user provides once)                   │
+│    - which model/variant to optimise                    │
+│    - search space: params, ranges, step sizes           │
+│    - stopping criteria                                  │
+│    - baseline config + initial run                      │
+└──────────────────────────┬──────────────────────────────┘
+                           ▼  (loop begins)
+┌─────────────────────────────────────────────────────────┐
+│ 2. FETCH current metrics from MLflow                    │
+│    query the last run for this model+target combination │
+└──────────────────────────┬──────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────┐
+│ 3. DIAGNOSE training state                              │
+│    healthy? overfitting? underfitting? NaN? converged?  │
+└──────────────────────────┬──────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────┐
+│ 4. DECIDE next parameter change                         │
+│    pick one param, compute new value from search space  │
+└──────────────────────────┬──────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────┐
+│ 5. APPLY change to config                               │
+└──────────────────────────┬──────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────┐
+│ 6. LAUNCH training run                                  │
+│    start pipeline / script in background                │
+│    capture PID for monitoring                           │
+└──────────────────────────┬──────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────┐
+│ 7. MONITOR with sleep-based polling                     │
+│    while process running: sleep(N), check PID,          │
+│    tail log for progress, detect stalls                 │
+└──────────────────────────┬──────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────┐
+│ 8. READ new metrics from MLflow                         │
+│    query the run that just completed                    │
+└──────────────────────────┬──────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────┐
+│ 9. COMPARE                                               │
+│    new vs previous min_val_loss                          │
+│    improved? → keep config + commit                     │
+│    regressed? → revert config + try different approach  │
+└──────────────────────────┬──────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────┐
+│ 10. CHECK stopping criteria                             │
+│     met? → commit final summary, stop                   │
+│     not met? → go to step 2                             │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## The loop
+## Step-by-step
 
-Each iteration follows the same pattern.  The agent runs this loop
-fully autonomously until a stopping criterion triggers.
+### 1 — Define target (user provides once)
 
-```
-┌─────────────────────────────────────────────────────┐
-│ 1. READ current metrics                             │
-│    results/<target>/<model>/metrics.yaml            │
-└──────────────────────────┬──────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│ 2. DIAGNOSE current state                           │
-│    overfitting? underfitting? converged?            │
-└──────────────────────────┬──────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│ 3. DECIDE next change                               │
-│    pick one param, compute new value                │
-└──────────────────────────┬──────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│ 4. EDIT config                                      │
-│    params/models/<target>/<model>.yaml              │
-└──────────────────────────┬──────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│ 5. REPRO                                             │
-│    dvc repro train@datasetX-<model>                 │
-│    (wait for completion, check exit code)           │
-└──────────────────────────┬──────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│ 6. READ new metrics                                 │
-│    results/<target>/<model>/metrics.yaml            │
-└──────────────────────────┬──────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│ 7. COMPARE                                           │
-│    new_min_val_loss vs old_min_val_loss             │
-│    improved? → keep + commit                        │
-│    regressed? → revert + try different param        │
-└──────────────────────────┬──────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│ 8. LOG to hpo_study.md                              │
-│    append row to Progress table                     │
-└──────────────────────────┬──────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│ 9. CHECK stopping criteria                          │
-│    met? → stop and commit final summary             │
-│    not met? → go to step 1                         │
-└─────────────────────────────────────────────────────┘
+The user specifies:
+
+- **Target ID** — a short label used in commit messages and
+  MLflow tags (e.g. `dla-bernstein-nf`).
+- **Model/variant** — which model architecture to optimise.
+- **Search space** — a table of tunable parameters, their initial
+  values, allowed ranges, and step sizes / strategies.
+- **Stopping criteria** — at least two of: target metric value,
+  max iterations without improvement, max total iterations,
+  search space exhausted signal.
+- **Baseline config** — the starting YAML / JSON / TOML config.
+- **Run command** — how to launch a training run for this target
+  (e.g. `python train.py --config path/to/config.yaml`,
+  `dvc repro train@dataset0-<model>`).
+
+The agent stores this in a study log file (e.g. `hpo_study.md`)
+at the repo root with a structured header.
+
+### 2 — Fetch current metrics from MLflow
+
+Query MLflow for the most recent run matching this target:
+
+```python
+import mlflow
+from mlflow.tracking import MlflowClient
+
+client = MlflowClient()
+exp = client.get_experiment_by_name("<experiment-name>")
+runs = client.search_runs(
+    experiment_ids=[exp.experiment_id],
+    filter_string="tags.target = '<target-id>'",
+    order_by=["start_time DESC"],
+    max_results=1,
+)
+run = runs[0]
+current_val_loss = run.data.metrics.get("min_val_loss")
+current_train_loss = run.data.metrics.get("min_loss")
+best_epoch = run.data.metrics.get("best_epoch")
 ```
 
-### Step-by-step details
+If no prior run exists, this is iteration 0 — run the baseline
+config first.
 
-#### 1 — Read current metrics
+### 3 — Diagnose training state
 
-```bash
-cat results/<target>/<model>/metrics.yaml
-```
-
-Expected output:
-```yaml
-best_epoch: 125
-final_train_loss: 233.57
-final_val_loss: -98.11
-min_loss: 233.87
-min_val_loss: -98.16
-```
-
-Keys to read: `min_val_loss` (primary), `min_loss` (training),
-`best_epoch` (convergence speed).
-
-#### 2 — Diagnose
-
-Classify the training state from the loss values:
+Classify from MLflow metrics:
 
 | Signal | Pattern | Conclusion |
 |--------|---------|------------|
-| Both losses high (positive) | `min_loss > +50`, `min_val_loss > +50` | Model not learning |
-| Train low, val high | `min_loss << min_val_loss` | Overfitting |
-| Both low but val > train | `min_loss < -100`, `min_val_loss > -100` | Overfitting |
-| Both decreasing together | `min_loss ≈ min_val_loss`, both negative | Healthy |
-| Val loss rising over epochs | `final_val_loss > min_val_loss` | Overfitting / plateau |
+| No prior run | — | Run baseline first |
+| Losses high (positive) | `min_loss >> 0`, `min_val_loss >> 0` | Not learning |
+| Train ≪ val | `min_loss < -100`, `min_val_loss > -50` | Overfitting |
+| Both negative, close | `min_loss ≈ min_val_loss < -50` | Healthy |
+| Train low, val rising | `final_val_loss > min_val_loss` | Overfitting late |
+| NaN | `min_val_loss` is NaN or inf | Numerical instability |
 
-**Diagnosis → action mapping:**
+**Action mapping:**
 
-- **Not learning**: reduce `initial_learning_rate`, or switch from
-  `constant` to `cosine_decay` schedule.
-- **Overfitting (train ≪ val)**: add `dropout`, enable `batch_norm`,
-  reduce `hidden_units`, or increase `early_stopping_patience`.
-- **Underfitting (both high, stable)**: increase `num_parameters`,
-  widen `hidden_units`, increase `max_epochs`.
-- **Healthy (both negative, close)**: try increasing `num_parameters`
-  or `hidden_units` to push val_loss lower; watch for overfitting.
-- **NaN**: lognormal base → switch to cosine decay LR, or add Scale
-  bijector.  Spline with tight bins → reduce `num_parameters`.
+- **Not learning**: reduce learning rate (log-scale, halve), or
+  switch to a learning rate schedule (cosine decay).
+- **Overfitting**: add regularisation, reduce model capacity,
+  increase early stopping patience.
+- **Healthy**: cautiously increase capacity to push val_loss lower.
+- **NaN training loss**: adjust numerical stabilisation — reduce
+  LR, switch schedule, add gradient clipping, change base
+  distribution.
+- **Converged** (last N iterations Δ < threshold): stop, report
+  best config.
 
-#### 3 — Decide next change
+### 4 — Decide next parameter change
 
-Change exactly **one** param per iteration (isolate cause and effect).
+Change exactly **one** parameter per iteration to isolate cause
+and effect.  Exploration order:
 
-Order of exploration:
-1. **LR regime first** — find a working learning rate and schedule
-   before touching capacity or regularisation.
-2. **Capacity second** — increase `num_parameters` or `hidden_units`
-   once LR is settled.
-3. **Regularisation third** — add `dropout` / `batch_norm` only if
-   overfitting appears after capacity increase.
-4. **Training budget last** — increase `max_epochs` or patience only
-   when the model consistently underfits with current budget.
+1. **Learning regime** — find a working LR and schedule first.
+2. **Capacity** — increase model size once LR is settled.
+3. **Regularisation** — add only if overfitting appears.
+4. **Training budget** — increase epochs/patience last.
 
-Estimate the new value: always move one step in the search space,
-never jump multiple steps.  This makes each commit's Δ attributable.
+Move one step in the search space per iteration.  Never jump
+multiple steps — each commit's Δ must be attributable.
 
-#### 4 — Edit config
+### 5 — Apply change to config
 
-Modify `params/models/<target>/<model>.yaml`.
+Edit the config file(s).  This is project-specific — the
+`ml-project` skill defines the exact config format and fields.
+Common edits: learning rate, model size params, regularisation
+strength, training duration.
 
-Only touch these fields (example with typical starting values):
+### 6 — Launch training run
 
-```yaml
-model:
-  hidden_units: [128, 128]
-  dropout: 0.0
-  batch_norm: false
-
-train:
-  max_epochs: 200
-  early_stopping_patience: 10
-  initial_learning_rate: 0.001
-  lr_schedule: constant
-  batch_size: 256
-```
-
-Do **not** modify source code (`.py` files).  If a bug surfaces,
-load the `python-dev` skill and fix it as a separate commit with
-`fix:` prefix before resuming the HPO loop.
-
-#### 5 — Repro
-
-Run the DVC stage for the model being optimised:
+Start the training pipeline in the background so the agent can
+monitor it:
 
 ```bash
-dvc repro train@dataset<X>-<model>
+nohup <run-command> > logs/iter<N>_<target-id>.log 2>&1 &
+PID=$!
+echo $PID > /tmp/hpo_iter<N>.pid
 ```
 
-- Output goes to stdout/stderr; pipe to a log file if the
-  iteration will take long: `nohup dvc repro ... > iterN.log 2>&1 &`
-- Wait for completion: poll with `tail -f iterN.log` or
-  check process status with `ps`.
-- Verify exit code is 0 before reading metrics.
-- The evaluate stage runs automatically if `dvc.yaml` defines it
-  as a downstream dependency.  If not, run it separately:
+Record the PID and redirect stdout/stderr to a log file.
 
-  ```bash
-  dvc repro evaluate@dataset<X>-<model>
-  ```
+If the pipeline has multiple stages (prepare → train → evaluate),
+invoke the top-level command that runs all of them.
 
-#### 6 — Read new metrics
+### 7 — Monitor with sleep-based polling
 
-Same as step 1.  Read `results/<target>/<model>/metrics.yaml`.
+After launching, poll for completion:
 
-#### 7 — Compare
+```bash
+# Basic PID-based polling
+while kill -0 $PID 2>/dev/null; do
+    sleep 30
+done
+
+# Check exit code
+wait $PID
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ]; then
+    echo "Run failed with exit code $EXIT_CODE"
+    # Handle failure: revert config, log error, continue
+fi
+```
+
+For agents with tool-based process control (no shell PID access),
+use a file-based handoff:
+
+```bash
+# At launch:
+echo "running" > /tmp/hpo_<target-id>_status
+<run-command> > logs/iter<N>.log 2>&1
+echo "done" > /tmp/hpo_<target-id>_status
+```
+
+Then poll by reading the status file:
 
 ```python
-improvement = old_min_val_loss - new_min_val_loss  # negative = better
+import time
+import pathlib
+
+status_file = pathlib.Path("/tmp/hpo_<target-id>_status")
+while status_file.read_text().strip() != "done":
+    time.sleep(30)
+```
+
+**Polling interval:** 30–60 seconds for typical ML training runs
+(minutes to hours).  Adjust based on expected run duration.
+
+**Progress check inside the loop:** periodically tail the log file
+to detect stalls (no new output after N minutes):
+
+```python
+import time
+
+log_file = pathlib.Path("logs/iter<N>.log")
+last_size = log_file.stat().st_size
+
+while status_file.read_text().strip() != "done":
+    time.sleep(60)
+    current_size = log_file.stat().st_size
+    if current_size == last_size:
+        # No progress for 60s — may be stalled
+        # Consider: check process, escalate, or abort
+        pass
+    last_size = current_size
+```
+
+### 8 — Read new metrics from MLflow
+
+Run the MLflow query from step 2 again.  The newly completed run
+should now appear with `start_time` near-now.
+
+Validate the run completed successfully:
+- `min_val_loss` is not NaN.
+- `best_epoch` is reasonable (> 5, not equal to `max_epochs` if
+  early stopping was expected to trigger).
+- The run has the expected tags.
+
+### 9 — Compare
+
+```python
+improvement = old_val_loss - new_val_loss  # negative = better
 ```
 
 | Condition | Action |
 |-----------|--------|
-| `improvement > 0.5` (val_loss dropped by >0.5) | Keep config, commit |
-| `0 < improvement <= 0.5` | Keep config, commit (marginal) |
-| `improvement <= 0` (val_loss stayed same or rose) | Revert config change, try different param |
-| `new_min_val_loss` is NaN | Revert, try different approach |
+| `improvement > threshold` (e.g. > 0.5) | Keep config, commit |
+| `0 < improvement <= threshold` | Keep config, commit (marginal) |
+| `improvement <= 0` | Revert config, try different param |
+| NaN result | Revert, log issue |
 
-When reverting: `git checkout -- params/models/<target>/<model>.yaml`
+When reverting: restore the config file to its pre-edit state
+(e.g. `git checkout -- <config-file>`).
 
-#### 8 — Log to hpo_study.md
+After keeping: commit with message:
 
-Append one row to the Progress table in the study plan:
-
-```markdown
-| # | Date | Model | Target | Params changed | Train loss | Val loss | Δ val_loss | Commit |
-|---|------|-------|--------|----------------|------------|----------|------------|--------|
-| 1 | 2026-05-22 | bernstein_nf | dla | lr: 0.001→0.0005 | -140.86 | -130.84 | -32.70 | abc1234 |
+```
+feat(hpo): <target-id> iter<N> — <param> <old>→<new> (val: <old>→<new>)
 ```
 
-Always include the short commit hash so each iteration is traceable.
+The commit body may contain notes about the diagnosis that led
+to this change.
 
-#### 9 — Check stopping criteria
+### 10 — Check stopping criteria
 
-Evaluate against the criteria from the study plan.  Also visual:
-if the last 3 iterations show diminishing Δ (e.g. -0.1, -0.05, -0.02),
-the model is near its optimum for the current search space.
+Evaluate against the user-defined criteria.  Typical rules:
+
+1. **Target reached** — `min_val_loss` meets or exceeds the target.
+2. **Plateau** — last N iterations (e.g. 5) without improvement.
+3. **Max iterations** — total iterations reached limit.
+4. **Search space exhausted** — all params at boundaries,
+   or all reasonable combinations tried.
 
 If stopping criterion met:
-1. Write a summary paragraph in `hpo_study.md` with the best config
-   found and its metrics.
+1. Write a summary to the study log: best config, best metric,
+   iteration history.
 2. Commit:
    ```
-   feat(hpo): <target> -- <model> optimised (val_loss: <best>)
+   feat(hpo): <target-id> — optimisation complete (val_loss: <best>)
    ```
+3. Report results to the user.
 
-If not met, go to step 1.
-
----
-
-## Commit conventions
-
-Every iteration gets its own commit on the `dev` branch:
-
-```
-feat(hpo): <target> iter<N> -- <model>: <param> <old>→<new> (val: <old>→<new>)
-```
-
-Examples:
-
-```
-feat(hpo): dla iter3 -- bernstein_nf: lr 0.001→0.0005 (val: -98→-131)
-feat(hpo): dla iter4 -- bernstein_nf: dropout 0.0→0.1 (val: -131→-129, revert)
-feat(hpo): ofen_g_koks iter1 -- spline_nf: nbins 8→12 (val: -45→-52)
-```
-
-Body (if helpful): a one-line note like "overfitting on zero-heavy
-data — adding regularisation" or "healthy convergence, increasing
-capacity".
-
-After committing, push when convenient — the commit log itself is
-the progress tracker.
+If not met, return to step 2.
 
 ---
 
-## Multi-target strategy
+## MLflow tracking conventions
 
-Optimise one target completely before moving to the next.
-Typical order: primary target (most data, cleanest signal) →
-secondary targets.
+Tag every run with the target ID and iteration number for easy
+querying:
 
-When switching targets, update the `hpo_study.md` plan header and
-create a new Progress section.  The commit prefix changes to the
-new target name.
+```python
+mlflow.set_tag("target", "<target-id>")
+mlflow.set_tag("hpo_iteration", str(N))
+mlflow.log_param("config_file", "<path>")
+```
+
+Query pattern for the study log:
+
+```python
+runs = client.search_runs(
+    experiment_ids=[exp.experiment_id],
+    filter_string="tags.target = '<target-id>'",
+    order_by=["tags.hpo_iteration ASC"],
+)
+for r in runs:
+    print(
+        r.data.tags.get("hpo_iteration"),
+        r.data.metrics.get("min_val_loss"),
+    )
+```
 
 ---
 
-## Common pitfalls
+## Logging conventions
 
-| Problem | Detection | Action |
-|---------|-----------|--------|
-| NaN loss | `metrics.yaml` has `nan` | Revert, try cosine decay LR or add Scale bijector |
-| val_loss oscillates | `final_val_loss > min_val_loss` | Add dropout, enable batch_norm, reduce LR |
-| Model never learns | `min_loss` stays positive | Reduce LR (log-scale), try cosine decay |
-| No improvement after N=3 iter | Δ < 0.1 per step | Stop this model, declare optimum reached |
-| `invert: true` missing | val_loss >> 0 for NF models | Add to `bijector_kwargs` (non-Scale only) |
-| Pre-commit hook fails | Commit rejected | Fix formatting, re-commit |
+The study log (e.g. `hpo_study.md`) is a living document:
+
+1. **Header** — written once at start: target definition, search
+   space, stopping criteria, baseline.
+2. **Progress table** — one row appended per iteration:
+   `| # | Date | Param changed | Old val | New val | Δ val_loss | Commit |`
+3. **Each iteration is a git commit**, so `git log` alone serves
+   as the complete iteration history.  The study log duplicates
+   key information for quick human reading.
+
+---
+
+## Common patterns
+
+| Situation | Response |
+|-----------|----------|
+| Run crashes on launch | Check config format, check dependencies, check GPU memory. Fix + re-run as same iteration. |
+| Run hangs / no output for 5 min | Abort (`kill <PID>`), note in log, try different params. |
+| NaN after 3 different attempts | Declare this model/variant unstable for this target. Document in study log. |
+| Δ < 0.1 for 5 consecutive iterations | Plateau reached. Stop optimisation for this target. |
+| val_loss improves but train_loss stays flat | Continue — val_loss is the primary metric. |
+| User interrupts the loop | The last commit is the restore point. Resume from `git log` tail. |
 
 ---
 
 ## Key references
 
-- `hpo_study.md` — study plan + progress at repo root
-- `params/models/<target>/<model>.yaml` — per-target model config
-- `results/<target>/<model>/metrics.yaml` — per-run metrics
-- `dvc repro <stage>` — DVC pipeline execution
-- `ml-project` skill — DVC `foreach` layout, MLflow, project structure
-- `git-conventions` skill — branching, commit messages, pre-commit
-- `python-dev` skill — YAML editing, uv, analysis scripts
+- MLflow Tracking: https://mlflow.org/docs/latest/tracking.html
+- `ml-project` skill — project-specific pipeline, config, experiment conventions
+- `git-conventions` skill — commit formatting, branching
