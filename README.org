@@ -20,3 +20,4 @@ All skills are licensed under MIT — see =LICENSE=.
 | latex-paper-revision   | LaTeX paper revision and enhancement workflow    |
 | ml-project             | Research ML project conventions (DVC, MLflow, HPO) |
 | auto-hpo-studies       | Autonomous HPO loop: define target, iterate update-config run monitor commit until convergence. Uses MLflow, sleep-based polling |
+| paper-writing          | End-to-end paper writing workflow: figure generation, LaTeX templates (IEEE/Elsevier/UAI), revision cycles, venue submission |
