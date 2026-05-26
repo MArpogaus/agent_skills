@@ -23,16 +23,6 @@ results via MLflow, commit if improved, and repeat until convergence.
 
 ---
 
-## Prerequisite skills
-
-- **ml-project** — provides the project-specific ML conventions:
-  pipeline structure, config format, training script interface,
-  experiment naming.  Load this skill *first*, then auto-hpo-studies
-  on top.
-- **git-conventions** — branching, conventional commits.
-
----
-
 ## Overview
 
 The agent runs an autonomous loop after the user defines the target.
@@ -530,3 +520,15 @@ The study log (e.g. `hpo_study.md`) is a living document and the
 - MLflow Tracking: https://mlflow.org/docs/latest/tracking.html
 - `ml-project` skill — project-specific pipeline, config, experiment conventions
 - `git-conventions` skill — commit formatting, branching
+
+---
+
+## Required skills
+
+This skill assumes the following prerequisite skills are loaded.
+Use the `skill` tool to load them before using this one:
+
+- **ml-project** — DVC pipeline orchestration, MLflow experiment
+  tracking, HPO study logs, per-target configs, figure generation.
+- **git-conventions** — two-branch flow, conventional commits,
+  pre-commit hooks, tagging/releases.

@@ -68,6 +68,16 @@ Always use these defaults — **do not ask the user**:
 
 Optionally ask about `metadata` — a string-to-string map (e.g. `audience: maintainers`, `stack: python`).
 
+If the skill depends on other skills (e.g. requires git or python
+conventions), add a `requires` list to metadata:
+
+```yaml
+metadata:
+  requires:
+    - git-conventions
+    - python-dev
+```
+
 ### 5. Generate the skill
 
 Create `skills/<name>/SKILL.md` with:
@@ -80,6 +90,9 @@ Create `skills/<name>/SKILL.md` with:
   `<project>`, `<package>`, `<your-org>` where needed.
 - Code blocks with examples that use the tools available to
   the agent (Read, Edit, Write, Bash, Glob, Grep, etc.)
+- A **Required skills** section at the very end listing every
+  skill in `metadata.requires` with an explicit instruction to
+  load them via the `skill` tool (see examples in existing skills)
 
 ### 6. File structure
 
@@ -103,6 +116,9 @@ After writing, verify:
       information is hardcoded
 - [ ] The skill uses existing patterns from nearby skills
 - [ ] The file is named `SKILL.md` (all caps)
+- [ ] If `metadata.requires` is non-empty, a **Required skills**
+      section exists at the end of the file with explicit
+      instructions to load each listed skill via the `skill` tool
 
 ### 8. Register in repo
 

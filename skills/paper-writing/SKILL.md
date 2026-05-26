@@ -24,19 +24,6 @@ and camera-ready submission.
 
 ---
 
-## Prerequisite skills
-
-This skill covers paper-specific patterns. Load these skills first:
-
-- **git-conventions** — two-branch flow, conventional commits,
-  pre-commit hooks, dependabot, tagging/releases.
-- **python-dev** — Python project structure, pyproject.toml, ruff,
-  NumPy docstrings, pytest, uv, matplotlib patterns.
-- **ml-project** — DVC pipeline orchestration, MLflow experiment
-  tracking, HPO study logs, per-target configs, figure generation.
-
----
-
 ## Phase 1: LaTeX project scaffolding
 
 ### Directory structure
@@ -532,3 +519,17 @@ v2 — Revised: expanded method section, added Experiment 3,
   - `thermo-forecast-paper` — Elsevier elsarticle, revision cycle with latexdiff
   - `hybrid_flows_paper` — UAI 2025, TikZ overlays, supplementary material
   - `Sylaski_Manuscript` — Elsevier format, changelog tracking
+
+---
+
+## Required skills
+
+This skill assumes the following prerequisite skills are loaded.
+Use the `skill` tool to load them before using this one:
+
+- **git-conventions** — two-branch flow, conventional commits,
+  pre-commit hooks, tagging/releases.
+- **python-dev** — Python project structure, pyproject.toml, ruff,
+  NumPy docstrings, pytest, matplotlib patterns.
+- **ml-project** — DVC pipeline orchestration, MLflow experiment
+  tracking, HPO study logs, per-target configs, figure generation.

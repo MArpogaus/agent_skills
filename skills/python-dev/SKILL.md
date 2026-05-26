@@ -1030,3 +1030,13 @@ terminal output).
   https://numpydoc.readthedocs.io/en/latest/format.html
 - pdoc:
   https://pdoc.dev/
+
+---
+
+## Required skills
+
+This skill assumes the following prerequisite skills are loaded.
+Use the `skill` tool to load them before using this one:
+
+- **git-conventions** — two-branch flow, conventional commits,
+  pre-commit hooks, tagging/releases.

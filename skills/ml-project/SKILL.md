@@ -23,17 +23,6 @@ experiment tracking, and paper figure generation.
 
 ---
 
-## Prerequisite skills
-
-This skill covers ML-specific patterns. Load these skills first:
-
-- **git-conventions** — two-branch flow, conventional commits,
-  pre-commit hooks, dependabot, tagging/releases.
-- **python-dev** — Python project structure, pyproject.toml, ruff,
-  NumPy docstrings, pytest, uv, matplotlib patterns.
-
----
-
 ## Project structure
 
 ```
@@ -518,3 +507,15 @@ python scripts/hpo.py \
   - `dcp_nf_forecast` — clean DVC foreach, Feather I/O, HPO study logs
   - `hybrid_flows` — CI/CD, pdoc docs, experiment separation
   - `gnn_regler` — DVC foreach with PyTorch Lightning
+
+---
+
+## Required skills
+
+This skill assumes the following prerequisite skills are loaded.
+Use the `skill` tool to load them before using this one:
+
+- **git-conventions** — two-branch flow, conventional commits,
+  pre-commit hooks, tagging/releases.
+- **python-dev** — Python project structure, pyproject.toml, ruff,
+  NumPy docstrings, pytest, matplotlib patterns.
