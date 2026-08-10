@@ -51,6 +51,25 @@ hold:
 
 If any one of them fails, do not rewrite.
 
+## Shared repos — one dev branch per contributor
+
+The two-branch flow assumes one author.  With several authors, give
+each their own long-lived dev branch instead of a shared `dev`:
+
+```
+feat/<topic>  ->  PR  ->  dev-<name>  ->  PR  ->  main
+```
+
+- `dev-<name>` (e.g. `dev-marcel`, `dev-oliver`) — that person's
+  integration branch.  They own it and may push to it directly.
+- `main` — protected: pull requests only, no direct pushes, no
+  force-push.  It still holds nothing but `init` and merge commits.
+- Rebasing your own `dev-<name>` onto `main` is fine.  Never
+  rewrite someone else's.
+
+This keeps every merge into `main` reviewable and stops two people
+serialising on one `dev`.
+
 ## Commit workflow (plan-first)
 
 Before making any edits, the agent **must** plan the commit
