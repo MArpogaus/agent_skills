@@ -64,7 +64,11 @@ Always use these defaults — **do not ask the user**:
 | Field | Value |
 |-------|-------|
 | `license` | `MIT` |
-| `compatibility` | `opencode` |
+| `compatibility` | `claude-code opencode` |
+
+`compatibility` is a space-separated list of harnesses the skill has
+actually been used in.  Add one only after verifying it there — do
+not list a harness speculatively.
 
 Optionally ask about `metadata` — a string-to-string map (e.g. `audience: maintainers`, `stack: python`).
 
