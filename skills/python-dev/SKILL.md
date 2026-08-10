@@ -793,6 +793,41 @@ def test_n_bins_parameter(n_bins: int, expected: int) -> None:
 
 ---
 
+## Notebooks
+
+Never commit `.ipynb` as the source.  Embedded base64 outputs
+destroy diffs and merge conflicts become unresolvable.
+
+- Notebooks are **jupytext `py:percent` files**: plain `.py` with
+  `# %%` cell markers and prose in `# %% [markdown]` cells.  The
+  `.py` file is always the source of truth.
+- Add the generated notebooks to `.gitignore`:
+  ```
+  notebooks/*.ipynb
+  ```
+- Add a `notebooks` dependency group:
+  ```toml
+  notebooks = [
+    "jupytext",
+    "ipykernel",  # so JupyterLab / VS Code can run the generated .ipynb
+  ]
+  ```
+- Regenerate on demand: `uvx jupytext --to ipynb <name>.py`.
+- VS Code and Emacs run the `.py` cells directly, so most work
+  needs no conversion at all.
+- **One exception**: a notebook that needs a public "Open in
+  Colab" badge requires a tracked `.ipynb`.  Track that single
+  file output-stripped, un-ignore it explicitly, and regenerate it
+  in the same commit as its `.py`:
+  ```
+  !notebooks/demo_colab.ipynb
+  ```
+- Give `notebooks/` a `README.md` with a one-line-per-notebook
+  table and the "edit the `.py`, never the `.ipynb`" rule, so a
+  new reader cannot get it wrong.
+
+---
+
 ## CI / GitHub workflows
 
 ### `.github/workflows/` files
