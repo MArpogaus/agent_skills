@@ -286,10 +286,28 @@ Rules:
 
 ## Adopting this flow on an existing repo
 
-To give an existing repo the clean `main` (`init` + merges only)
-without losing anything.  This is a history rewrite — every
-condition in [History is append-only](#history-is-append-only-once-pushed)
-applies first.
+**Default: adopt it going forward, and leave the history alone.**
+Branch `dev-<name>` off the current tip for each contributor, protect
+`main`, and route everything through pull requests from now on.  The
+old history stays exactly as it is.  This needs no rewrite, no
+force-push, and nobody's permission:
+
+```bash
+git switch -c dev-<yourname> main
+git push -u origin dev-<yourname>
+```
+
+The clean-`main` property (`init` + merge commits only) then holds for
+everything *after* the switch, which is all it needs to do.  Expect a
+co-owner to refuse a rewrite of a shared repo, and expect that refusal
+to be right: an intact history is worth more than a tidy root commit.
+
+### Only if every owner actively wants the rewrite
+
+The variant below replaces `main` with an `init` commit plus one
+squashed snapshot.  It is a history rewrite, so every condition in
+[History is append-only](#history-is-append-only-once-pushed) applies
+first.  Do not propose it as the default.
 
 Do this **before** any cleanup commits, so the snapshot is the
 untouched prior state.
