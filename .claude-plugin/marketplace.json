@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "agent-skills",
+  "name": "marpogaus-skills",
   "description": "Skill definitions encoding recurring project conventions and workflows.",
   "owner": {
     "name": "Marcel Arpogaus",
@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "agent-skills",
+      "name": "marpogaus-skills",
       "source": "./",
       "version": "0.1.0",
       "description": "Marcel's recurring project conventions as skills: Python, git, ML research projects, and paper writing.",

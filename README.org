@@ -22,18 +22,18 @@ no symlink, nothing to keep in sync:
 
 #+begin_src bash :exports code
   claude plugin marketplace add ~/.agents
-  claude plugin install agent-skills@agent-skills
+  claude plugin install marpogaus-skills@marpogaus-skills
 #+end_src
 
 Or install straight from GitHub on a machine without the checkout:
 
 #+begin_src bash :exports code
   claude plugin marketplace add MArpogaus/agent_skills
-  claude plugin install agent-skills@agent-skills
+  claude plugin install marpogaus-skills@marpogaus-skills
 #+end_src
 
 Inspect what a session pays for them with
-=claude plugin details agent-skills@agent-skills=.
+=claude plugin details marpogaus-skills@marpogaus-skills=.
 
 All skills are licensed under MIT — see =LICENSE=.
 
