@@ -6,7 +6,7 @@ description: >
   code structure, per-target model configs, and reproducible
   figure generation.
 license: MIT
-compatibility: opencode
+compatibility: claude-code opencode
 metadata:
   requires:
     - git-conventions

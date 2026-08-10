@@ -5,7 +5,7 @@ description: >
   NumPy docstrings, pdoc, pytest xdist, uv, commitizen,
   matplotlib figure patterns, and skeleton-based project setup.
 license: MIT
-compatibility: opencode
+compatibility: claude-code opencode
 metadata:
   requires:
     - git-conventions

@@ -6,7 +6,7 @@ description: >
   LaTeX writing with IEEE/Elsevier/UAI templates, revision cycles, and
   venue submission.
 license: MIT
-compatibility: opencode
+compatibility: claude-code opencode
 metadata:
   requires:
     - git-conventions

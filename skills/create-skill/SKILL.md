@@ -4,7 +4,7 @@ description: >
   Guide to create a new opencode skill: determine requirements, domain,
   workflows, conventions, and generate the SKILL.md file.
 license: MIT
-compatibility: opencode
+compatibility: claude-code opencode
 metadata:
   stack: meta
 ---

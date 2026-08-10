@@ -4,7 +4,7 @@ description: >
   LaTeX paper revision workflow: structural analysis, content generation,
   language polishing, figure/table integration, and final cleanup.
 license: MIT
-compatibility: opencode
+compatibility: claude-code opencode
 metadata:
   stack: latex
 ---

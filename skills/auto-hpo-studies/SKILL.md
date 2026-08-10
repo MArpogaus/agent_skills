@@ -5,7 +5,7 @@ description: >
   space, then iterate update-config run monitor log commit until convergence.
   Uses MLflow for tracking, sleep-based polling for long-running tasks.
 license: MIT
-compatibility: opencode
+compatibility: claude-code opencode
 metadata:
   requires:
     - ml-project

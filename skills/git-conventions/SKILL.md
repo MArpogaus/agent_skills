@@ -4,7 +4,7 @@ description: >
   Git workflow conventions: two-branch flow, conventional commits,
   pre-commit hooks, dependabot, tagging, and releases.
 license: MIT
-compatibility: opencode
+compatibility: claude-code opencode
 metadata:
   requires: []
   stack: git
