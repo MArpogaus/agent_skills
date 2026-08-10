@@ -182,6 +182,26 @@ where = ["src"]
 local_scheme = "no-local-version"
 ```
 
+### Version — exactly one source
+
+The version lives in **git tags only** (`dynamic = ["version"]` +
+`setuptools_scm`).  Never write a literal version string into
+`pyproject.toml` or `__init__.py`.
+
+When the package needs `__version__` at runtime, read it back from
+the installed metadata — never retype it:
+
+```python
+from importlib.metadata import version
+
+__version__ = version("<hyphenated-package-name>")
+```
+
+A hardcoded `version = "0.3.0"` in `pyproject.toml` **and** a
+`__version__ = "0.3.0"` in `__init__.py` is the common failure: the
+two drift on the first release someone rushes.  This applies to any
+build backend, including hatchling.
+
 ### Optional dependency groups
 
 ```toml
