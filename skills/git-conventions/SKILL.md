@@ -204,8 +204,26 @@ repos:
         stages: [pre-push]   # checks every message on the branch
 ```
 
+### Activate the hooks — the config alone does nothing
+
+A `.pre-commit-config.yaml` in the repo does not install anything.  In
+**every fresh clone**, run once:
+
+```bash
+pre-commit install --install-hooks -t pre-commit -t commit-msg -t pre-push
+```
+
+Plain `pre-commit install` wires up the `pre-commit` stage **only** —
+the `commitizen` (commit-msg) and `commitizen-branch` (pre-push) hooks
+stay dormant and bad commit messages sail through.  Verify with
+`ls .git/hooks/` — expect `pre-commit`, `commit-msg`, `pre-push`.
+
+Document the command in `CONTRIBUTING.md`; git cannot install hooks
+for a contributor.
+
 Run `pre-commit autoupdate` periodically to keep hook revisions
-current.
+current, and `pre-commit migrate-config` when it warns about
+deprecated stage names.
 
 ### CI workflow for pre-commit
 
