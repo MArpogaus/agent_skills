@@ -46,9 +46,11 @@ experiment tracking, and paper figure generation.
 │       ├── models.py        # Model builders
 │       └── utils.py         # I/O helpers, logging, config
 ├── test/
+│   ├── README.md            # what the tests guarantee + where truth comes from
 │   ├── conftest.py
 │   ├── test_data.py
 │   └── test_models.py
+├── simulations/             # in-package: numpy-only DGPs with known truth
 ├── params/
 │   ├── target_a.yaml        # Per-target hyperparameters
 │   └── target_b.yaml
@@ -334,6 +336,64 @@ Document hyperparameter optimisation as a structured log in
 - Only the final configs for each phase remain in the repo.
 
 ---
+
+## Validating research code
+
+"It runs without error" is not a test.  Research code needs a
+reference to be wrong against.  Build one.
+
+### Simulate with known ground truth
+
+Write the data-generating process yourself, in **numpy only**, with
+no import of the model under test — that independence is what makes
+it a reference.  Ship each frozen dataset with the truth beside it:
+
+```
+data/<dgp-name>/
+├── obs.csv        # frozen sample, committed
+└── truth.json     # the true parameters / effects of the generator
+```
+
+Give every generator a CLI that regenerates its own folder from a
+fixed seed, and a `REGISTRY` dict so tests and scripts look DGPs up
+by name.
+
+### Frozen data is a contract
+
+- Tests assert each CSV regenerates **bit-identically** from its
+  stored seed.  Without that, the data silently drifts away from
+  `truth.json` and every number in the paper is unverifiable.
+- A new seed or changed equations means a **new folder**, never an
+  in-place edit.  Old results keep pointing at old data.
+- Never regenerate `data/` to make a failing test pass.
+
+### Order tests by how much trust they carry
+
+1. **Mathematical identities** — must hold by the maths, with no
+   reference implementation: a transform inverts, a likelihood
+   decomposes, a distributional claim survives a KS test.
+2. **Equivalence to independent implementations** — the strongest
+   external check.  Where a special case of your model *is* a
+   classical model, it must match software written by other people
+   in another language (`statsmodels`, R).  Commit the reference
+   output so the suite runs without R installed.
+3. **Known-truth recovery** — the generator's true parameters,
+   effects and counterfactuals, which no real dataset exposes.
+4. **Frozen-data contracts** — the regeneration checks above.
+5. **Stability guards** — regressions you have already been bitten
+   by, each naming the symptom in a comment.
+
+### test/README.md
+
+Document what the suite guarantees, not how to run it: the five
+kinds of test, the file-by-file table, and — most important — **how
+each reference number was obtained** (by construction, analytically,
+Monte Carlo from the generator, or other software).  A reference
+number whose origin is undocumented will be "fixed" by the next
+person who sees it fail.
+
+Mark anything that trains `@pytest.mark.slow` (see the `python-dev`
+skill's CI split).
 
 ## Paper-oriented code structure
 
