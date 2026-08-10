@@ -263,6 +263,57 @@ Rules:
 - Check for open branches and pull requests **before** any wide
   change, and say in the PR what will need rebasing.
 
+## Adopting this flow on an existing repo
+
+To give an existing repo the clean `main` (`init` + merges only)
+without losing anything.  This is a history rewrite — every
+condition in [History is append-only](#history-is-append-only-once-pushed)
+applies first.
+
+Do this **before** any cleanup commits, so the snapshot is the
+untouched prior state.
+
+```bash
+OLD=$(git rev-parse main)
+
+# 1. preserve: a tag and a branch, pushed BEFORE the rewrite
+git tag archive/pre-restructure-$(date +%Y%m%d) "$OLD"
+git push origin archive/pre-restructure-$(date +%Y%m%d)
+git push origin "$OLD":refs/heads/dev-<owner>      # full old history
+
+# 2. new main: orphan root, then one snapshot commit
+git checkout --orphan main-new "$OLD"
+git rm -r --cached . -q
+git add .gitignore .pre-commit-config.yaml
+git commit -m "init"
+git add -A
+git commit -m "chore: import <project> <version> from the prior history"
+
+# 3. link the histories ONCE, or every later PR fails on
+#    "refusing to merge unrelated histories"
+git checkout dev-<owner>
+git merge --allow-unrelated-histories main-new -m "chore: adopt the new main root"
+
+# 4. publish
+git branch -f main main-new
+git push --force-with-lease origin main
+git push origin main:refs/heads/dev-<yourname>
+```
+
+Notes:
+
+- Step 3 is the step people miss.  The snapshot commit must record
+  the **same tree** as the old tip, otherwise this merge conflicts
+  instead of resolving cleanly.
+- Existing release tags keep the old commits alive independently of
+  any branch, so nothing is lost even if a branch is deleted later.
+- Afterwards: retarget open pull requests onto `dev-<owner>`, delete
+  merged branches, and protect `main`.
+- Cost/benefit: a repo with many live branches or outside forks is
+  usually not worth restructuring.  Count the unmerged branches
+  first (`git rev-list --count main..<branch>` per branch) — if only
+  one or two carry work, the rewrite is cheap.
+
 ## Formatting sweeps
 
 The first `ruff format` on an unformatted repo touches nearly every
