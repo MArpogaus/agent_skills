@@ -322,6 +322,7 @@ repos:
         args: [--autofix, --indent, "2"]
       - id: pretty-format-toml
         args: [--autofix]
+        exclude: ^uv\.lock$   # uv owns it; formatting reorders the whole file
       - id: pretty-format-ini
         args: [--autofix]
 
