@@ -368,9 +368,16 @@ file.  Keep it harmless:
   # style: apply ruff-format
   <full-40-char-sha>
   ```
-  Then `git config blame.ignoreRevsFile .git-blame-ignore-revs`,
-  and note the command in `CONTRIBUTING.md` — the config is
-  per-clone, so each contributor sets it once.
+  GitHub honours this file automatically in its web blame, at no cost.
+  Locally it needs `git config blame.ignoreRevsFile
+  .git-blame-ignore-revs` per clone — worth doing for yourself, not
+  worth prescribing to contributors.
+
+  Keep expectations small: measured on a 10 700-line repo after a
+  50-file sweep, only **3%** of lines were misattributed without the
+  file (6% in the worst file), because the formatter mostly rewraps and
+  git tracks moved content. The file is six lines and zero maintenance,
+  so it earns its place — but it is a convenience, not a rescue.
 - Do the sweep **before** any refactor of the same files, so the
   churn is paid once.
 
