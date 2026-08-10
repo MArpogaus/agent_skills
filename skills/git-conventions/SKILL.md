@@ -263,6 +263,27 @@ Rules:
 - Check for open branches and pull requests **before** any wide
   change, and say in the PR what will need rebasing.
 
+## Formatting sweeps
+
+The first `ruff format` on an unformatted repo touches nearly every
+file.  Keep it harmless:
+
+- **One commit, formatting only.**  Never mix a reformat with a
+  behaviour change — the diff becomes unreviewable and a real bug
+  hides in the noise.
+- Message: `style: apply ruff-format`.
+- Record it in `.git-blame-ignore-revs` (one full SHA per line) so
+  `git blame` skips it:
+  ```
+  # style: apply ruff-format
+  <full-40-char-sha>
+  ```
+  Then `git config blame.ignoreRevsFile .git-blame-ignore-revs`,
+  and note the command in `CONTRIBUTING.md` — the config is
+  per-clone, so each contributor sets it once.
+- Do the sweep **before** any refactor of the same files, so the
+  churn is paid once.
+
 ## Tagging and releases
 
 - **Tags** follow `v<semver>` format (e.g. `v0.1.0`, `v1.2.3`).
