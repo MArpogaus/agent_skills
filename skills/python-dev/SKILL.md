@@ -182,7 +182,7 @@ requires = ["setuptools >= 61", "setuptools_scm>=7"]
 [project]
 dynamic = ["version"]
 requires-python = ">=3.11"
-readme = "README.org"
+readme = "README.md"   # generated from README.org, committed
 name = "<hyphenated-package-name>"
 classifiers = [
   "Programming Language :: Python :: 3.11",
