@@ -236,6 +236,33 @@ updates:
     target-branch: "dev"
 ```
 
+## Repos you do not own
+
+When contributing to someone else's repo, these conventions are
+**not** a mandate.  Separate defects from preferences:
+
+| Adopt freely — objective improvements | Leave alone — the owner's call |
+|---|---|
+| linting, formatting, pre-commit | licence |
+| type annotations, docstrings | `README` format (`.md` vs `.org`) |
+| dead code, unused imports | directory names (`test/` vs `tests/`) |
+| CI matrix, dependency pinning | build backend |
+| duplicated constants, path hacks | commit-message history |
+
+Rules:
+
+- Land the work as **small, separately reviewable PRs**, one
+  concern each.  A single 40-file PR gets no review, only a
+  reluctant merge.
+- Match the repo's existing style where it is merely different from
+  yours.  Do not renumber, rename or relayout to taste.
+- Never change the licence, the author list, or the release
+  process without asking.
+- Read the repo's own `CONTRIBUTING.md` / `CLAUDE.md` / `AGENTS.md`
+  first — it outranks this skill inside that repo.
+- Check for open branches and pull requests **before** any wide
+  change, and say in the PR what will need rebasing.
+
 ## Tagging and releases
 
 - **Tags** follow `v<semver>` format (e.g. `v0.1.0`, `v1.2.3`).
