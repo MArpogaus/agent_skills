@@ -5,8 +5,19 @@
 A collection of [[https://opencode.ai/docs/skills][opencode skill]] definitions encoding
 recurring project conventions and workflows.
 
-Symlink =skills/= to =~/.agents/skills/= or =~/.config/opencode/skills/=
-for global discovery.
+The skill files are plain [[https://agentskills.io][SKILL.md]] documents, so any harness that
+speaks that format can load them.
+
+For global discovery:
+
+| Harness     | Location                                          |
+|-------------+---------------------------------------------------|
+| opencode    | =~/.agents/skills/= or =~/.config/opencode/skills/= |
+| Claude Code | =~/.claude/skills/<name>/SKILL.md=                  |
+
+Symlink =skills/= to the directory when the checkout is permanent;
+copy it when the checkout is not (Claude Code follows symlinks, but
+a link into a temporary mount breaks silently when the mount goes).
 
 All skills are licensed under MIT — see =LICENSE=.
 
