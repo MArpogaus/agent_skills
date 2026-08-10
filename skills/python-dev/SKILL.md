@@ -29,16 +29,17 @@ dependabot, tagging/releases), load the `git-conventions` skill.
 
 ### Skeleton repo
 
-A skeleton template is maintained at a public Git hosting
-platform (see [Key references](#key-references) for the URL).
-It serves as the single source of truth for project conventions
-across all Python projects.
+The skeleton template lives at
+<https://github.com/MArpogaus/minimal_python_project_skeleton>.
+It is the starting point for new projects; **this skill is the
+authority** where the two disagree (see [Skeleton
+drift](#skeleton-drift)).
 
 ### Initial project setup
 
 1. **Clone the skeleton** to the desired project location:
    ```
-   git clone <skeleton-url> <new-project>
+   git clone https://github.com/MArpogaus/minimal_python_project_skeleton <new-project>
    cd <new-project>
    ```
 2. **Remove the `.git` folder** to detach from upstream:
@@ -76,7 +77,7 @@ same update across every project.
 Procedure:
 1. Clone the skeleton if not already present:
    ```
-   git clone <skeleton-url>
+   git clone https://github.com/MArpogaus/minimal_python_project_skeleton
    ```
 2. Change config in current project on `dev`.
 3. Cherry-pick / copy the same change to the skeleton.
@@ -1021,7 +1022,8 @@ terminal output).
 
 ## Key references
 
-- Skeleton template: `<skeleton-url>` (public repo URL)
+- Skeleton template:
+  https://github.com/MArpogaus/minimal_python_project_skeleton
 - Conventional commits:
   https://www.conventionalcommits.org/
 - Ruff rules:
