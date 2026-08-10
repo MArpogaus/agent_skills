@@ -8,16 +8,32 @@ recurring project conventions and workflows.
 The skill files are plain [[https://agentskills.io][SKILL.md]] documents, so any harness that
 speaks that format can load them.
 
-For global discovery:
+** Installation
 
-| Harness     | Location                                          |
-|-------------+---------------------------------------------------|
-| opencode    | =~/.agents/skills/= or =~/.config/opencode/skills/= |
-| Claude Code | =~/.claude/skills/<name>/SKILL.md=                  |
+Clone to =~/.agents/=, which opencode reads natively:
 
-Symlink =skills/= to the directory when the checkout is permanent;
-copy it when the checkout is not (Claude Code follows symlinks, but
-a link into a temporary mount breaks silently when the mount goes).
+#+begin_src bash :exports code
+  git clone git@github.com:MArpogaus/agent_skills.git ~/.agents
+#+end_src
+
+=~/.agents/skills/= is then the single source of truth.  Register the
+same checkout with Claude Code, which reads it **in place** — no copy,
+no symlink, nothing to keep in sync:
+
+#+begin_src bash :exports code
+  claude plugin marketplace add ~/.agents
+  claude plugin install agent-skills@agent-skills
+#+end_src
+
+Or install straight from GitHub on a machine without the checkout:
+
+#+begin_src bash :exports code
+  claude plugin marketplace add MArpogaus/agent_skills
+  claude plugin install agent-skills@agent-skills
+#+end_src
+
+Inspect what a session pays for them with
+=claude plugin details agent-skills@agent-skills=.
 
 All skills are licensed under MIT — see =LICENSE=.
 
