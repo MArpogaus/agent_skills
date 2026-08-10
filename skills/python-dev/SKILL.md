@@ -861,6 +861,43 @@ jobs:
       - run: pytest -n auto
 ```
 
+### Slow suites: split fast PR runs from a nightly full run
+
+When the suite trains models or fits anything, a full matrix on
+every push wastes minutes per commit and people start skipping CI.
+Mark the expensive tests and give CI two jobs:
+
+```toml
+[tool.pytest.ini_options]
+markers = [
+  "slow: long fit/training tests — excluded from PR CI, run nightly",
+]
+```
+
+```yaml
+on:
+  push:
+  pull_request:
+  workflow_dispatch:      # manual full run from the Actions tab
+  schedule:
+    - cron: "17 3 * * *"  # off-peak minute, not :00
+
+jobs:
+  fast:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    steps:
+      - run: pytest -q -m "not slow"
+  full:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 120
+    steps:
+      - run: pytest -q
+```
+
+Rules: mark **anything that trains** `@pytest.mark.slow`; always
+set `timeout-minutes` on the full job; keep `workflow_dispatch` so
+the full suite can be demanded before a release.
+
 ### pre-commit.yaml
 
 ```yaml
