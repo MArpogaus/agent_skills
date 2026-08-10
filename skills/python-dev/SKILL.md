@@ -496,12 +496,17 @@ class MyModel:
 
 ### Formatting rules (exact)
 
-1. **Section headers**: the header name, then a line of exactly
-   three dashes (`---`) underneath.
+1. **Section headers**: the header name, then a line of dashes
+   **exactly as long as the header** underneath.  numpydoc and
+   ruff `D` both reject a shorter or longer underline.
 
    ```
    Parameters
    ----------
+   Returns
+   -------
+   Raises
+   ------
    ```
 
 2. **Parameter entries**: `name : type` — exactly one space before
