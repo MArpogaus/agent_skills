@@ -27,6 +27,30 @@ metadata:
   before any branch/push), then `git add` only the intended files
   and `git commit -m "init"`.
 
+## History is append-only once pushed
+
+**Never rewrite a commit that has been pushed.**  No `rebase`, no
+`commit --amend`, no `reset --hard`, no force-push on any branch
+someone else can have fetched.  Correct a pushed mistake with a new
+commit (`git revert`, or a `fix:` commit on top).
+
+Rewriting is legal only while the commits are **local**: before the
+first push, `amend` and interactive rebase are the right tools for
+cleaning up a messy sequence.
+
+The one exception is a **deliberate, agreed history rewrite**, e.g.
+adopting this flow on an existing repo.  All four conditions must
+hold:
+
+1. Every owner of the repo has agreed, in writing.
+2. The old tip stays reachable: an `archive/*` tag **and** a
+   branch, both pushed **before** the rewrite.
+3. The push uses `--force-with-lease`, never plain `--force`.
+4. Open pull requests are retargeted, and every collaborator is
+   told to re-clone or hard-reset.
+
+If any one of them fails, do not rewrite.
+
 ## Commit workflow (plan-first)
 
 Before making any edits, the agent **must** plan the commit
