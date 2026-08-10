@@ -330,6 +330,8 @@ repos:
     hooks:
       - id: commitizen
         stages: [commit-msg]
+      - id: commitizen-branch
+        stages: [pre-push]   # checks every message on the branch
 ```
 
 Run `pre-commit autoupdate` periodically.  When updating revs,
