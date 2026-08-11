@@ -950,6 +950,58 @@ jobs:
         uses: actions/deploy-pages@v4
 ```
 
+The `.. include:: ../../README.md` docstring in `__init__.py` is what
+makes the README the docs landing page.  Keep a one-line summary above
+the include, so `help(<package>)` in a REPL still says something.
+`D400` must be ignored for `src/*/__init__.py`: a trailing period would
+break the included file name.
+
+#### Versioned docs need a gh-pages branch, not deploy-pages
+
+`actions/deploy-pages` **replaces the entire site** on every
+deployment.  So it cannot publish one version per branch: a push to
+`main` wipes whatever a dev branch published, and the only workaround
+is rebuilding every version on every push, which doubles the CI time.
+
+When you want `main` at `/` and each dev branch at `/dev-<name>/`,
+publish into a `gh-pages` branch instead and let it accumulate.  Set
+Settings -> Pages -> Source to *Deploy from a branch*: `gh-pages`,
+`/ (root)`.  A git worktree does it with first-party actions only:
+
+```yaml
+on:
+  push:
+    branches: [main, dev-*]     # dev-* so it works for every contributor
+permissions:
+  contents: write               # pushes gh-pages
+concurrency:
+  group: gh-pages               # every run pushes the same branch
+  cancel-in-progress: false
+```
+
+```bash
+git fetch origin gh-pages:gh-pages 2>/dev/null || true
+git worktree add ../pages gh-pages 2>/dev/null \
+  || git worktree add --orphan -b gh-pages ../pages
+if [ "$REF" = main ]; then
+  # replace the root, KEEP the version directories
+  find ../pages -mindepth 1 -maxdepth 1 \
+    ! -name .git ! -name 'dev-*' -exec rm -rf {} +
+  cp -a site/. ../pages/
+else
+  rm -rf "../pages/$REF" && mkdir -p "../pages/$REF"
+  cp -a site/. "../pages/$REF/"
+fi
+```
+
+The `! -name 'dev-*'` guard is the whole trick: a plain `rm -rf` of the
+root deletes the other versions.  Test the deletion against a mock tree
+before trusting it.
+
+Build docs with `uv run --with pdoc pdoc ...`, never
+`--group docs`: the workflow may check out a ref that does not declare
+that group, and then the step fails with `Group 'docs' is not defined`.
+
 ### dependabot.yml
 
 ```yaml
