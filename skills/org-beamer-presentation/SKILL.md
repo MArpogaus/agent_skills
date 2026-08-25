@@ -144,6 +144,12 @@ Two rules that are easy to get wrong:
   quotes may remain.
 - **Org verbatim is `~code~` or `=verbatim=`.** Markdown backticks are
   not markup; they export literally.
+- **No nested or Markdown emphasis.** `*~code~*` does not parse — the
+  inner `~` is preceded by `*`, so the tildes print literally; write the
+  lead-in as plain `~code~`. `**bold**` is Markdown; Org bold is a single
+  `*bold*`. Adjacent code needs a space: `~LS~ + ~CS~`, never `~LS~+~CS~`.
+- **listings ships no `toml`, `yaml`, `json` or `text`** — those go into
+  `#+begin_example`; `python` and `bash` are safe.
 - **Verbatim needs a border.** Org only recognises `~…~` when the
   opening `~` follows whitespace, `(`, `{`, `"` or a line start, and the
   closing `~` precedes whitespace or punctuation. `~SI~/~CI~` fails —
