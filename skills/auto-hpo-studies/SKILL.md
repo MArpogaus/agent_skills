@@ -96,7 +96,7 @@ No manual intervention between iterations.
 The user specifies:
 
 - **Target ID** — a short label used in commit messages and
-  MLflow tags (e.g. `dla-bernstein-nf`).
+  MLflow tags (e.g. `<dataset>-<model>`).
 - **Model/variant** — which model architecture to optimise.
 - **Search space** — a table of tunable parameters, their initial
   values, allowed ranges, and step sizes / strategies.

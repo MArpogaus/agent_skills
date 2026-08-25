@@ -272,7 +272,8 @@ For data-driven plots that should match the document font, use
 <dataset>_<method>_<plot_type>.pdf
 ```
 
-Examples: `moons_maf_contour.pdf`, `cer_bnf_calibration.pdf`.
+Examples: `<dataset>_<model>_<quantity>.pdf`, so a figure names its
+own experiment: `synth_baseline_contour.pdf`, `<dataset>_<model>_calibration.pdf`.
 
 ---
 
@@ -514,11 +515,11 @@ v2 — Revised: expanded method section, added Experiment 3,
 - ICML style: https://icml.cc/Conferences/2021/StyleAuthorInstructions
 - latexmk: https://mg.readthedocs.io/latexmk.html
 - PGFPlots: https://pgfplots.sourceforge.net/
-- Existing paper examples:
-  - `stplf-bnf` — IEEE TSG paper, latexdiff flatten, PGFPlots data plotting
-  - `thermo-forecast-paper` — Elsevier elsarticle, revision cycle with latexdiff
-  - `hybrid_flows_paper` — UAI 2025, TikZ overlays, supplementary material
-  - `Sylaski_Manuscript` — Elsevier format, changelog tracking
+- Earlier papers in the group are the best reference for a venue; look
+  for one that already used the target class and copy its setup:
+  - an IEEE transactions paper — latexdiff flatten, PGFPlots data plotting
+  - an Elsevier elsarticle paper — revision cycle with latexdiff, changelog
+  - a UAI/NeurIPS-style paper — TikZ overlays, supplementary material
 
 ---
 

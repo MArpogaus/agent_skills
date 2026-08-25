@@ -85,8 +85,8 @@ in `__init__.py`:
 
 from <package> import distributions as _distributions
 
-# Register custom log-normal parameterisation into hybrid_flows
-import hybrid_flows.distributions  # noqa: F811
+# Register the custom parameterisation into the upstream package
+import <upstream-package>.distributions  # noqa: F811
 ```
 
 This ensures the monkey-patch runs once when the package is
@@ -563,10 +563,11 @@ python scripts/hpo.py \
 
 - DVC documentation: https://dvc.org/doc
 - MLflow documentation: https://mlflow.org/docs
-- Existing project examples:
-  - `dcp_nf_forecast` — clean DVC foreach, Feather I/O, HPO study logs
-  - `hybrid_flows` — CI/CD, pdoc docs, experiment separation
-  - `gnn_regler` — DVC foreach with PyTorch Lightning
+- Earlier projects in the group are the best reference; look for one
+  that already solved the same piece:
+  - a forecasting project — clean DVC `foreach`, Feather I/O, HPO study logs
+  - a published library — CI/CD, pdoc docs, experiment separation
+  - a graph-model project — DVC `foreach` with PyTorch Lightning
 
 ---
 

@@ -60,8 +60,8 @@ each their own long-lived dev branch instead of a shared `dev`:
 feat/<topic>  ->  PR  ->  dev-<name>  ->  PR  ->  main
 ```
 
-- `dev-<name>` (e.g. `dev-marcel`, `dev-oliver`) — that person's
-  integration branch.  They own it and may push to it directly.
+- `dev-<name>` — that person's integration branch.  They own it and
+  may push to it directly.
 - `main` — protected: pull requests only, no direct pushes, no
   force-push.  It still holds nothing but `init` and merge commits.
 - Rebasing your own `dev-<name>` onto `main` is fine.  Never
