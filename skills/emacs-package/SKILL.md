@@ -317,6 +317,21 @@ them.
   scrolling stops at such a block and stays there.  A page scroll and
   `next-line' get past; the wheel gets past but does not come back to
   the same place.
+- Never hide the newline a block hangs on.  Rows that must be strings
+  (an image is swallowed by a display property, and `:align-to' is
+  ignored in one) belong on the after-string of an overlay that ends
+  *before* that newline, leaving the newline itself as real text.  With
+  the rows on the newline's own after-string and the newline replaced by
+  `display ""', `pixel-scroll-precision-scroll-up' refuses to pass the
+  block: measured over six figures, 280 refusals with a
+  beginning-of-buffer error and a window stuck mid-buffer, where the
+  same buffer with the newline left alone scrolls to the top without
+  one.  Scrolling down shows nothing of this, so test both directions.
+- A `line-prefix' with a fringe bitmap applies to the rows of a string
+  only when the string carries the property itself; an overlay says
+  nothing about them.  A display property carries no fringe at all.  A
+  bitmap taller than a row and aligned `bottom' lands one row off beside
+  a string row, so feet at the ends of a bracket are not worth having.
 - Redisplay pays for face runs, not for size.  Forty lines of plain
   output scroll as cheaply as none; twelve lines full of face changes
   cost three times as much, and rendered Markdown carries hundreds of
