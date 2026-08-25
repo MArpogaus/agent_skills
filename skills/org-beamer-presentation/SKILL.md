@@ -144,6 +144,10 @@ Two rules that are easy to get wrong:
   quotes may remain.
 - **Org verbatim is `~code~` or `=verbatim=`.** Markdown backticks are
   not markup; they export literally.
+- **Verbatim needs a border.** Org only recognises `~…~` when the
+  opening `~` follows whitespace, `(`, `{`, `"` or a line start, and the
+  closing `~` precedes whitespace or punctuation. `~SI~/~CI~` fails —
+  write `~SI~ / ~CI~`. The same holds for `=…=`, `*…*` and `/…/`.
 - **Underscores in identifiers and paths are always verbatim.** Outside
   `~…~`/`=…=`/`$…$`, an `_` in prose or a table cell becomes a subscript
   (`varying_coef`, `ground_truth/`, `check_data.py`). In a block title
