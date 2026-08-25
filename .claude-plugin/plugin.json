@@ -1,7 +1,7 @@
 {
   "name": "marpogaus-skills",
-  "version": "0.2.0",
-  "description": "Marcel's recurring project conventions as skills: Python, git, Emacs, ML research projects, and paper writing.",
+  "version": "0.3.0",
+  "description": "Marcel's recurring project conventions as skills: Python, git, Emacs, ML research projects, paper writing, and Beamer presentations.",
   "author": {
     "name": "Marcel Arpogaus",
     "url": "https://github.com/MArpogaus"
@@ -9,5 +9,5 @@
   "homepage": "https://github.com/MArpogaus/agent_skills",
   "repository": "https://github.com/MArpogaus/agent_skills",
   "license": "MIT",
-  "keywords": ["conventions", "python", "git", "emacs", "ml", "research"]
+  "keywords": ["conventions", "python", "git", "emacs", "ml", "research", "latex"]
 }

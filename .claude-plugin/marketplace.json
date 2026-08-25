@@ -10,8 +10,8 @@
     {
       "name": "marpogaus-skills",
       "source": "./",
-      "version": "0.1.0",
-      "description": "Marcel's recurring project conventions as skills: Python, git, ML research projects, and paper writing.",
+      "version": "0.3.0",
+      "description": "Marcel's recurring project conventions as skills: Python, git, Emacs, ML research projects, paper writing, and Beamer presentations.",
       "license": "MIT",
       "category": "productivity"
     }
