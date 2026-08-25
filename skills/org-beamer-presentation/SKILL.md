@@ -71,13 +71,13 @@ Figures live in a sidecar folder named exactly like the org file minus
 the extension:
 
 ```
-20260330T151457--gnn-regler__ai_presentation_work.org
-20260330T151457--gnn-regler__ai_presentation_work/
-    test_acc_box_plot_combined.pdf
+20260115T101500--graph-models__ai_presentation_work.org
+20260115T101500--graph-models__ai_presentation_work/
+    accuracy_box_plot.pdf
 ```
 
 Reference them either by full path in the link
-(`[[file:20260330T151457--gnn-regler__ai_presentation_work/plot.pdf]]`)
+(`[[file:20260115T101500--graph-models__ai_presentation_work/plot.pdf]]`)
 or by bare name plus `\graphicspath{{<foldername>}}` in the header.
 Pick one per file and stay with it. Prefer vector PDF over PNG.
 
@@ -101,7 +101,7 @@ Conventions that hold across all existing talks:
 
 - **Frame titles carry the message.** Either a full claim ("Physical
   grid expansions require long lead times and large investments") or a
-  crisp noun phrase ("Case Study 1: Allensbach Grid"). Not "Results".
+  crisp noun phrase ("Case Study 1: The Benchmark Grid"). Not "Results".
 - 3–6 bullets per frame, `*bold lead-in* followed by the point`.
 - A frame is either mostly figure or mostly text; the standard shape is
   a 0.4/0.6 or 0.5/0.5 two-column split of the two.
@@ -142,7 +142,7 @@ preceding word. The default source is the global
 in `header-extras.org` and must switch the global one off.
 
 Figure captions name their source: `#+CAPTION: … Figure from
-[cite:@IEA2025].`
+[cite:@Key].`
 
 ## 7. Export and verify
 

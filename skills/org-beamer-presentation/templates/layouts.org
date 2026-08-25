@@ -41,13 +41,13 @@ Blocks nest under a column heading; the block title is the heading text.
 
 <intro sentence>
 
-,**** GATv2Conv [cite:@Brody2022] :B_block:
+,**** <Method A> [cite:@KeyA] :B_block:
 :PROPERTIES:
 :BEAMER_env: block
 :END:
 - <point>
 
-,**** TransformerConv [cite:@Shi2021] :B_block:
+,**** <Method B> [cite:@KeyB] :B_block:
 :PROPERTIES:
 :BEAMER_env: block
 :END:
@@ -220,10 +220,10 @@ Always a raw export block, never an org =equation= environment.
 
 #+begin_src org
 ,#+ATTR_LATEX: :align lllrr
-| Dataset     | Model           | Mean Acc.              |
-|-------------+-----------------+------------------------|
-| LV-semiurb4 | GATv2Conv       | $85.1 \pm 2.0\,\%$     |
-|             | TransformerConv | **$94.4 \pm 0.8\,\%$** |
+| Dataset     | Model     | Mean Acc.              |
+|-------------+-----------+------------------------|
+| <dataset A> | <Method A> | $00.0 \pm 0.0\,\%$     |
+|             | <Method B> | **$00.0 \pm 0.0\,\%$** |
 #+end_src
 
 * Code slide, revealed step by step
@@ -296,7 +296,7 @@ Do you have any Questions?
 :END:
 
 ,#+ATTR_LATEX: :width \columnwidth
-[[file:my_vcard.png]]
+[[file:<vcard-qr>.png]]
 
 ,**** Details :BMCOL:
 :PROPERTIES:
