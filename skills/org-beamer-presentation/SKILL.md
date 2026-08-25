@@ -144,6 +144,23 @@ Two rules that are easy to get wrong:
   quotes may remain.
 - **Org verbatim is `~code~` or `=verbatim=`.** Markdown backticks are
   not markup; they export literally.
+- **Underscores in identifiers and paths are always verbatim.** Outside
+  `~…~`/`=…=`/`$…$`, an `_` in prose or a table cell becomes a subscript
+  (`varying_coef`, `ground_truth/`, `check_data.py`). In a block title
+  (`:options {…}`) it must be `\_`, because that text is raw LaTeX. Never
+  wrap Org tags such as `:B_block:` — they are not prose.
+- **Frame text after an in-frame block** must not be a child of that
+  block's heading. Wrap code in a special block instead of a `***`
+  heading, so bullets below stay frame-level:
+
+  ```
+  #+ATTR_LATEX: :options {Title}
+  #+begin_block
+  #+begin_src python
+  ...
+  #+end_src
+  #+end_block
+  ```
 - **Pin the listings backend per file** with a local-variables block at
   the very end, so the export does not depend on the global setting:
 
@@ -211,6 +228,7 @@ run; delete it, it is not an input.
 - [ ] No hand-written agenda frames (the `\AtBeginSection` hook owns them)
 - [ ] Frames with code or TikZ marked `:BEAMER_OPT: fragile`
 - [ ] No Unicode math outside code blocks — every symbol is `$…$`
+- [ ] Every identifier or path with an underscore is `~…~` (`\_` in block titles)
 - [ ] Inline code is `~…~`, not backticks; every `src` block names a
       listings-known language (`yaml`/`json`/`text` are `example` blocks)
 - [ ] No code line over ~60 characters; wide tables use `p{}` columns
