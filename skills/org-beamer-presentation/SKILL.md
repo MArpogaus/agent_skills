@@ -3,9 +3,9 @@ name: org-beamer-presentation
 description: >
   Author Beamer talks as Org mode files exported to LaTeX and PDF, in the
   denote-named presentation style: three interchangeable designs
-  (metropolis-dark, Szeged/dolphin, SimplePlus), a fixed header block, H:2
-  section/frame structure, column and overlay layouts, biblatex citations,
-  and a sidecar folder for figures.
+  (metropolis-dark, Szeged/dolphin, SimplePlus), a bare shared header with
+  opt-in extras, H:2 section/frame structure, column and overlay layouts,
+  biblatex citations, and a sidecar folder for figures.
 license: MIT
 compatibility: claude-code opencode
 metadata:
@@ -23,28 +23,37 @@ A presentation is **one Org file** plus a sidecar folder of figures.
 ## 1. Ask which design
 
 **Always ask before writing the file.** The three designs are equal
-options — pick by fit, not by seniority. They differ in colours, in the
-structure of the header, and in which extra packages they assume:
+options — pick by fit, not by seniority:
 
-| | **metropolis-dark** | **Szeged / dolphin** | **SimplePlus** |
-|---|---|---|---|
-| Look | dark background, flat, all-caps frame titles, progress bar | light, blue, section/subsection navigation bars at the top | light, minimal, no navigation bars |
-| Class options | `[dvipsnames, aspectratio=169, smaller]` | `[9pt,dvipsnames,aspectratio=169]` | `[dvipsnames, aspectratio=169]` |
-| Header directives | `#+LATEX_HEADER:` | `#+BEAMER_HEADER:` | `#+LATEX_HEADER:` + `#+BEAMER_HEADER:` for `\institute` |
-| Colour theme line | none (options ride on `#+BEAMER_THEME:`) | `#+BEAMER_COLOR_THEME: dolphin` | none |
-| External deps | TeX Live + `beamertheme-metropolis` | `my_beamer.sty` on `TEXINPUTS`, institute logos in the sidecar folder | `beamerthemeSimplePlus.sty` on `TEXINPUTS`, institute logos |
-| Template | `templates/metropolis.org` | `templates/szeged.org` | `templates/simpleplus.org` |
+| | Look | Fits |
+|---|---|---|
+| **metropolis-dark** | dark background, flat, all-caps frame titles, progress bar | internal talks, workshops, teaching |
+| **Szeged / dolphin** | light, blue, section/subsection navigation bars on top | academic talks, defences, project meetings |
+| **SimplePlus** | light, minimal, no navigation bars | conference talks |
 
-All three share the same body: `H:2` structure, the `\AtBeginSection`
-TOC hook, `biblatex ieee` citations, and every layout in
-`templates/layouts.org`. Switching design after the fact means swapping
-the header block only — the slides carry over unchanged.
+They differ by two lines. `templates/header.org` carries all three
+theme stanzas — keep one, delete the other two. Everything else in the
+header is shared, so switching design later is a two-line edit and the
+slides carry over untouched.
 
-Copy the chosen template verbatim, then fill the placeholders. Never
-retype a header from memory; the `\tikzset` and the `\AtBeginSection`
-hook must stay byte-identical across talks.
+The header is deliberately bare: denote keys, `H:2` options, lualatex
+with `unicode-math`, `biblatex ieee`, the bibliography item style and
+the `\AtBeginSection` TOC hook. Nothing else.
 
-## 2. Name the file
+## 2. Add header extras only on demand
+
+`templates/header-extras.org` holds every stanza that a *particular*
+talk may need, each with the trigger that earns it: `\graphicspath`,
+`\institute` logos, a per-talk `.bib`, TikZ and its overlay styles,
+matplotlib accent colours, `subcaption`/`multirow`/`xfrac`/`xmpmulti`,
+link colours, a footer frame counter, `header-args` for code slides,
+and a local `.sty` on `TEXINPUTS`.
+
+Add a stanza when the slide needing it exists — not in advance. A
+header that loads `tikz` for a deck without a single picture is noise
+the next talk inherits.
+
+## 3. Name the file
 
 Denote convention, in the presentations directory:
 
@@ -75,7 +84,7 @@ Pick one per file and stay with it. Prefer vector PDF over PNG.
 The `.tex`, `.pdf`, `.bbl`, `.aux` and friends are export products and
 sit beside the org file. Never edit the `.tex`.
 
-## 3. Structure
+## 4. Structure
 
 `#+OPTIONS: H:2` fixes the mapping:
 
@@ -103,16 +112,19 @@ Conventions that hold across all existing talks:
 - Commented-out lines (`# …`) inside a frame are the author's speaker
   prose. Leave them alone; add new speaker text as a `:B_note:` child.
 
-## 4. Layouts
+## 5. Layouts
 
 `templates/layouts.org` is the catalogue — read it before hand-rolling
 any arrangement. It covers: two-column splits, blocks inside columns,
 explicit `columns` wrappers, `onlyenv`/`overprint` alternatives,
 stepwise list reveals with `#+ATTR_BEAMER: :overlay`, inline TikZ with
 `visible on=<n->`, `\multiinclude` figure sequences, display math,
-booktabs tables, tangled code slides, speaker notes, the closing
+tables, tangled code slides, speaker notes, the closing
 "Thank you" frame with a QR contact block, appendix and bibliography
 frames.
+
+A layout that needs a package says so; take that stanza from
+`header-extras.org` at the same time.
 
 Two rules that are easy to get wrong:
 
@@ -121,25 +133,18 @@ Two rules that are easy to get wrong:
 - Display math is always a `#+begin_export latex` block, never an Org
   `equation` environment.
 
-## 5. Citations
+## 6. Citations
 
 `#+CITE_EXPORT: biblatex ieee`, cited as `[cite:@Key]` or
 `[cite:@KeyA; @KeyB]`. `\nbsp[cite:@Key]` glues the mark to the
-preceding word. Bibliography source is either the global
-`org-cite-global-bibliography` or a per-talk `#+bibliography:
-<same-basename>.bib`; when a local bib is used, disable the global one
-in the file's Local Variables:
-
-```org
-# Local Variables:
-# org-cite-global-bibliography: nil
-# End:
-```
+preceding word. The default source is the global
+`org-cite-global-bibliography`; a per-talk `.bib` is an opt-in stanza
+in `header-extras.org` and must switch the global one off.
 
 Figure captions name their source: `#+CAPTION: … Figure from
 [cite:@IEA2025].`
 
-## 6. Export and verify
+## 7. Export and verify
 
 Export from Emacs (`C-c C-e l P`), or headless:
 
@@ -158,9 +163,10 @@ grep -i 'undefined\|Missing' "<file>.log"  # broken refs or citations
 A `.bbl-SAVE-ERROR` file in the directory means an interrupted biber
 run; delete it, it is not an input.
 
-## 7. Checklist
+## 8. Checklist
 
-- [ ] Design chosen **by asking the user**, template copied verbatim
+- [ ] Design chosen **by asking the user**, one theme stanza kept
+- [ ] Header carries no package the slides do not use
 - [ ] Filename, `#+identifier:` and `#+filetags:` agree
 - [ ] Sidecar folder exists, figures are PDF where possible
 - [ ] `#+OPTIONS: … H:2 toc:nil date:nil` unchanged

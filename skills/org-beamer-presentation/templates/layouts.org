@@ -4,6 +4,9 @@
 Copy a block, drop it under a =**= frame heading, adjust.  Levels
 assume =H:2=: =*= section, =**= frame, =***= in-frame environment.
 
+Entries marked /needs:/ require a header stanza from
+=header-extras.org=; add it together with the slide.
+
 * Two columns (figure left, text right)
 The workhorse.  Column widths need not sum to 1; org emits
 =\begin{columns}= automatically around consecutive =:BMCOL:= siblings.
@@ -146,6 +149,8 @@ Whole sub-list at once, nested under its parent item:
 Whole column / block delayed: put =:BEAMER_ACT: <3->= in its drawer.
 
 * Inline TikZ figure with overlays
+/needs: tikz + overlay-aware TikZ styles + accent colours/
+
 Raw LaTeX in an export block.  The frame needs =:BEAMER_OPT: fragile=.
 =visible on=<2-3>= and =alt= come from the =\tikzset= in the header.
 
@@ -189,8 +194,9 @@ arrow/.style={-{Latex}, thick}
 #+end_src
 
 * Multi-stage figure (one PDF per overlay)
+/needs: xmpmulti/
+
 Files =name-0.pdf=, =name-1.pdf=, … built by the plotting script.
-Needs =\usepackage{xmpmulti}=.
 
 #+begin_src org
 ,#+begin_export latex
@@ -289,7 +295,7 @@ Do you have any Questions?
 :BEAMER_col: 0.2
 :END:
 
-,#+LATEX_ATTR: :width \columnwidth
+,#+ATTR_LATEX: :width \columnwidth
 [[file:my_vcard.png]]
 
 ,**** Details :BMCOL:
