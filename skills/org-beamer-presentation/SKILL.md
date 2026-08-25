@@ -133,6 +133,30 @@ Two rules that are easy to get wrong:
 - Display math is always a `#+begin_export latex` block, never an Org
   `equation` environment.
 
+## 5a. Pitfalls that cost a compile (learned the hard way)
+
+- **Math is LaTeX, always.** The header loads `unicode-math` under
+  lualatex, so a Unicode math character in *text* mode (β, ≈, →, ≤, ×,
+  −, ², ≙) raises `Missing $ inserted`. Write `$\beta_{12} = 2$`,
+  `$e^2 \approx 7.39$`, `$13 \to 7$`, `$1.5\times$`; use ASCII `-` for a
+  minus in a number. Before handing over, list every non-ASCII character
+  outside `src`/`example`/`export` blocks — only umlauts, dashes and
+  quotes may remain.
+- **Org verbatim is `~code~` or `=verbatim=`.** Markdown backticks are
+  not markup; they export literally.
+- **The listings backend needs a language it knows.** Every `src` block
+  carries one (`python`, `bash`, …); languages listings does not ship —
+  `yaml`, `json`, `text` — fail with *Couldn't load requested language*.
+  Use `#+begin_example` for those, or add them to
+  `org-latex-listings-langs` first.
+- **Code lines stay short.** At `aspectratio=169, smaller` a block holds
+  about 60 monospace characters; wrap or shorten beyond that, and put a
+  long example into a block per variant instead of one wide block.
+- **Wide tables get `p{}` columns and a smaller font**:
+  `#+ATTR_LATEX: :align p{4.6cm}p{8.4cm} :font \footnotesize`. Column
+  widths must sum below `\textwidth` (about 14 cm at 16:9); cut cell text
+  before cutting font size further.
+
 ## 6. Citations
 
 `#+CITE_EXPORT: biblatex ieee`, cited as `[cite:@Key]` or
@@ -172,6 +196,10 @@ run; delete it, it is not an input.
 - [ ] `#+OPTIONS: … H:2 toc:nil date:nil` unchanged
 - [ ] No hand-written agenda frames (the `\AtBeginSection` hook owns them)
 - [ ] Frames with code or TikZ marked `:BEAMER_OPT: fragile`
+- [ ] No Unicode math outside code blocks — every symbol is `$…$`
+- [ ] Inline code is `~…~`, not backticks; every `src` block names a
+      listings-known language (`yaml`/`json`/`text` are `example` blocks)
+- [ ] No code line over ~60 characters; wide tables use `p{}` columns
 - [ ] `Thanks` / `Appendix` / `References` present in that order
 - [ ] PDF builds, log is free of undefined citations
 

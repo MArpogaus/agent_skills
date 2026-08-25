@@ -226,7 +226,25 @@ Always a raw export block, never an org =equation= environment.
 |             | <Method B> | **$00.0 \pm 0.0\,\%$** |
 #+end_src
 
+Wide table — wrap text in =p{}= columns and drop the font one step;
+widths must sum below =\textwidth= (about 14 cm at 16:9):
+
+#+begin_src org
+,#+ATTR_LATEX: :align p{4.6cm}p{8.4cm} :font \footnotesize
+| Gone                    | Use instead                              |
+|-------------------------+------------------------------------------|
+| ~fit()~ without ~epochs=~ | set a budget, or ~schedule="plateau"~ + ~freeze_patience=~ |
+#+end_src
+
+Cells are org text: inline code is =~…~=, math is =$…$= — never
+Unicode math characters (see SKILL.md 5a).
+
 * Code slide, revealed step by step
+Every =src= block names a language the listings backend knows
+(=python=, =bash=, …).  For =yaml=, =json= or plain text use
+=#+begin_example= instead — listings has no definition for them and
+the export fails.  Keep lines under ~60 characters at 16:9 =smaller=.
+
 Tangles to a runnable script; =:eval never-export= keeps export cheap.
 
 #+begin_src org
