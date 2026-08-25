@@ -1,0 +1,340 @@
+#+title: Layout catalogue for org-beamer presentations
+#+startup: show2levels
+
+Copy a block, drop it under a =**= frame heading, adjust.  Levels
+assume =H:2=: =*= section, =**= frame, =***= in-frame environment.
+
+* Two columns (figure left, text right)
+The workhorse.  Column widths need not sum to 1; org emits
+=\begin{columns}= automatically around consecutive =:BMCOL:= siblings.
+
+#+begin_src org
+,*** Left :BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.5
+:END:
+
+,#+CAPTION: <caption, cite the source with [cite:@Key]>
+,#+ATTR_LATEX: :width \linewidth
+[[file:<identifier--slug__tags>/<figure>.pdf]]
+
+,*** Right :BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.5
+:END:
+
+- *<Lead-in>* <point>
+- *<Lead-in>* <point>
+#+end_src
+
+* Column with a block inside
+Blocks nest under a column heading; the block title is the heading text.
+
+#+begin_src org
+,*** Right :BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.6
+:END:
+
+<intro sentence>
+
+,**** GATv2Conv [cite:@Brody2022] :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+- <point>
+
+,**** TransformerConv [cite:@Shi2021] :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+- <point>
+#+end_src
+
+* Plain block (no columns)
+The tag alone is enough — org derives =BEAMER_env= from =:B_block:=.
+
+#+begin_src org
+,*** Goal :B_block:
+Develop a real-time, ML-based operational control algorithm.
+#+end_src
+
+* Explicit columns wrapper
+Only needed when the columns are not the frame's direct children, e.g.
+a second row of columns, or when they must sit inside another env.
+
+#+begin_src org
+,*** Top :B_columns:
+:PROPERTIES:
+:BEAMER_env: columns
+:END:
+,**** Left :BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.5
+:BEAMER_act: <+->
+:END:
+<content>
+,**** Right :BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.5
+:END:
+<content>
+#+end_src
+
+* Overprint — replace content in place
+Successive =onlyenv= children occupy the same space, one per click.
+=<+>= auto-increments the overlay counter.
+
+#+begin_src org
+,*** Only 1 :B_onlyenv:
+:PROPERTIES:
+:BEAMER_env: onlyenv
+:BEAMER_ACT: <+>
+:END:
+,**** <Sub-title shown on overlay 1>
+- <point>
+
+,*** Only 2 :B_onlyenv:
+:PROPERTIES:
+:BEAMER_env: onlyenv
+:BEAMER_ACT: <+>
+:END:
+,**** <Sub-title shown on overlay 2>
+- <point>
+#+end_src
+
+* Overprint env with manual \onslide
+Use when the alternatives differ in height and you want a fixed box, or
+when a slide must interleave raw =\onslide= with headings.  The
+=ignoreheading= child is the trick to emit an =\onslide= without a title.
+
+#+begin_src org
+,**** Overprint :B_overprint:
+:PROPERTIES:
+:BEAMER_env: overprint
+:END:
+\onslide<2>
+,***** <Heading for overlay 2>
+- <point>
+,***** Ignore :B_ignoreheading:
+:PROPERTIES:
+:BEAMER_env: ignoreheading
+:END:
+\onslide<3>
+,***** <Heading for overlay 3>
+- <point>
+#+end_src
+
+* Stepwise reveal of list items
+Per-item overlays via =ATTR_BEAMER=, one specification per item.
+
+#+begin_src org
+,#+ATTR_BEAMER: :overlay <2->
+1. Transform: $m_{1,j}^{(k)} = \text{Trf}(h_j^{(k)})$
+,#+ATTR_BEAMER: :overlay <3->
+2. Aggregate: $a_1^{(k)} = \text{Agg}(\{ m_{1,j}^{(k)} \})$
+#+end_src
+
+Whole sub-list at once, nested under its parent item:
+
+#+begin_src org
+- LV grid is put under stress
+  ,#+ATTR_BEAMER: :overlay <2->
+  - <detail>\nbsp[cite:@Key]
+#+end_src
+
+Whole column / block delayed: put =:BEAMER_ACT: <3->= in its drawer.
+
+* Inline TikZ figure with overlays
+Raw LaTeX in an export block.  The frame needs =:BEAMER_OPT: fragile=.
+=visible on=<2-3>= and =alt= come from the =\tikzset= in the header.
+
+#+begin_src org
+,** <Frame title>
+:PROPERTIES:
+:BEAMER_OPT: fragile
+:END:
+
+,*** Left :BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.4
+:END:
+
+,#+begin_export latex
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}[
+    scale=0.8, every node/.style={transform shape},
+    node distance=3cm and 1.5cm,
+    n/.style={circle, draw, inner sep=0, minimum size=1.75cm, thick},
+    e/.style={thick, -{Latex}, draw=gray}
+    ]
+    \node[n, fill=mpl_blue!80] (n1) at (0, 0) {$h_1$};
+    \node[n, fill=mpl_blue!80, above=of n1] (n2) {$h_2$};
+    \draw[e, draw=mpl_orange, visible on=<2->] (n2) -- (n1);
+    \onslide<3->{\node[n, fill=ForestGreen!60] (n1) at (0, 0) {$a_1$};}
+  \end{tikzpicture}
+\end{figure}
+,#+end_export
+#+end_src
+
+Flowchart variant — a =block/.style= with a default fill colour, so
+=[block]= and =[block=mpl_orange]= both work:
+
+#+begin_src latex
+block/.style={rectangle, draw, rounded corners, thick, text width=4cm,
+              align=center, minimum height=1cm, fill=#1},
+block/.default=mDarkTeal!80,
+arrow/.style={-{Latex}, thick}
+#+end_src
+
+* Multi-stage figure (one PDF per overlay)
+Files =name-0.pdf=, =name-1.pdf=, … built by the plotting script.
+Needs =\usepackage{xmpmulti}=.
+
+#+begin_src org
+,#+begin_export latex
+\multiinclude[<+->][format=pdf, graphics={width=\columnwidth}]{<basename>}
+,#+end_export
+#+end_src
+
+* Display math
+Always a raw export block, never an org =equation= environment.
+
+#+begin_src org
+,#+begin_export latex
+\begin{equation*}
+  f_y(y|\mathbf{x}) = f_z(h(y|\mathbf{x})) \left|\det(\nabla h(y|\mathbf{x}))\right|
+\end{equation*}
+,#+end_export
+#+end_src
+
+* Table
+=booktabs= via =ATTR_LATEX :align=; column count must match.
+
+#+begin_src org
+,#+ATTR_LATEX: :align lllrr
+| Dataset     | Model           | Mean Acc.              |
+|-------------+-----------------+------------------------|
+| LV-semiurb4 | GATv2Conv       | $85.1 \pm 2.0\,\%$     |
+|             | TransformerConv | **$94.4 \pm 0.8\,\%$** |
+#+end_src
+
+* Code slide, revealed step by step
+Tangles to a runnable script; =:eval never-export= keeps export cheap.
+
+#+begin_src org
+,** <Frame title>
+:PROPERTIES:
+:header-args+: :session <name>
+:header-args+: :tangle <path/to/script.py>
+:BEAMER_env: overprint
+:END:
+\onslide<+>
+Required packages
+,#+begin_src python
+import os
+,#+end_src
+
+\onslide<+>
+Define state
+,#+begin_src python
+class State(TypedDict):
+    request: str
+,#+end_src
+#+end_src
+
+* Speaker notes
+Exports to =\note{}=; invisible on the slide.
+
+#+begin_src org
+,*** Notes :B_note:
+:PROPERTIES:
+:BEAMER_env: note
+:END:
+- <what to say>
+#+end_src
+
+* Closing frame
+A title-styled "Thank you", then a contact block with a QR code column.
+
+#+begin_src org
+,** Thanks :B_fullframe:
+:PROPERTIES:
+:BEAMER_env: fullframe
+:END:
+,#+begin_export beamer
+\begin{center}
+{
+  \usebeamerfont{title}%
+  \usebeamercolor[fg]{title}%
+  \huge\scshape
+  Thank you!
+}
+
+\smallskip
+
+Do you have any Questions?
+\end{center}
+
+\bigskip
+,#+end_export
+
+,*** Feel free to get in touch! :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+,**** QR Code :BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.2
+:END:
+
+,#+LATEX_ATTR: :width \columnwidth
+[[file:my_vcard.png]]
+
+,**** Details :BMCOL:
+:PROPERTIES:
+:BEAMER_col: 0.75
+:END:
++ LinkedIn :: [[https://www.linkedin.com/in/<user>/][/in/<user>]]
++ GitHub :: [[https://github.com/<user>/][/<user>]]
++ Mail :: [[mailto:<mail>][<mail>]]
+#+end_src
+
+* Appendix
+Everything after it is excluded from the frame count and the TOC.
+
+#+begin_src org
+,* Appendix :B_appendix:
+:PROPERTIES:
+:UNNUMBERED: t
+:BEAMER_env: appendix
+:END:
+,** <Backup frame>
+#+end_src
+
+* Bibliography frame
+Last heading of the file.
+
+#+begin_src org
+,* References :B_ignoreheading:
+:PROPERTIES:
+:BEAMER_env: ignoreheading
+:END:
+,#+print_bibliography:
+#+end_src
+
+* Long frame that overflows
+#+begin_src org
+:PROPERTIES:
+:BEAMER_opt: allowframebreaks
+:END:
+#+end_src
+
+* Shorter title in the TOC
+#+begin_src org
+,* <Long section title spelled out on the section slide>
+:PROPERTIES:
+:ALT_TITLE: Problem I
+:END:
+#+end_src

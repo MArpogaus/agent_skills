@@ -50,3 +50,4 @@ All skills are licensed under MIT — see =LICENSE=.
 | paper-writing          | End-to-end paper writing workflow: figure generation, LaTeX templates (IEEE/Elsevier/UAI), revision cycles, venue submission |
 | emacs-config           | The literate Emacs configuration: org-only editing, naming, package idioms, git flow |
 | emacs-package          | Emacs Lisp packages: layout, the make check pipeline, ERT, display engine rules, MELPA |
+| org-beamer-presentation | Org → Beamer → PDF talks: three designs, denote naming, layout catalogue |

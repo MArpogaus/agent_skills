@@ -1,0 +1,96 @@
+#+title:      <TITLE>
+#+date:       [<YYYY-MM-DD Day HH:MM>]
+#+filetags:   :<tag1>:<tag2>:
+#+identifier: <YYYYMMDDTHHMMSS>
+
+#+SUBTITLE: <optional subtitle>
+#+AUTHOR: <Author>\inst{1,2} \and <Co-Author>\inst{2}
+
+#+STARTUP: beamer show2levels indent
+#+OPTIONS: TeX:t LaTeX:t H:2 toc:nil date:nil
+#+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
+
+#+LANGUAGE: en
+#+LATEX_COMPILER: lualatex
+
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [9pt,dvipsnames,aspectratio=169]
+
+#+CITE_EXPORT: biblatex ieee
+
+#+BEAMER_THEME: Szeged
+#+BEAMER_COLOR_THEME: dolphin
+
+#+BEAMER_HEADER: \usepackage[utf8]{luainputenc}
+#+BEAMER_HEADER: \usepackage[mathbf=sym]{unicode-math}
+#+BEAMER_HEADER: \usepackage{booktabs}
+#+BEAMER_HEADER: \usepackage{multirow}
+#+BEAMER_HEADER: \usepackage{subcaption}
+#+BEAMER_HEADER: \usepackage{tikz}
+#+BEAMER_HEADER: \usepackage{xfrac}
+#+BEAMER_HEADER: \usepackage{xmpmulti}
+#+BEAMER_HEADER: \usetikzlibrary{tikzmark}
+#+BEAMER_HEADER: \usetikzlibrary{arrows.meta}
+#+BEAMER_HEADER: \usetikzlibrary{positioning}
+#+BEAMER_HEADER: \tikzset{
+#+BEAMER_HEADER:   % https://tex.stackexchange.com/a/55849
+#+BEAMER_HEADER:   alt/.code args={<#1>#2#3}{%
+#+BEAMER_HEADER:     \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
+#+BEAMER_HEADER:   },
+#+BEAMER_HEADER:   invisible/.style={opacity=0},
+#+BEAMER_HEADER:   visible on/.style={alt={#1{}{invisible}}},
+#+BEAMER_HEADER:   line/.style  = {thick, draw=gray, visible on=#1},
+#+BEAMER_HEADER:   arrow/.style = {line=#1, -{latex}, shorten >=1pt},
+#+BEAMER_HEADER:   desc/.style  = {pin edge={-,thin,black,dotted,visible on=#1},align=center,font=\em,visible on=#1},
+#+BEAMER_HEADER:   node/.style  = {minimum size=2em, font=\sffamily, visible on=#1},
+#+BEAMER_HEADER:   model/.style = {node=#1, draw, fill=lightgray, align = center},
+#+BEAMER_HEADER:   line/.default=<1->,
+#+BEAMER_HEADER:   desc/.default=<1->,
+#+BEAMER_HEADER:   node/.default=<1->
+#+BEAMER_HEADER: }
+#+BEAMER_HEADER: \definecolor{mpl_blue}{HTML}{1f77b4}
+#+BEAMER_HEADER: \definecolor{mpl_orange}{HTML}{ff7f0e}
+#+BEAMER_HEADER: \graphicspath{{<identifier--slug__tags>}}
+#+BEAMER_HEADER: \usepackage[foreground_color=RoyalBlue, alerted_color=Maroon]{my_beamer}
+#+BEAMER_HEADER: \setlength{\parskip}{\medskipamount}
+#+BEAMER_HEADER: \institute[<Short Affiliation>]{%
+#+BEAMER_HEADER:   \inst{1}%
+#+BEAMER_HEADER:   \includegraphics[height=2.5em]{htwg.pdf}%
+#+BEAMER_HEADER:   \hfill%
+#+BEAMER_HEADER:   \inst{2}%
+#+BEAMER_HEADER:   \includegraphics[height=2.5em]{uni_goettingen.png}%
+#+BEAMER_HEADER: }
+#+BEAMER_HEADER: \setbeamertemplate{bibliography item}[text]
+#+BEAMER_HEADER: \AtBeginSection[]
+#+BEAMER_HEADER: {
+#+BEAMER_HEADER:   \begin{frame}<beamer>
+#+BEAMER_HEADER:     \tableofcontents[
+#+BEAMER_HEADER:       currentsection,
+#+BEAMER_HEADER:       % currentsubsection,
+#+BEAMER_HEADER:       subsectionstyle=show/shaded/hide,
+#+BEAMER_HEADER:     ]
+#+BEAMER_HEADER:   \end{frame}
+#+BEAMER_HEADER: }
+#+BEAMER_HEADER: \addtobeamertemplate{navigation symbols}{}{\usebeamerfont{footline}\usebeamercolor[fg]{footline}\hspace{1em}\raisebox{1.4pt}[0pt][0pt]{\insertframenumber / \inserttotalframenumber}}
+#+BEAMER_HEADER: \newsavebox{\mytmpbox}
+#+BEAMER_HEADER: \newenvironment<>{highlightbox}[1][draw=red]%
+#+BEAMER_HEADER: {\begin{altenv}#2
+#+BEAMER_HEADER:     {\begin{lrbox}{\mytmpbox}}
+#+BEAMER_HEADER:     {\end{lrbox}\tikz[baseline]\node[#1]{\unhbox\mytmpbox};}
+#+BEAMER_HEADER:     {}{}}%
+#+BEAMER_HEADER:     {\end{altenv}}
+
+* <Section>
+** <Frame title>
+- <point>
+
+* References :B_ignoreheading:
+:PROPERTIES:
+:BEAMER_env: ignoreheading
+:END:
+#+print_bibliography:
+
+# Local Variables:
+# org-latex-hyperref-template: nil
+# eval: (setenv "TEXINPUTS" ".:<path/to/tex/sty>:")
+# End:
