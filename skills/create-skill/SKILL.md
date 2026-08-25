@@ -18,9 +18,9 @@ all necessary specifics for the domain.
 
 ## Working directory
 
-All skills live in `~/Projekte/agent_skills/skills/<name>/SKILL.md`.
-That repo is symlinked to `~/.agents/skills/`.  **Always edit files
-in the repo** (`~/Projekte/agent_skills/`), not through the symlink.
+All skills live in `<repo>/skills/<name>/SKILL.md`.  The checkout is
+read in place by both harnesses, so there is nothing to copy or sync —
+edit the files in the checkout.
 
 ## Procedure
 
