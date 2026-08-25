@@ -105,6 +105,16 @@ Silences evaluation on export; only for a talk with `src` blocks.
 
 #+begin_src org
 ,#+PROPERTY: header-args :results silent :eval never-export
+,#+LATEX_HEADER: \lstset{showstringspaces=false,breaklines=true,basicstyle=\small, keywordstyle=\color{mLightBrown},stringstyle=\color{mLightBrown},numberstyle=\color{mLightBrown},commentstyle=\color{lightgray}}
+#+end_src
+
+The =\lstset= colours are metropolis names (=mLightBrown=); swap them for
+the other themes.  Pin the backend at the end of the file:
+
+#+begin_src org
+,# Local Variables:
+,# org-latex-listings: listings
+,# End:
 #+end_src
 
 * Local package on TEXINPUTS

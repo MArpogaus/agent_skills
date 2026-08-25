@@ -144,6 +144,20 @@ Two rules that are easy to get wrong:
   quotes may remain.
 - **Org verbatim is `~code~` or `=verbatim=`.** Markdown backticks are
   not markup; they export literally.
+- **Pin the listings backend per file** with a local-variables block at
+  the very end, so the export does not depend on the global setting:
+
+  ```
+  # Local Variables:
+  # org-latex-listings: listings
+  # End:
+  ```
+
+  and put the `\lstset{…}` (colours from the theme, `breaklines=true`,
+  `basicstyle=\small`) as a `#+LATEX_HEADER:` line right after
+  `unicode-math` — see the code-slides stanza in `header-extras.org`.
+- **Every code example sits in a `:B_block:`** with a short title, never
+  bare on the frame.
 - **The listings backend needs a language it knows.** Every `src` block
   carries one (`python`, `bash`, …); languages listings does not ship —
   `yaml`, `json`, `text` — fail with *Couldn't load requested language*.
