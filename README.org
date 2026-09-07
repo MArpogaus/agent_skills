@@ -44,6 +44,7 @@ All skills are licensed under MIT — see =LICENSE=.
 | python-dev             | Python conventions: setuptools, ruff, pytest, uv |
 | git-conventions        | Git workflow: two-branch, conventional commits   |
 | create-skill           | Guide for generating new opencode skills         |
+| repo-tour              | Guided code tour of an unfamiliar repo: one stop at a time, linked, verified |
 | latex-paper-revision   | LaTeX paper revision and enhancement workflow    |
 | ml-project             | Research ML project conventions (DVC, MLflow, HPO) |
 | auto-hpo-studies       | Autonomous HPO loop: define target, iterate update-config run monitor commit until convergence. Uses MLflow, sleep-based polling |
