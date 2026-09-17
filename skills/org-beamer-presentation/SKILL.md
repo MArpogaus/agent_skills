@@ -133,7 +133,11 @@ Two rules that are easy to get wrong:
 - Display math is always a `#+begin_export latex` block, never an Org
   `equation` environment.
 
-## 5a. Pitfalls that cost a compile (learned the hard way)
+## 5a. Pitfalls (learned the hard way)
+
+Some of these stop the compile, which is the easy case. The dangerous
+ones below compile cleanly and put the wrong thing on the slide — a
+drawer as body text, a table row split in two. Only §7a catches those.
 
 - **Math is LaTeX, always.** The header loads `unicode-math` under
   lualatex, so a Unicode math character in *text* mode (β, ≈, →, ≤, ×,
@@ -142,6 +146,20 @@ Two rules that are easy to get wrong:
   minus in a number. Before handing over, list every non-ASCII character
   outside `src`/`example`/`export` blocks — only umlauts, dashes and
   quotes may remain.
+- **A property drawer must touch its heading.** One blank line between
+  `** Frame title` and `:PROPERTIES:` stops it being a drawer, and
+  `BEAMER_OPT: fragile` is then typeset onto the slide as body text. It
+  compiles, so only looking at the page catches it. Same for `:BMCOL:`
+  and `:B_block:` drawers.
+- **Never write `\%`.** Org escapes `%` itself. A hand-escaped one
+  exports as `$\backslash$%`, and the `%` then comments out the rest of
+  the line — inside a table that eats the row separator and the next row
+  merges, raising `Extra alignment tab has been changed to \cr`. Write a
+  plain `%`.
+- **No `*bold*` inside a `p{}` table column.** Org exports bold as
+  `\alert{}`, which beamer starts on a new line inside a paragraph
+  column, so the label drops below its own numbers. Use an `l` column for
+  a cell that needs emphasis, or drop the emphasis.
 - **Org verbatim is `~code~` or `=verbatim=`.** Markdown backticks are
   not markup; they export literally.
 - **No nested or Markdown emphasis.** `*~code~*` does not parse — the
@@ -194,9 +212,25 @@ Two rules that are easy to get wrong:
   about 60 monospace characters; wrap or shorten beyond that, and put a
   long example into a block per variant instead of one wide block.
 - **Wide tables get `p{}` columns and a smaller font**:
-  `#+ATTR_LATEX: :align p{4.6cm}p{8.4cm} :font \footnotesize`. Column
-  widths must sum below `\textwidth` (about 14 cm at 16:9); cut cell text
-  before cutting font size further.
+  `#+ATTR_LATEX: :align p{4.6cm}p{8.4cm} :font \footnotesize`; cut cell
+  text before cutting font size further. Size the columns by the
+  arithmetic below rather than by eye.
+
+### The table-width budget
+
+At `aspectratio=169, smaller` the frame gives `\textwidth = 398.34pt =
+13.99cm` (the log prints it: `grep textwidth= <file>.log`). A `tabular`
+adds `2 × \tabcolsep` — 12pt, 0.42cm — **per column**, edges included. So
+
+```
+sum of the p{} widths  ≤  13.99 − 0.42 × ncols
+```
+
+which is **13.1cm for two columns, 12.7cm for three, 12.3cm for four**.
+Going over is silent apart from an `Overfull \hbox` in the log; a table
+whose widths sum to 13.4cm overflows every time by the same 6.9pt, which
+is the tell. Inside a `:BEAMER_col: f` column the budget is
+`f × 13.99 − 0.42 × ncols`, so a 0.46 column holds about 5.9cm of `p{}`.
 
 ## 6. Citations
 
@@ -209,24 +243,99 @@ in `header-extras.org` and must switch the global one off.
 Figure captions name their source: `#+CAPTION: … Figure from
 [cite:@Key].`
 
-## 7. Export and verify
+## 7. Export
 
 Export from Emacs (`C-c C-e l P`), or headless:
 
 ```bash
-emacs --batch -l org "<file>.org" -f org-beamer-export-to-pdf
+emacs -Q --batch -l org -l ox-beamer \
+  --eval '(setq enable-local-variables :all
+                org-latex-remove-logfiles nil
+                org-latex-pdf-process
+                (list "latexmk -f -pdf -%latex -interaction=nonstopmode \
+                       -output-directory=%o %f"))' \
+  "<file>.org" -f org-beamer-export-to-pdf
 ```
 
-Then check:
+Two things a headless export needs that an interactive one does not:
 
-```bash
-pdfinfo "<file>.pdf" | grep Pages          # frame count is plausible
-grep -c 'Overfull\|Underfull' "<file>.log" # box warnings
-grep -i 'undefined\|Missing' "<file>.log"  # broken refs or citations
-```
+- **Add `#+LATEX_HEADER: \usepackage{listings}` yourself.** The local
+  variable `org-latex-src-block-backend: listings` makes org emit
+  `lstlisting` environments but does **not** pull the package in under
+  `emacs -Q`, so every code frame fails with `Environment lstlisting
+  undefined`. Loading it twice is harmless, so keep the line.
+- **If `biber` will not run**, add `org-cite-biblatex-options
+  "backend=bibtex"` to the same `setq` and put TeX Live's `bin` ahead of
+  any conda environment on `PATH` — conda ships `bibtex` and `kpsewhich`
+  over an empty texmf tree, and they win otherwise. The bibtex backend
+  then ends every log with a generic `There were undefined references`;
+  that line is the backend's own anchor bookkeeping. Confirm it is
+  harmless with `pdftotext … | grep -c '??'`, which must print `0`.
 
 A `.bbl-SAVE-ERROR` file in the directory means an interrupted biber
 run; delete it, it is not an input.
+
+## 7a. Then look at it — every page, every time
+
+The log catches overflow. It cannot catch a legend sitting on a title, a
+marker hidden under another marker, a legend key with the wrong colour,
+or a drawer typeset onto the slide. **Those are only ever found by
+rendering the pages and reading them**, and in practice that is where
+most of the real defects are. Never report a deck as done on the
+strength of a clean log.
+
+```bash
+pdfinfo  "<file>.pdf" | grep Pages          # frame count is plausible
+pdftotext "<file>.pdf" - | grep -c '??'     # unresolved refs; must be 0
+grep -c 'Overfull\|Underfull' "<file>.log"  # box warnings
+tools/contact-sheet.py "<file>.pdf" /tmp/sheet   # then READ every sheet
+```
+
+- **Map a box warning to its page.** The log's `at line N` is the `.vrb`
+  of that frame, not the `.org`. Walk the log and keep the last `[N`
+  shipout marker before each warning; `tools/box-pages.py` does it.
+- **An `Overfull \vbox` means content ran past the bottom of the slide.**
+  Trim a line, or scale the figure: a figure at `\linewidth` with aspect
+  `a` costs `398/a` points of height, so dropping to `0.9\linewidth`
+  gives 10% of that back.
+- **The metropolis title page always reports about 13.8pt of `\vbox`.**
+  It is the theme's own title template and appears in every deck; leave
+  it alone rather than chasing it.
+- Render any figure you generated on its own too, at 120 dpi or better.
+  A defect that is invisible in a slide thumbnail is obvious there.
+
+## 7b. Figures for a dark 16:9 deck
+
+Everything here was a real defect found by looking:
+
+- **Add a legend entry once, not once per panel.** A label passed inside
+  a per-axis loop is added once per axis; three copies stack and cover
+  the middle panel's title. Guard it with `if ax is axes[0]`.
+- **An empty artist carries no colour.** `ax.bar([], [], color=…,
+  label=…)` creates no patch, so its legend key draws in the default
+  colour and two series look identical. Use
+  `matplotlib.patches.Patch(facecolor=…, label=…)` proxies.
+- **Never overlay two translucent histograms.** The overlap reads as a
+  third category and neither height is recoverable. Draw them side by
+  side on shared bins, and make a mean line dashed so it is not read as
+  one more bar.
+- **Give coinciding series their own lane.** Two markers that agree to
+  three decimals hide each other, which is exactly the case worth
+  showing; offset each series by a fraction of the row.
+- **A reference line needs its label off the line**, with
+  `bbox={"facecolor": "white", "edgecolor": "none", "pad": 1.0}`.
+- **Scaling shrinks text proportionally.** A graphviz graph 1200pt wide
+  placed at `\linewidth` is scaled to 0.33, so its 11pt labels land at
+  under 4pt. Either shorten the labels so the graph is narrower, or
+  raise its font size to survive the scale.
+- **Fills must be lighter than the slide.** The metropolis dark
+  background is about `#23373B`; a node filled with the same colour
+  vanishes. Keep figure backgrounds transparent and pick fills against
+  the slide, not against white.
+- **State what a band or a dot is, in the figure.** If a reader has to
+  ask what the grey band means, the figure is not finished. Prefer a
+  labelled span from min to max over a scatter of unlabelled dots when
+  the reader cannot tell which comparison a dot belongs to.
 
 ## 8. Checklist
 
@@ -236,14 +345,21 @@ run; delete it, it is not an input.
 - [ ] Sidecar folder exists, figures are PDF where possible
 - [ ] `#+OPTIONS: … H:2 toc:nil date:nil` unchanged
 - [ ] No hand-written agenda frames (the `\AtBeginSection` hook owns them)
-- [ ] Frames with code or TikZ marked `:BEAMER_OPT: fragile`
+- [ ] Frames with code or TikZ marked `:BEAMER_OPT: fragile`, and every
+      property drawer touching its heading with no blank line
+- [ ] No `\%` anywhere; no `*bold*` inside a `p{}` column
 - [ ] No Unicode math outside code blocks — every symbol is `$…$`
 - [ ] Every identifier or path with an underscore is `~…~` (`\_` in block titles)
 - [ ] Inline code is `~…~`, not backticks; every `src` block names a
       listings-known language (`yaml`/`json`/`text` are `example` blocks)
-- [ ] No code line over ~60 characters; wide tables use `p{}` columns
+- [ ] No code line over ~60 characters; every `p{}` table inside the
+      width budget of §5a
 - [ ] `Thanks` / `Appendix` / `References` present in that order
-- [ ] PDF builds, log is free of undefined citations
+- [ ] PDF builds; `pdftotext … | grep -c '??'` prints `0`
+- [ ] **Every page rendered and read**, not just the log — contact sheets
+      for the deck, and each generated figure on its own
+- [ ] No legend duplicated, overlapping a title, or keyed in the wrong
+      colour; no marker hidden under another
 
 ## Required skills
 
