@@ -14,10 +14,11 @@ metadata:
 
 ## Two-branch flow
 
-- **`main`** — clean history, only `init` + merge commits from `dev`.
-  The `init` commit contains exactly `.gitignore` (and
+- **`main`** — clean history, only the root commit + merge commits
+  from `dev`.  The root commit contains exactly `.gitignore` (and
   `.pre-commit-config.yaml` if it already exists at that point).
-  Nothing else.  Message is literally: `init` (no body).
+  Nothing else.  Message is literally: `chore: init` (no body).  A
+  bare `init` fails the commitizen commit-msg and branch hooks.
 
 - **`dev`** — main working branch.  All feature work, commits, and
   PRs target `dev`.  Never commit directly to `main`.
@@ -25,7 +26,7 @@ metadata:
 - **Sketch and redo** when the first attempt gets it wrong:
   `git update-ref -d HEAD` to remove the root commit (only safe
   before any branch/push), then `git add` only the intended files
-  and `git commit -m "init"`.
+  and `git commit -m "chore: init"`.
 
 ## History is append-only once pushed
 
@@ -63,7 +64,7 @@ feat/<topic>  ->  PR  ->  dev-<name>  ->  PR  ->  main
 - `dev-<name>` — that person's integration branch.  They own it and
   may push to it directly.
 - `main` — protected: pull requests only, no direct pushes, no
-  force-push.  It still holds nothing but `init` and merge commits.
+  force-push.  It still holds nothing but `chore: init` and merge commits.
 - Rebasing your own `dev-<name>` onto `main` is fine.  Never
   rewrite someone else's.
 
@@ -297,14 +298,14 @@ git switch -c dev-<yourname> main
 git push -u origin dev-<yourname>
 ```
 
-The clean-`main` property (`init` + merge commits only) then holds for
+The clean-`main` property (`chore: init` + merge commits only) then holds for
 everything *after* the switch, which is all it needs to do.  Expect a
 co-owner to refuse a rewrite of a shared repo, and expect that refusal
 to be right: an intact history is worth more than a tidy root commit.
 
 ### Only if every owner actively wants the rewrite
 
-The variant below replaces `main` with an `init` commit plus one
+The variant below replaces `main` with a `chore: init` commit plus one
 squashed snapshot.  It is a history rewrite, so every condition in
 [History is append-only](#history-is-append-only-once-pushed) applies
 first.  Do not propose it as the default.
@@ -324,7 +325,7 @@ git push origin "$OLD":refs/heads/dev-<owner>      # full old history
 git checkout --orphan main-new "$OLD"
 git rm -r --cached . -q
 git add .gitignore .pre-commit-config.yaml
-git commit -m "init"
+git commit -m "chore: init"
 git add -A
 git commit -m "chore: import <project> <version> from the prior history"
 
