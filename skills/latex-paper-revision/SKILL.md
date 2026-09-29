@@ -2,7 +2,8 @@
 name: latex-paper-revision
 description: >
   LaTeX paper revision workflow: structural analysis, content generation,
-  language polishing, figure/table integration, and final cleanup.
+  language polishing, figure/table integration, and final cleanup.  Use
+  when revising an existing draft; a new paper follows paper-writing.
 license: MIT
 compatibility: claude-code opencode
 metadata:
@@ -13,6 +14,11 @@ metadata:
 
 This skill provides a structured workflow for revising, polishing, and
 enhancing academic papers or reports written in LaTeX.
+
+Every number, result and citation in new text comes from data or
+sources the user provided.  Never invent one; mark a gap with
+`\TODO{...}` instead.  Build and check commands are in the
+`paper-writing` skill, Phase 4.
 
 ## Phase 1: Initial Analysis and Structural Setup
 
@@ -71,3 +77,6 @@ consistent formatting.
     -   Remove leftover comments, outdated `\TODO{}` markers, and
         redundant information.
     -   Verify all cross-references and citations resolve correctly.
+    -   Compile, and check that the log has no undefined references or
+        citations and that `pdftotext main.pdf - | grep -c '??'`
+        prints 0.
