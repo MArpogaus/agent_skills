@@ -851,7 +851,7 @@ destroy diffs and merge conflicts become unresolvable.
 | `test.yaml` | push | matrix (ubuntu + windows) × Python 3.11–3.13 |
 | `pre-commit.yaml` | push | `pre-commit/action@v3.0.1` |
 | `docs.yaml` | push to `main`, `dev`, `dev-*` | MkDocs site, one version per branch with mike on `gh-pages` |
-| `release.yaml` | push (tag) | build → PyPI + TestPyPI + GitHub Release |
+| `release.yaml` | push to `main`, `v*` tags | build; TestPyPI from `main` and tags; PyPI + GitHub Release from `v*` tags |
 | `example.yaml` | push | run `examples/minimal.py` across Python versions |
 
 ### test.yaml
