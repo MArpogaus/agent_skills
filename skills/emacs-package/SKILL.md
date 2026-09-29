@@ -115,7 +115,7 @@ checkdoc and package-lint are strict about form:
 - Docstring first line is a complete sentence ending in a period.
 - Sentences end with **two** spaces.
 - Arguments appear in the docstring in upper case; `_name` is exempt.
-- Symbols are quoted `` `like-this` ``, never `` `like-this` ``.
+- Symbols are quoted `` `like-this' ``, never `` `like-this` ``.
 - A parenthesis at column zero inside a docstring needs `\(`.
 - Key sequences use `\\[command]`, not literal `mouse-1`.
 - Ambiguous names need ``the variable `exec-path'`` rather than the bare
@@ -570,3 +570,15 @@ in a real frame under Xvfb:
 - A demo that toggles a mode shows every layout change the mode
   makes.  Measure it: the first pixel of a text row before and after
   must be the same column, and the first frame must equal the last.
+
+---
+
+## Required skills
+
+This skill assumes the following prerequisite skills are loaded.
+Use the `skill` tool to load them before using this one:
+
+- **git-conventions** — two-branch flow, conventional commits,
+  pre-commit hooks, push and attribution rules, tagging and releases.
+- **emacs-config** — the configuration a package is extracted from
+  and tested in.
