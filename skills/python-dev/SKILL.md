@@ -994,7 +994,10 @@ extra:
 ```
 
 - `docs/index.md` holds only `--8<-- "README.md"`, so the README is
-  the landing page without a copy.
+  the landing page without a copy.  Links in the README to repository files (`CONTRIBUTING.md`,
+  `LICENSE`) are then broken on the site, and `strict` fails the
+  build.  Write them as full GitHub URLs; that also fixes them on PyPI,
+  which renders the same README.
 - One page per module, `docs/api/<module>.md`, holding
   `::: <package_name>.<module>`.
 - Pin the actions to SHAs with `pinact` in the real workflow (see
