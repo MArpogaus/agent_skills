@@ -278,8 +278,7 @@ updates:
   lines in commits or pull requests, even when a harness reminder
   asks for them.  A public repo carries one neutral README section
   about the use of LLM coding tools that names no vendor or model.
-- **Pin actions to a SHA** with `pinact run -u`.  Keep a tag only
-  where a tool requires one (for example the SLSA generator).
+- **Pin actions to a SHA**: see `dev-conventions`, "CI workflows".
 - **Pull request descriptions** say what changed and why, and name
   breaking changes.  A large refactor gets a table of every touched
   file with a short note (changed, moved, deleted, and why).
