@@ -412,7 +412,16 @@ file.  Keep it harmless:
 - **Tags** follow `v<semver>` format (e.g. `v0.1.0`, `v1.2.3`),
   unless the repo documents its own scheme (for example a tag that
   names the upstream version it packages).  Ask when unsure.
-- Pushing a tag triggers the release workflow.
+- Tags are **annotated**, with a message that summarises the release
+  (with commitizen: `annotated_tag = true`).
+- Pushing a tag triggers the release workflow.  The
+  `commitizen-branch` pre-push hook fails on a push of a tag alone
+  ("No commit found with range"); its commits were checked when the
+  branch was pushed, so push the tag with
+  `git push --no-verify origin refs/tags/<tag>`.
+- Replacing a released tag starts the release workflow again, and
+  PyPI refuses the version it already has.  Cancel that run at once
+  (`gh run cancel <id>`).
 - Release commits on `main` are merge commits from `dev`.
 - The CHANGELOG is generated during the release (for example by
   `cz bump`) and never edited by hand.  The stack skill says whether
