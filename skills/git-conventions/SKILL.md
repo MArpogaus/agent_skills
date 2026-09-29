@@ -409,11 +409,8 @@ file.  Keep it harmless:
   .git-blame-ignore-revs` per clone — worth doing for yourself, not
   worth prescribing to contributors.
 
-  Keep expectations small: measured on a 10 700-line repo after a
-  50-file sweep, only **3%** of lines were misattributed without the
-  file (6% in the worst file), because the formatter mostly rewraps and
-  git tracks moved content. The file is six lines and zero maintenance,
-  so it earns its place — but it is a convenience, not a rescue.
+  It is a convenience, not a rescue: git already attributes most
+  rewrapped and moved lines correctly without it.
 - Do the sweep **before** any refactor of the same files, so the
   churn is paid once.
 
