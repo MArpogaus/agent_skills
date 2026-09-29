@@ -200,15 +200,16 @@ echo "<target-id>" > /tmp/hpo_<target-id>_target
 echo "<N>" > /tmp/hpo_<target-id>_iter
 echo "<param-name>:<old-value>-><new-value>" > /tmp/hpo_<target-id>_change
 
-# Launch; the wrapper records the exit code when the run ends
-nohup sh -c '<run-command> > logs/iter<N>_<target-id>.log 2>&1
-             echo $? > /tmp/hpo_<target-id>_exit' > /dev/null 2>&1 &
+# Launch in its own process group; the wrapper records the exit code
+nohup setsid sh -c '<run-command> > logs/iter<N>_<target-id>.log 2>&1
+                    echo $? > /tmp/hpo_<target-id>_exit' > /dev/null 2>&1 &
 echo $! > /tmp/hpo_<target-id>_pid
 ```
 
 Each shell call of an agent is a new shell, so the run is not a child
 of the shell that later checks it.  The PID file and the exit file
-carry the state between calls.
+carry the state between calls.  The run command sits inside single
+quotes; if it contains a `'`, put it into a script and call that.
 
 If the pipeline has multiple stages (prepare → train → evaluate),
 invoke the top-level command that runs all of them.
@@ -223,7 +224,13 @@ monitor tool or as a background job, so that a run of several hours
 does not hit the tool timeout:
 
 ```bash
-until [ -f /tmp/hpo_<target-id>_exit ]; do sleep 30; done
+log=logs/iter<N>_<target-id>.log; last=0
+until [ -f /tmp/hpo_<target-id>_exit ]; do
+    sleep 30
+    size=$(stat -c %s "$log" 2>/dev/null || echo 0)
+    [ "$size" = "$last" ] && echo "no new output in 30 s: possible stall"
+    last=$size
+done
 if [ "$(cat /tmp/hpo_<target-id>_exit)" = 0 ]; then
     echo "completed" > /tmp/hpo_<target-id>_status
 else
@@ -235,26 +242,16 @@ fi
 **Polling interval:** 30–60 seconds for runs of minutes to hours.
 Adjust based on expected duration.
 
-**Stall detection:** check log file growth each cycle:
+**Stall:** when the loop reports no new output for several cycles,
+check the log tail for errors and GPU use with `nvidia-smi`.  If the
+run hangs, abort the whole process group, which also ends the loop:
 
-```python
-log_file = pathlib.Path("logs/iter<N>_<target-id>.log")
-last_size = log_file.stat().st_size
-
-while status_file.read_text().strip() == "running":
-    time.sleep(60)
-    current_size = log_file.stat().st_size
-    if current_size == last_size:
-        # No output appended for 60s — possible stall.
-        # Check if process is alive, abort if hung.
-        pass
-    last_size = current_size
+```bash
+kill -- -"$(cat /tmp/hpo_<target-id>_pid)"
+echo 143 > /tmp/hpo_<target-id>_exit
 ```
 
-On stall suspicion: check exit code, check GPU utilisation with
-`nvidia-smi`, check log tail for error messages.  If hung, abort
-(`kill <PID>`), write `failed` to status file, revert config,
-and try different params.
+Then revert the config and try different params.
 
 ### 8 — Read new metrics from MLflow
 
@@ -335,7 +332,7 @@ exactly where it left off.
 |--------|--------------------|
 | `hpo_study.md` exists? | Study was started. If missing, ask user for definition (step 1). |
 | Git log last commit | `git log --oneline -1 --grep="feat(hpo): <target-id>"` — the last committed iteration number. |
-| Status file | `/tmp/hpo_<target-id>_status` — `running`, `completed`, or missing. |
+| Status file | `/tmp/hpo_<target-id>_status` — `running`, `completed`, `failed`, or missing. |
 | Working tree diff | `git diff params/` — uncommitted config changes from the current iteration. |
 | MLflow last run | Query most recent run for this target — may have metrics from an uncommitted iteration. |
 
@@ -350,12 +347,12 @@ Does hpo_study.md exist?
        └── Status file says "running" → training process may still be alive.
             ├── Process in /tmp/hpo_<target-id>_pid still running → resume monitoring (step 7).
             │    Poll the log file, wait for completion.
-            └── PID gone / process dead → run finished or crashed.
-                 Check MLflow for new metrics.
-                 ├── Metrics found → go to step 8 (read + compare).
-                 └── No metrics / NaN → run failed. Revert config,
-                      log failure in study log, start new iteration
-                      with different params (step 4).
+            └── PID gone / process dead → read /tmp/hpo_<target-id>_exit.
+                 ├── 0 → go to step 8 (read + compare).
+                 ├── non-zero → run failed. Revert config, log the
+                 │    failure in the study log, start a new iteration
+                 │    with different params (step 4).
+                 └── missing → the run crashed; treat it as failed.
 
        Status file says "completed" → run finished but loop was interrupted
        before commit.  Go to step 8 (read metrics → compare → commit).
