@@ -277,8 +277,8 @@ For data-driven plots that should match the document font, use
 <dataset>_<method>_<plot_type>.pdf
 ```
 
-Examples: `<dataset>_<model>_<quantity>.pdf`, so a figure names its
-own experiment: `synth_baseline_contour.pdf`, `<dataset>_<model>_calibration.pdf`.
+A figure names its own experiment, for example
+`synth_baseline_contour.pdf` or `synth_baseline_calibration.pdf`.
 
 ---
 

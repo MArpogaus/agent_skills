@@ -76,7 +76,8 @@ serialising on one `dev`.
 ## Commit workflow (plan-first)
 
 Before making any edits, the agent **must** plan the commit
-structure:
+structure.  This is the agent's own list; it waits for the user's
+approval only when the user asked for a plan first:
 
 ### 1. Identify commit boundaries
 
@@ -207,7 +208,7 @@ repos:
       - id: commitizen
         stages: [commit-msg]
       - id: commitizen-branch
-        stages: [pre-push]   # checks origin/HEAD..HEAD
+        stages: [pre-push]
 ```
 
 The example is for a Python repo; the stack skill gives the hooks for

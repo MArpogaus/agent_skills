@@ -87,9 +87,8 @@ setup.
 
 ## Git flow (see git-conventions skill)
 
-- Branches: `main` (kept with full old history) and `dev` (work).
-  This repo is a documented exception to `git-conventions`: it
-  adopted the flow going forward, so `main` holds the old history.
+- Branches: `main` (full old history; a documented exception to
+  `git-conventions`, adopted going forward) and `dev` (work).
   Commits go to `dev`; merges to `main` are fast-forward, done when
   stable and after a `chore: tangle` commit brings `lisp/*.el`
   current.  Never rewrite pushed history.

@@ -71,8 +71,6 @@ Set these without asking the user:
 - `metadata.stack`: one short word for the domain (`python`, `git`,
   `meta`, ...).
 
-`metadata` may also hold `requires`, a list of skill names.
-
 If the skill depends on other skills (e.g. requires git or python
 conventions), add a `requires` list to metadata:
 
