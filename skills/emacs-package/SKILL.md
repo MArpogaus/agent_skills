@@ -32,7 +32,7 @@ Layout, identical in every package:
 
 ```
 .dir-locals.el              indentation, fill column, double space
-.elpaignore                 files MELPA leaves out of the tarball
+.elpaignore                 files package-vc and GNU ELPA leave out (MELPA ignores it)
 .github/workflows/test.yml  CI, one job per supported Emacs version
 .gitignore
 COPYING                     GPLv3
@@ -266,8 +266,10 @@ in the commentary instead.
    ```
 
    Add `:branch "main"` when the default branch is the working branch.
-   No `:files` keyword: `.elpaignore` already excludes the tests, the
-   Makefile and the CI files.
+   No `:files` keyword: MELPA's default files spec takes only the
+   top-level `*.el` (and `lisp/*.el`) and excludes `*-test.el`, so the
+   tests, the Makefile and the CI files stay out.  MELPA does not read
+   `.elpaignore`.
 3. Verify locally in the melpa checkout: `make recipes/foo` and
    `make sandbox INSTALL=foo`.
 4. One pull request per package.  Its checklist asks for lint-clean
@@ -555,7 +557,8 @@ in a real frame under Xvfb:
   end is eaten by a trailing stretch glyph.
 - Record on the default theme, drive prompts with `cl-letf` on
   `completing-read`, and keep the driver script in `demo/` in the
-  repository, with `demo` and `img` listed in `.elpaignore`.
+  repository.  MELPA's default files spec leaves `demo/` and `img/`
+  out; list them in `.elpaignore` too for package-vc users.
 - For one pixel line art, encode at the frames' own size with
   `paletteuse=dither=none` and no `gifsicle --lossy`.  Scaling turns a
   one pixel line into two grey ones (measured: an edge column of 127
