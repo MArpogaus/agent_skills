@@ -32,7 +32,7 @@ Layout, identical in every package:
 
 ```
 .dir-locals.el              indentation, fill column, double space
-.elpaignore                 files package-vc and GNU ELPA leave out (MELPA ignores it)
+.elpaignore                 GNU ELPA leaves these out, package.el skips compiling them; MELPA ignores it
 .github/workflows/test.yml  CI, one job per supported Emacs version
 .gitignore
 COPYING                     GPLv3
@@ -558,7 +558,7 @@ in a real frame under Xvfb:
 - Record on the default theme, drive prompts with `cl-letf` on
   `completing-read`, and keep the driver script in `demo/` in the
   repository.  MELPA's default files spec leaves `demo/` and `img/`
-  out; list them in `.elpaignore` too for package-vc users.
+  out; list them in `.elpaignore` too, for GNU ELPA and package-vc.
 - For one pixel line art, encode at the frames' own size with
   `paletteuse=dither=none` and no `gifsicle --lossy`.  Scaling turns a
   one pixel line into two grey ones (measured: an edge column of 127
