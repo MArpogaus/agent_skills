@@ -933,7 +933,18 @@ docstrings through mkdocstrings) published with `mike` to a
 `gh-pages` branch.  `main` is the default version `latest`; every dev
 branch gets its own version beside it, so no push overwrites another.
 Set Settings -> Pages -> Source to *Deploy from a branch*:
-`gh-pages`, `/ (root)`.
+`gh-pages`, `/ (root)`, not `/docs`: mike writes to the branch root,
+and a `/docs` source fails the Pages build with "No such file or
+directory".  Check and fix it with `gh api`:
+
+```bash
+gh api repos/<owner>/<repo>/pages -q .source
+gh api -X PUT repos/<owner>/<repo>/pages \
+  -f 'source[branch]=gh-pages' -f 'source[path]=/'
+```
+
+The site root answers 404 until the first deploy from `main` sets the
+default version; the dev versions live under `/<branch>/`.
 
 ```yaml
 name: docs
