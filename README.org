@@ -52,4 +52,4 @@ All skills are licensed under MIT — see =LICENSE=.
 | emacs-config           | The literate Emacs configuration: org-only editing, naming, package idioms, git flow |
 | emacs-package          | Emacs Lisp packages: layout, the make check pipeline, ERT, display engine rules, MELPA |
 | org-beamer-presentation | Org → Beamer → PDF talks: three designs, denote naming, layout catalogue |
-| dev-conventions        | Cross-project way of working: principles, ask vs act, verification, review loop, autonomy, sandbox and git safety, style |
+| dev-conventions        | Cross-project way of working: principles, ask vs act, verification, commit-monitor review loop, autonomy, sandbox safety, style |
