@@ -51,7 +51,7 @@ skill is the authority — and fix the skeleton in the same pass.
    ```
    git init
    git add .gitignore .pre-commit-config.yaml
-   git commit -m "init"
+   git commit -m "chore: init"
    ```
 4. **Create `dev` branch** and switch to it:
    ```
@@ -332,7 +332,7 @@ repos:
       - id: commitizen
         stages: [commit-msg]
       - id: commitizen-branch
-        stages: [pre-push]   # checks every message on the branch
+        stages: [pre-push]   # checks origin/HEAD..HEAD
 ```
 
 Run `pre-commit autoupdate` periodically.  When updating revs,
@@ -1149,7 +1149,7 @@ in Emacs.  Each logical code unit gets its own block with a
 - Blocks without `:tangle` are for interactive inspection only
   and do not end up in the tangled file.
 
-### Example structure (from this repo)
+### Example structure
 
 ```
 *** Quick start
