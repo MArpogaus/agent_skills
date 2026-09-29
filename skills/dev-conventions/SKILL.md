@@ -331,7 +331,24 @@ The user often leaves the agent alone for hours.
   host, give the exact command, or write a script to a file for the
   user to run.
 
-## 7. Code style (all languages)
+## 7. CI workflows
+
+- **Pin every action to a SHA** with `pinact`, in every repo, after
+  any change to a workflow:
+  `PINACT_GITHUB_TOKEN=$(gh auth token) pinact run -u`.  It pins each
+  `uses:` to a commit SHA with the tag as a comment, and `-u` updates
+  to the latest release.
+- **A branch ref cannot be pinned.**  `pinact` pins tags only; for an
+  action on a branch (for example `@release/v1`), set its latest
+  release tag first, then run `pinact` again.
+- **Check that nothing is left:**
+  `grep -rn 'uses:' .github/workflows | grep -v '@[0-9a-f]\{40\}'`
+  prints nothing.  Keep a tag only where a tool requires one (for
+  example the SLSA generator), and say so in a comment.
+- Dependabot keeps the pins current (see `git-conventions`,
+  "Dependabot").
+
+## 8. Code style (all languages)
 
 - **Code speaks for itself.**  Comment only a short "why" that the
   code cannot say.  No comments that repeat the code, no long
@@ -350,7 +367,7 @@ The user often leaves the agent alone for hours.
 - **Complexity limits** are enforced by hooks where the stack has a
   tool for it.  Split a function instead of raising the limit.
 
-## 8. Documentation
+## 9. Documentation
 
 - **Simplified Technical English**: sentences of 25 words or fewer,
   active voice, one idea per sentence, one word for one thing, no em
@@ -364,7 +381,7 @@ The user often leaves the agent alone for hours.
 - **One place per fact.**  Examples live in one place (for example the
   notebooks); other docs link there.  No documents outside the repos.
 
-## 9. Visual work
+## 10. Visual work
 
 - **Match the existing style.**  Before you make a deck, a dashboard
   or an icon set, look at the user's earlier work of the same kind and
@@ -389,6 +406,7 @@ The user often leaves the agent alone for hours.
 - [ ] No leftovers: dead code, stale files, drifted docs, debug output.
 - [ ] No backwards-compatibility code, no anecdotes, no obvious
       comments.
+- [ ] Every GitHub Action is pinned to a SHA with `pinact`.
 - [ ] Git work follows `git-conventions`.
 - [ ] Open questions are in my reply, not in the code.
 
