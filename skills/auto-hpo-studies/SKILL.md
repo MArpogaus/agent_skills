@@ -199,13 +199,15 @@ echo "<target-id>" > /tmp/hpo_<target-id>_target
 echo "<N>" > /tmp/hpo_<target-id>_iter
 echo "<param-name>:<old-value>-><new-value>" > /tmp/hpo_<target-id>_change
 
-# Launch
-nohup <run-command> > logs/iter<N>_<target-id>.log 2>&1 &
-PID=$!
-echo $PID > /tmp/hpo_iter<N>.pid
+# Launch; the wrapper records the exit code when the run ends
+nohup sh -c '<run-command> > logs/iter<N>_<target-id>.log 2>&1
+             echo $? > /tmp/hpo_<target-id>_exit' > /dev/null 2>&1 &
+echo $! > /tmp/hpo_<target-id>_pid
 ```
 
-Record the PID and redirect stdout/stderr to a log file.
+Each shell call of an agent is a new shell, so the run is not a child
+of the shell that later checks it.  The PID file and the exit file
+carry the state between calls.
 
 If the pipeline has multiple stages (prepare → train → evaluate),
 invoke the top-level command that runs all of them.
@@ -215,44 +217,18 @@ invoke the top-level command that runs all of them.
 After launching, poll for completion.  This is the longest step —
 the agent must sleep and wait, not spin.
 
-**Shell-based polling (PID available):**
+Poll until the exit file appears.  Run the loop with the harness's
+monitor tool or as a background job, so that a run of several hours
+does not hit the tool timeout:
 
 ```bash
-# Poll until process exits
-while kill -0 $PID 2>/dev/null; do
-    sleep 30
-done
-
-# Check exit code
-wait $PID
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
-    echo "Run failed with exit code $EXIT_CODE"
+until [ -f /tmp/hpo_<target-id>_exit ]; do sleep 30; done
+if [ "$(cat /tmp/hpo_<target-id>_exit)" = 0 ]; then
+    echo "completed" > /tmp/hpo_<target-id>_status
+else
     echo "failed" > /tmp/hpo_<target-id>_status
     # Handle failure: revert config, log error, continue
 fi
-```
-
-**File-based polling (agent has no PID access):**
-
-The launch command (step 6) already set the status file to
-`running`.  The training script must write `completed` on exit:
-
-```bash
-# Must be appended to the end of <run-command> or a wrapper:
-<run-command> > logs/iter<N>.log 2>&1
-echo "completed" > /tmp/hpo_<target-id>_status
-```
-
-Poll by reading the status file:
-
-```python
-import time
-import pathlib
-
-status_file = pathlib.Path("/tmp/hpo_<target-id>_status")
-while status_file.read_text().strip() == "running":
-    time.sleep(30)
 ```
 
 **Polling interval:** 30–60 seconds for runs of minutes to hours.
@@ -261,7 +237,7 @@ Adjust based on expected duration.
 **Stall detection:** check log file growth each cycle:
 
 ```python
-log_file = pathlib.Path("logs/iter<N>.log")
+log_file = pathlib.Path("logs/iter<N>_<target-id>.log")
 last_size = log_file.stat().st_size
 
 while status_file.read_text().strip() == "running":
@@ -296,7 +272,7 @@ to status file and treat as run failure in step 9.
 ### 9 — Compare
 
 ```python
-improvement = old_val_loss - new_val_loss  # negative = better
+improvement = old_val_loss - new_val_loss  # positive = better
 ```
 
 | Condition | Action |
@@ -324,7 +300,7 @@ to this change.
 
 Evaluate against the user-defined criteria.  Typical rules:
 
-1. **Target reached** — `min_val_loss` meets or exceeds the target.
+1. **Target reached** — `min_val_loss` is at or below the target.
 2. **Plateau** — last N iterations (e.g. 5) without improvement.
 3. **Max iterations** — total iterations reached limit.
 4. **Search space exhausted** — all params at boundaries,
@@ -371,7 +347,7 @@ Does hpo_study.md exist?
 ├── No → study never started. Go to step 1 (ask user for definition).
 └── Yes → check status file.
        └── Status file says "running" → training process may still be alive.
-            ├── PID exists and process is running → resume monitoring (step 7).
+            ├── Process in /tmp/hpo_<target-id>_pid still running → resume monitoring (step 7).
             │    Poll the log file, wait for completion.
             └── PID gone / process dead → run finished or crashed.
                  Check MLflow for new metrics.
@@ -382,6 +358,9 @@ Does hpo_study.md exist?
 
        Status file says "completed" → run finished but loop was interrupted
        before commit.  Go to step 8 (read metrics → compare → commit).
+
+       Status file says "failed" → revert the config, log the failure in
+       the study log, and start a new iteration with other params (step 4).
 
        No status file → loop was interrupted between commit and next launch.
             Check git log for last HPO commit:
@@ -412,7 +391,8 @@ echo "failed" > /tmp/hpo_<target-id>_status
 
 # Before next launch, clean up:
 rm -f /tmp/hpo_<target-id>_status /tmp/hpo_<target-id>_iter \
-      /tmp/hpo_<target-id>_change
+      /tmp/hpo_<target-id>_change /tmp/hpo_<target-id>_pid \
+      /tmp/hpo_<target-id>_exit
 ```
 
 ### Restoring the config after crash
@@ -467,8 +447,8 @@ Query pattern for the study log:
 runs = client.search_runs(
     experiment_ids=[exp.experiment_id],
     filter_string="tags.target = '<target-id>'",
-    order_by=["tags.hpo_iteration ASC"],
 )
+runs.sort(key=lambda r: int(r.data.tags["hpo_iteration"]))  # tags are text
 for r in runs:
     print(
         r.data.tags.get("hpo_iteration"),
