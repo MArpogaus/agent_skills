@@ -80,16 +80,16 @@ not repeat them.
   list.  The user answers in short form (`1: yes, 2: drop, 3:
   explain`).  Keep the numbers stable until the list is done.
 - **Interviews.**  When the user says "ask me" or "interview me",
-  use the question tool, one decision at a time, with enough
-  background to decide.
+  use the question tool (Claude Code: `AskUserQuestion`), one
+  decision at a time, with enough background to decide.
 - **Open questions go to the chat**, never into a code comment or a
   doc.
 - **Plain explanations.**  When the user does not understand, explain
   the mechanism with a short example, not with more jargon.
 - **Outward text is a draft.**  Show issue replies, forum posts,
   emails and pull request texts for other people before you send
-  them.  Write natural, simple language: no dashes, no emojis, no
-  marketing, no overselling.
+  them.  Write natural, simple language: no em or en dashes, no
+  emojis, no marketing, no overselling.
 - **Plain text deliverables.**  Analyses and reports are Markdown in
   the chat.  No HTML pages, artifacts or charts unless asked.
 - **Mixed languages.**  The user writes German, English or both, fast
@@ -142,7 +142,8 @@ a monitor watches the commits, and when enough unreviewed change has
 piled up, a round of reviewers starts on that range.  **This is the
 default.**  Turn it off only when the user says so ("no reviews",
 "save tokens", "no subagents"); then review your own changes before
-you report.
+you report.  When the user asks for a review only ("report back,
+change nothing"), change nothing.
 
 ### 4.1 Arm the commit monitor
 
@@ -155,7 +156,7 @@ script to the agent's cache, not into the repo:
 #!/bin/bash
 # review-watch.sh REPO...: print one REVIEW line when the unreviewed
 # range on $BRANCH crosses the threshold, then mark it as handed out.
-BRANCH=${BRANCH:-dev} LINES=${LINES:-100} COMMITS=${COMMITS:-5} EVERY=${EVERY:-300}
+BRANCH=${BRANCH:-dev} REVIEW_LINES=${REVIEW_LINES:-100} REVIEW_COMMITS=${REVIEW_COMMITS:-5} EVERY=${EVERY:-300}
 STATE=${STATE:-$HOME/.cache/review-watch}; mkdir -p "$STATE"
 while true; do
   for r in "$@"; do
@@ -165,9 +166,9 @@ while true; do
     last=$(cat "$f")
     [ "$head" = "$last" ] && continue
     git -C "$r" merge-base --is-ancestor "$last" "$head" || last=$(git -C "$r" merge-base "$last" "$head")
-    n=$(git -C "$r" rev-list --count "$last..$head")
+    n=$(git -C "$r" rev-list --count "$last..$head" -- . ':!*.md' ':!*.org')
     code=$(git -C "$r" diff --numstat "$last" "$head" -- . ':!*.md' ':!*.org' | awk '{s+=$1+$2} END {print s+0}')
-    if [ "$code" -ge "$LINES" ] || { [ "$n" -ge "$COMMITS" ] && [ "$code" -gt 0 ]; }; then
+    if [ "$code" -ge "$REVIEW_LINES" ] || [ "$n" -ge "$REVIEW_COMMITS" ]; then
       echo "REVIEW $r ${last:0:7}..${head:0:7} commits=$n code_lines=$code"
       echo "$head" > "$f"
     fi
@@ -179,7 +180,7 @@ done
 - **Trigger:** 100 or more changed lines outside docs, or 5 or more
   commits that touch code.  Smaller changes accumulate until they
   cross the line.  Changes to docs only wait for the final round.
-  Tune `LINES` and `COMMITS` per project.
+  Tune `REVIEW_LINES` and `REVIEW_COMMITS` per project.
 - **Rewritten history** (an amend or rebase of local commits) resets
   the range to the merge base, so the rewritten commits are reviewed
   again.
@@ -250,16 +251,14 @@ whatever its size:
    only docs nits counts as clean.
 4. Report what changed, what was rejected and why, and what is open.
 
-When the user asks for a review only ("report back, change
-nothing"), change nothing.
-
 ### 4.5 findings.md
 
 When the user wants the review written down, write `findings.md` in
 the repo root.  It is a handoff file, not a plan waiting for
 approval:
 
-- gitignored, never committed,
+- never committed: list it in `.git/info/exclude` (or the repo's
+  `.gitignore` if it already ignores it),
 - numbered sections, `file:line` on every finding, ranked by cost to
   the reader,
 - the reproduction output for each correctness finding,
@@ -289,9 +288,10 @@ The user often leaves the agent alone for hours.
 - **When idle**, do hygiene work: leftovers, drifted docs, alignment
   across repos.
 - **Handoff files.**  At the end of a session, or when asked, write
-  the state (done, open, next steps, where things live) to a file for
-  the next agent.  Report and plan files are never committed; delete
-  them when they are no longer needed.
+  the state (done, open, next steps, where things live) to
+  `HANDOFF.md` in the repo root, listed in `.git/info/exclude`.
+  Report and plan files are never committed; delete them when they
+  are no longer needed.
 - **Other agents.**  When the user says "another agent works on X",
   do not touch X.  When the user says "just file issues", file issues
   and fix nothing.
@@ -346,7 +346,7 @@ The user often leaves the agent alone for hours.
 
 - **Simplified Technical English**: sentences of 25 words or fewer,
   active voice, one idea per sentence, one word for one thing, no em
-  dashes, no first person.
+  or en dashes, no first person.
 - **The README is the entry point for a person.**  It says what the
   project is, how to install and run it, and where to read more.  It
   is short and task oriented.  It is not a rules file for agents.
