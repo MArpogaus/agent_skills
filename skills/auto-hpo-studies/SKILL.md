@@ -227,8 +227,8 @@ does not hit the tool timeout:
 log=logs/iter<N>_<target-id>.log; last=0
 until [ -f /tmp/hpo_<target-id>_exit ]; do
     sleep 30
-    size=$(stat -c %s "$log" 2>/dev/null || echo 0)
-    [ "$size" = "$last" ] && echo "no new output in 30 s: possible stall"
+    size=$(wc -c < "$log" 2>/dev/null || echo 0)
+    [ "$size" = "$last" ] && echo "no new output since the last check: possible stall"
     last=$size
 done
 if [ "$(cat /tmp/hpo_<target-id>_exit)" = 0 ]; then
@@ -381,8 +381,9 @@ echo "<target-id>" > /tmp/hpo_<target-id>_target
 echo "<N>" > /tmp/hpo_<target-id>_iter
 echo "<param-name>:<old-value>-><new-value>" > /tmp/hpo_<target-id>_change
 
-# In monitoring (step 7), on completion:
+# In monitoring (step 7), on exit code 0 / non-zero:
 echo "completed" > /tmp/hpo_<target-id>_status
+echo "failed" > /tmp/hpo_<target-id>_status
 
 # In compare (step 9), if NaN/failure:
 echo "failed" > /tmp/hpo_<target-id>_status
@@ -483,7 +484,7 @@ The study log (e.g. `hpo_study.md`) is a living document and the
 | Situation | Response |
 |-----------|----------|
 | Run crashes on launch | Check config format, check dependencies, check GPU memory. Fix + re-run as same iteration. |
-| Run hangs / no output for 5 min | Abort (`kill <PID>`), note in log, try different params. |
+| Run hangs / no output for 5 min | Abort the process group as in step 7, note in log, try different params. |
 | NaN after 3 different attempts | Declare this model/variant unstable for this target. Document in study log. |
 | Δ < 0.1 for 5 consecutive iterations | Plateau reached. Stop optimisation for this target. |
 | val_loss improves but train_loss stays flat | Continue — val_loss is the primary metric. |
