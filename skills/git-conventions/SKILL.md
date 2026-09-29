@@ -2,7 +2,9 @@
 name: git-conventions
 description: >
   Git workflow conventions: two-branch flow, conventional commits,
-  pre-commit hooks, dependabot, tagging, and releases.
+  pre-commit hooks, dependabot, tagging, releases, and the push and
+  attribution rules for agents.  Load before any commit, branch, push,
+  pull request, tag or release, and when setting up hooks or CI.
 license: MIT
 compatibility: claude-code opencode
 metadata:
@@ -23,10 +25,10 @@ metadata:
 - **`dev`** — main working branch.  All feature work, commits, and
   PRs target `dev`.  Never commit directly to `main`.
 
-- **Sketch and redo** when the first attempt gets it wrong:
-  `git update-ref -d HEAD` to remove the root commit (only safe
-  before any branch/push), then `git add` only the intended files
-  and `git commit -m "chore: init"`.
+- **Redo the root commit** when it holds the wrong files and nothing
+  is branched or pushed yet: `git update-ref -d HEAD` to remove it,
+  `git rm -r --cached -q .` to empty the index, then `git add` only
+  the intended files and `git commit -m "chore: init"`.
 
 ## History is append-only once pushed
 
@@ -108,15 +110,17 @@ If mid-work you discover an unrelated fix is needed:
 - **Do not** bundle it with the current commit.
 - Stage and commit the current change first.
 - Then make the unrelated fix as its own commit.
-- If the unrelated fix is urgent, stop current work entirely,
-  commit the in-progress change (with `WIP:` prefix if unfinished),
-  handle the fix, then resume.
+- If the unrelated fix is urgent, stash the unfinished change
+  (`git stash push -m "<topic>"`), commit the fix, then
+  `git stash pop` and resume.
 
 ### 4. When edits target a single file for multiple reasons
 
 If one file needs changes for two separate purposes (e.g. add an
 import and also fix a typo), use `git add -p` to stage only the
-relevant hunks for each commit:
+relevant hunks for each commit.  An agent harness without
+interactive input cannot answer `git add -p`; there, edit the file
+for commit A only, commit, then make the rest of the change:
 
 ```bash
 git add -p path/to/file   # stage only hunks for commit A
@@ -203,8 +207,13 @@ repos:
       - id: commitizen
         stages: [commit-msg]
       - id: commitizen-branch
-        stages: [pre-push]   # checks every message on the branch
+        stages: [pre-push]   # checks origin/HEAD..HEAD
 ```
+
+The example is for a Python repo; the stack skill gives the hooks for
+other stacks.  `commitizen-branch` checks the messages in
+`origin/HEAD..HEAD`.  A repo created locally and pushed later has no
+`origin/HEAD`; set it once with `git remote set-head origin -a`.
 
 ### Activate the hooks — the config alone does nothing
 
@@ -260,8 +269,8 @@ updates:
 
 ## Rules for agents
 
-- **Stay on `dev`.**  No feature branches or pull requests unless
-  the user asks for them.
+- **Stay on `dev`** (in a shared repo, on your `dev-<name>`).  No
+  feature branches or pull requests unless the user asks for them.
 - **Commit locally, push on request.**  Push only when the user says
   so, or when the task says "push when all green".
 - **Before a push**, run `pre-commit run --all-files` and the full
@@ -351,7 +360,7 @@ git checkout --orphan main-new "$OLD"
 git rm -r --cached . -q
 git add .gitignore .pre-commit-config.yaml
 git commit -m "chore: init"
-git add -A
+git read-tree "$OLD"                               # exactly the old tree
 git commit -m "chore: import <project> <version> from the prior history"
 
 # 3. link the histories ONCE, or every later PR fails on
@@ -362,12 +371,13 @@ git merge --allow-unrelated-histories main-new -m "chore: adopt the new main roo
 # 4. publish
 git branch -f main main-new
 git push --force-with-lease origin main
+git push origin dev-<owner>
 git push origin main:refs/heads/dev-<yourname>
 ```
 
 Notes:
 
-- Step 3 is the step people miss.  The snapshot commit must record
+- Step 3 is required.  The snapshot commit must record
   the **same tree** as the old tip, otherwise this merge conflicts
   instead of resolving cleanly.
 - Existing release tags keep the old commits alive independently of
@@ -414,11 +424,8 @@ file.  Keep it harmless:
   names the upstream version it packages).  Ask when unsure.
 - Pushing a tag triggers the release workflow.
 - Release commits on `main` are merge commits from `dev`.
-- CHANGELOG is auto-generated during the release process (e.g.
-  via commitizen or a similar tool).  It is not tracked in the
-  repository.
-
-### gh workflow for releases
-
-`.github/workflows/release.yaml` — build, publish to package
-index, and create a GitHub Release on tag push.
+- The CHANGELOG is generated during the release (for example by
+  `cz bump`) and never edited by hand.  The stack skill says whether
+  it is tracked.
+- `.github/workflows/release.yaml` builds, publishes and creates a
+  GitHub Release on a tag push; the stack skill has the workflow.
