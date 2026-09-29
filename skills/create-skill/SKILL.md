@@ -1,15 +1,17 @@
 ---
 name: create-skill
 description: >
-  Guide to create a new opencode skill: determine requirements, domain,
-  workflows, conventions, and generate the SKILL.md file.
+  Create a new agent skill (skills/<name>/SKILL.md) in this collection:
+  determine requirements, domain, workflows and conventions, write the
+  SKILL.md, and register it.  Use when the user asks to add, write or
+  scaffold a skill.
 license: MIT
 compatibility: claude-code opencode
 metadata:
   stack: meta
 ---
 
-# Skill: Create a New opencode Skill
+# Skill: Create a New Agent Skill
 
 This skill guides you through creating a new skill — a reusable
 SKILL.md that agents can load on demand. The result must be
@@ -26,7 +28,8 @@ edit the files in the checkout.
 
 ### 1. Determine skill name
 
-Use the `question` tool to ask the user for the name. It must:
+Use the question tool (Claude Code: `AskUserQuestion`) to ask the user
+for the name. It must:
 - Be 1–64 characters
 - Be lowercase alphanumeric with single hyphen separators
 - Not start or end with `-`
@@ -59,18 +62,16 @@ cover. Collect at minimum:
 
 ### 4. Set frontmatter
 
-Always use these defaults — **do not ask the user**:
+Set these without asking the user:
 
-| Field | Value |
-|-------|-------|
-| `license` | `MIT` |
-| `compatibility` | `claude-code opencode` |
+- `license: MIT`
+- `compatibility`: a space-separated list of the harnesses where you
+  loaded and used the skill (`claude-code`, `opencode`).  Do not list a
+  harness speculatively.
+- `metadata.stack`: one short word for the domain (`python`, `git`,
+  `meta`, ...).
 
-`compatibility` is a space-separated list of harnesses the skill has
-actually been used in.  Add one only after verifying it there — do
-not list a harness speculatively.
-
-Optionally ask about `metadata` — a string-to-string map (e.g. `audience: maintainers`, `stack: python`).
+`metadata` may also hold `requires`, a list of skill names.
 
 If the skill depends on other skills (e.g. requires git or python
 conventions), add a `requires` list to metadata:
@@ -96,7 +97,8 @@ Create `skills/<name>/SKILL.md` with:
   the agent (Read, Edit, Write, Bash, Glob, Grep, etc.)
 - A **Required skills** section at the very end listing every
   skill in `metadata.requires` with an explicit instruction to
-  load them via the `skill` tool (see examples in existing skills)
+  load them via the skill tool (Claude Code: `Skill`; see examples
+  in existing skills)
 
 ### 6. File structure
 
@@ -107,7 +109,9 @@ skills/<name>/
 └── SKILL.md
 ```
 
-No other files are needed. The directory name must match the
+Supporting files (templates, helper scripts) may sit beside it, for
+example `templates/` or `tools/`; say in SKILL.md that their paths are
+relative to the skill directory.  The directory name must match the
 `name` field in frontmatter.
 
 ### 7. Verification
@@ -128,5 +132,10 @@ After writing, verify:
 
 After creating the skill file:
 - [ ] Add the skill to the table in `README.org`
+- [ ] Check that the descriptions in `.claude-plugin/plugin.json` and
+      `.claude-plugin/marketplace.json` still cover the collection
+- [ ] Check that the skill loads: in Claude Code,
+      `claude plugin details marpogaus-skills@marpogaus-skills`
+      lists it
 - [ ] `git add` the new skill directory and any changed files
 - [ ] Commit with message: `feat: add <name> skill definition`
