@@ -287,6 +287,55 @@ them.
 - A `display` string ignores `(space :align-to (- right ...))`.
   Right-aligned icons only work in overlay strings (`before-string`,
   `after-string`), never inside a `display` replacement.
+- For "how many columns does a row of this window have", use
+  `window-max-chars-per-line` and not `window-body-width`.  Measured in
+  an 800-pixel window at 8 px a character: body width 100 columns both
+  ways, `max-chars-per-line` 100 with no line numbers, **94** with them
+  on, and **91** with margins of 2 and 1.  Line numbers and margins are
+  both inside what `window-body-width` reports; `max-chars-per-line`
+  takes both off, and it accepts a WINDOW argument, so it needs no
+  `with-selected-window` the way `line-number-display-width` does.
+- Right-aligning with `(space :align-to (- right N))` needs a terminal
+  two columns of slack, not one: a row that reaches the last column
+  makes the line a continuation and the last glyph wraps to a row of
+  its own.
+- A string built for a window is baked: a label cut to fit is still cut
+  when the window grows, until whatever built it runs again.  Never
+  measure a fallback window a buffer is not shown in — with no window,
+  leave the string whole.  `get-buffer-window-list`'s ALL-FRAMES must be
+  `'visible`, or an invisible frame's narrow window decides.
+- A keymap on an overlay shadows every keymap inside the string that
+  overlay displays.  `get-char-property` answers an overlay before a
+  text property, so a row hung on a `display` string cannot have
+  per-word keymaps — a link rendered by shr ran the block's own command
+  instead of following its URL, for as long as the overlay carried one.
+  Where the string carries its own keymaps, put none on the overlay.
+- The same does NOT apply to an `after-string` or `before-string` shown
+  at the overlay's edge: those draw at a position the overlay's range
+  does not cover, so a keymap in them is not shadowed.  That is why
+  header-bar buttons on an after-string always worked while links in a
+  display string never did.
+- Emacs *does* consult a display string's own text properties for a
+  click: `posn-string` gives (STRING . INDEX), and the keymap is looked
+  up there.  So moving a keymap off the overlay and into the string
+  loses nothing.
+- To ask what a click would run, `key-binding` needs the POSITION
+  argument: `(key-binding [mouse-2] nil nil posn)`.  Without it the
+  answer is for point, which is somewhere else entirely — a probe that
+  omits it will report the global binding and look like a bug.
+- An overlay string is not displayed at all when its position sits in
+  invisible text.  A row that hides its line with `display ""` and shows
+  an image on its `after-string` draws that string at the overlay's END,
+  so a neighbouring invisible overlay that begins exactly there swallows
+  it -- silently, with valid image specs and files on disk.  Ride the
+  `before-string` instead: it draws at the overlay's start.  Measured on
+  a frame by counting the pixels of the image itself: 0 with the
+  invisible run at the end, 32 on the before-string.
+- The two rules above compose into a trap: a display property *inside* a
+  display string is never looked at either.  Anything a caller needs to
+  put on part of a row it hangs on one display property -- an image, a
+  size cap, a hidden delimiter -- has to be in the text, or on a
+  before/after-string, never a nested `display`.
 - An overlay string without a face inherits the face of the buffer
   text next to it.  Give every block a base face with
   `add-face-text-property` APPEND, or stray overlines spread.
@@ -388,6 +437,28 @@ them.
 - A header or mode line row reaches past fringes and margins, so a
   border drawn from those cannot close that row's ends.  Let the row
   close itself with a glyph at each end.
+- Two overlays of the same priority over the same character: the
+  **narrower one wins**.  A one-character guide over a wide bookkeeping
+  overlay disappeared for that reason; the guide needs the higher
+  priority, whatever its width says.
+- `line-prefix' of a number draws no prefix at all.  It takes a string
+  or a display spec; a number is ignored silently.
+- `format-mode-line' with a FACE argument renders the construct in that
+  face but attaches no face to the string it answers with.  Put the face
+  on afterwards if the string is going anywhere else.
+- A theme is applied through `enable-theme', so advice on `load-theme'
+  runs for the first load only.  Hook `enable-theme-functions' to follow
+  every theme change, `load-theme' from a customize buffer included.
+- `fringe-bitmap-p' is fringe.el's, not C's: `(require 'fringe)' or the
+  byte compiler on a nox build calls it unknown.  And a build without
+  fringes still has `define-fringe-bitmap' — fringe.el defines one that
+  defines nothing — so a test guard must ask
+  `(fringe-bitmap-p 'left-arrow)' instead of `fboundp'.
+- The REP function of `replace-regexp-in-string' must not clobber the
+  match data: the caller reads the match back after every call.  A REP
+  that searches (measuring columns, say) needs `save-match-data', or the
+  replacement lands beside the fragment instead of over it and the text
+  is drawn twice.
 
 Pixel claims are testable: export the frame with `x-export-frames'
 inside Emacs (guard it with `declare-function', console builds lack
