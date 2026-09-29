@@ -258,6 +258,31 @@ updates:
     target-branch: "dev"
 ```
 
+## Rules for agents
+
+- **Stay on `dev`.**  No feature branches or pull requests unless
+  the user asks for them.
+- **Commit locally, push on request.**  Push only when the user says
+  so, or when the task says "push when all green".
+- **Before a push**, run `pre-commit run --all-files` and the full
+  local check of the project (for example plain `make` or the whole
+  test suite), not a subset.  After the push, read the CI result
+  with `gh run list` / `gh run view`.
+- **Stage paths by name.**  No `git commit -a` and no blind
+  `git add -A`: they pick up submodule pointers, symlinks and the
+  user's own uncommitted edits.
+- **No AI attribution.**  No `Co-Authored-By` or "generated with"
+  lines in commits or pull requests, even when a harness reminder
+  asks for them.  A public repo carries one neutral README section
+  about the use of LLM coding tools that names no vendor or model.
+- **Pin actions to a SHA** with `pinact run -u`.  Keep a tag only
+  where a tool requires one (for example the SLSA generator).
+- **Pull request descriptions** say what changed and why, and name
+  breaking changes.  A large refactor gets a table of every touched
+  file with a short note (changed, moved, deleted, and why).
+- **Use the `gh` CLI** for repos, pull requests, issues, releases and
+  CI.
+
 ## Repos you do not own
 
 When contributing to someone else's repo, these conventions are
@@ -384,7 +409,9 @@ file.  Keep it harmless:
 
 ## Tagging and releases
 
-- **Tags** follow `v<semver>` format (e.g. `v0.1.0`, `v1.2.3`).
+- **Tags** follow `v<semver>` format (e.g. `v0.1.0`, `v1.2.3`),
+  unless the repo documents its own scheme (for example a tag that
+  names the upstream version it packages).  Ask when unsure.
 - Pushing a tag triggers the release workflow.
 - Release commits on `main` are merge commits from `dev`.
 - CHANGELOG is auto-generated during the release process (e.g.
