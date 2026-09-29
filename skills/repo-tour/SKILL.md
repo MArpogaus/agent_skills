@@ -4,7 +4,8 @@ description: >
   Guided step-by-step code tour of an unfamiliar repository: orient cheaply,
   link one entry point, stop, then answer questions and offer the next stop.
   One stop at a time, markdown file links with line anchors, claims verified
-  by running the code.
+  by running the code.  Use when the user asks for a tour or walkthrough
+  of a codebase.
 license: MIT
 compatibility: claude-code opencode
 metadata:

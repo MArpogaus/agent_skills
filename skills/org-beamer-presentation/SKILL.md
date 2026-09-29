@@ -5,7 +5,8 @@ description: >
   denote-named presentation style: three interchangeable designs
   (metropolis-dark, Szeged/dolphin, SimplePlus), a bare shared header with
   opt-in extras, H:2 section/frame structure, column and overlay layouts,
-  biblatex citations, and a sidecar folder for figures.
+  biblatex citations, and a sidecar folder for figures.  Use when making
+  or revising a slide deck.
 license: MIT
 compatibility: claude-code opencode
 metadata:

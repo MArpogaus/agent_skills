@@ -3,7 +3,8 @@ name: python-dev
 description: >
   Python project conventions: setuptools, ruff I/E/F/D/UP,
   NumPy docstrings, pdoc, pytest xdist, uv, commitizen,
-  matplotlib figure patterns, and skeleton-based project setup.
+  matplotlib figure patterns, and skeleton-based project setup.  Use
+  when creating, changing or reviewing a Python project.
 license: MIT
 compatibility: claude-code opencode
 metadata:

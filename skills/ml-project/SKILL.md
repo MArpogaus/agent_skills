@@ -4,7 +4,8 @@ description: >
   Research ML project conventions: DVC pipeline orchestration,
   MLflow experiment tracking, HPO study logs, paper-oriented
   code structure, per-target model configs, and reproducible
-  figure generation.
+  figure generation.  Use when setting up or changing the experiment
+  code of a research project.
 license: MIT
 compatibility: claude-code opencode
 metadata:

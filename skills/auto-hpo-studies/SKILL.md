@@ -4,6 +4,7 @@ description: >
   Autonomous hyperparameter optimization loop: define target and search
   space, then iterate update-config run monitor log commit until convergence.
   Uses MLflow for tracking, sleep-based polling for long-running tasks.
+  Use when the user asks to tune hyperparameters autonomously.
 license: MIT
 compatibility: claude-code opencode
 metadata:

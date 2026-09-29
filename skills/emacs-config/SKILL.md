@@ -5,6 +5,7 @@ description: >
   configuration (MArpogaus/emacs.d): org-only editing workflow, naming
   schemes, package idioms, the my/pycell notebook layer, header-line
   buttons, display-property rendering lore, and the repo's git flow.
+  Use when working in that configuration repository.
 license: MIT
 compatibility: claude-code opencode
 metadata:
