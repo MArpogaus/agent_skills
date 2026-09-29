@@ -2,7 +2,8 @@
 name: python-dev
 description: >
   Python project conventions: setuptools, ruff I/E/F/D/UP,
-  NumPy docstrings, pdoc, pytest xdist, uv, commitizen,
+  NumPy docstrings, MkDocs + mkdocstrings + mike docs, pytest xdist,
+  uv, commitizen,
   matplotlib figure patterns, and skeleton-based project setup.  Use
   when creating, changing or reviewing a Python project.
 license: MIT
@@ -97,7 +98,7 @@ Follow the skeleton layout exactly:
 <project>/
 ├── .github/
 │   └── workflows/
-│       ├── docs.yaml           # pdoc → GitHub Pages
+│       ├── docs.yaml           # MkDocs + mike → gh-pages
 │       ├── example.yaml        # (optional) run examples/
 │       ├── pre-commit.yaml     # pre-commit/action@v3
 │       ├── release.yaml        # build → PyPI + GitHub Release
@@ -214,7 +215,9 @@ test = [
   "pytest-xdist",
 ]
 docs = [
-  "pdoc",
+  "mkdocs-material",
+  "mkdocstrings[python]",
+  "mike",
 ]
 develop = [
   "<package_name>[test]",
@@ -583,9 +586,8 @@ class MyModel:
 
 ### `__init__.py` docstring
 
-```python
-""".. include:: ../../README.md"""
-```
+A one-line summary of the package, like any module docstring.  The
+README reaches the docs through `docs/index.md` (see "docs.yaml").
 
 ---
 
@@ -848,7 +850,7 @@ destroy diffs and merge conflicts become unresolvable.
 |----------|-------|---------|
 | `test.yaml` | push | matrix (ubuntu + windows) × Python 3.11–3.13 |
 | `pre-commit.yaml` | push | `pre-commit/action@v3.0.1` |
-| `docs.yaml` | push to `main`, `dev`, `dev-*` | `pdoc -d numpy`, deploy to Pages |
+| `docs.yaml` | push to `main`, `dev`, `dev-*` | MkDocs site, one version per branch with mike on `gh-pages` |
 | `release.yaml` | push (tag) | build → PyPI + TestPyPI + GitHub Release |
 | `example.yaml` | push | run `examples/minimal.py` across Python versions |
 
@@ -926,91 +928,77 @@ jobs:
 
 ### docs.yaml
 
+The docs are a MkDocs site (Material theme, API pages from the numpy
+docstrings through mkdocstrings) published with `mike` to a
+`gh-pages` branch.  `main` is the default version `latest`; every dev
+branch gets its own version beside it, so no push overwrites another.
+Set Settings -> Pages -> Source to *Deploy from a branch*:
+`gh-pages`, `/ (root)`.
+
 ```yaml
-name: Generate documentation using pdoc and deploy as gh page.
+name: docs
 on:
   push:
     branches: [main, dev, 'dev-*']
+  workflow_dispatch:
 permissions:
-  contents: read
+  contents: write               # mike pushes gh-pages
+concurrency:
+  group: gh-pages               # every run pushes the same branch
+  cancel-in-progress: false
 jobs:
-  build:
+  docs:
     runs-on: ubuntu-latest
+    env:
+      REF: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # mike reads and writes gh-pages
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - run: pip install -e .[docs]
-      - run: pdoc -d numpy -o docs <package_name>
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ "$REF" = main ]; then
+            mike deploy --push --update-aliases main latest
+            mike set-default --push latest
+          else
+            mike deploy --push "$REF"
+          fi
 ```
 
-The `.. include:: ../../README.md` docstring in `__init__.py` is what
-makes the README the docs landing page.  Keep a one-line summary above
-the include, so `help(<package>)` in a REPL still says something.
-`D400` must be ignored for `src/*/__init__.py`: a trailing period would
-break the included file name.
-
-#### Versioned docs need a gh-pages branch, not deploy-pages
-
-`actions/deploy-pages` **replaces the entire site** on every
-deployment.  So it cannot publish one version per branch: a push to
-`main` wipes whatever a dev branch published, and the only workaround
-is rebuilding every version on every push, which doubles the CI time.
-
-When you want `main` at `/` and each dev branch at `/dev-<name>/`,
-publish into a `gh-pages` branch instead and let it accumulate.  Set
-Settings -> Pages -> Source to *Deploy from a branch*: `gh-pages`,
-`/ (root)`.  A git worktree does it with first-party actions only:
+`mkdocs.yml`, the minimum:
 
 ```yaml
-on:
-  push:
-    branches: [main, dev-*]     # dev-* so it works for every contributor
-permissions:
-  contents: write               # pushes gh-pages
-concurrency:
-  group: gh-pages               # every run pushes the same branch
-  cancel-in-progress: false
+site_name: <package_name>
+repo_url: https://github.com/<owner>/<project>
+strict: true                    # a broken link or a stale docstring fails the build
+theme:
+  name: material
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: numpy
+markdown_extensions:
+  - pymdownx.snippets
+extra:
+  version:
+    provider: mike
 ```
 
-```bash
-git fetch origin gh-pages:gh-pages 2>/dev/null || true
-git worktree add ../pages gh-pages 2>/dev/null \
-  || git worktree add --orphan -b gh-pages ../pages
-if [ "$REF" = main ]; then
-  # replace the root, KEEP the version directories
-  find ../pages -mindepth 1 -maxdepth 1 \
-    ! -name .git ! -name 'dev-*' -exec rm -rf {} +
-  cp -a site/. ../pages/
-else
-  rm -rf "../pages/$REF" && mkdir -p "../pages/$REF"
-  cp -a site/. "../pages/$REF/"
-fi
-```
-
-The `! -name 'dev-*'` guard is the whole trick: a plain `rm -rf` of the
-root deletes the other versions.  Test the deletion against a mock tree
-before trusting it.
-
-Build docs with `uv run --with pdoc pdoc ...`, never
-`--group docs`: the workflow may check out a ref that does not declare
-that group, and then the step fails with `Group 'docs' is not defined`.
+- `docs/index.md` holds only `--8<-- "README.md"`, so the README is
+  the landing page without a copy.
+- One page per module, `docs/api/<module>.md`, holding
+  `::: <package_name>.<module>`.
+- Pin the actions to SHAs with `pinact` in the real workflow (see
+  `git-conventions`).
 
 ### dependabot.yml
 
@@ -1205,8 +1193,10 @@ terminal output).
   https://docs.astral.sh/ruff/rules/
 - NumPy docstring guide:
   https://numpydoc.readthedocs.io/en/latest/format.html
-- pdoc:
-  https://pdoc.dev/
+- mkdocstrings (Python handler):
+  https://mkdocstrings.github.io/python/
+- mike:
+  https://github.com/jimporter/mike
 
 ---
 
