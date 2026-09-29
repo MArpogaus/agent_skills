@@ -102,7 +102,12 @@ Conventions that hold across all existing talks:
 - **Frame titles carry the message.** Either a full claim ("Physical
   grid expansions require long lead times and large investments") or a
   crisp noun phrase ("Case Study 1: The Benchmark Grid"). Not "Results".
-- 3–6 bullets per frame, `*bold lead-in* followed by the point`.
+- **Sober tone.**  No punch lines, no sensational titles, no aphorism
+  blocks, no pay-offs revealed by overlay.  Read earlier decks of the
+  same kind first and follow their tone.
+- 3–6 bullets per frame, `*bold lead-in* followed by the point`.  The
+  lead-in names the subject ("Data", "Training"); it is never a teaser
+  such as "The catch:".
 - A frame is either mostly figure or mostly text; the standard shape is
   a 0.4/0.6 or 0.5/0.5 two-column split of the two.
 - Sections follow the paper arc: Motivation → Methodology → Results →

@@ -648,6 +648,12 @@ layout python
 
 Commit `uv.lock`.
 
+`uv run` and `uv sync` re-sync `.venv` and can replace the interpreter
+under a running kernel.  In a project where the user manages the
+environment, an agent runs none of the commands above: it uses the
+existing `.venv/bin/python` read-only, or the system `python3` for a
+quick check, and reports a missing package.  When in doubt, ask.
+
 ---
 
 ## Matplotlib plotting

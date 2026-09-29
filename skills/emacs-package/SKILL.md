@@ -241,6 +241,19 @@ marker cannot corrupt the result.
 A package must not set user options.  Recommend them in the README and
 in the commentary instead.
 
+- **No key bindings.**  A package provides keymaps and commands; the
+  user binds them in their configuration.  The only exception is a
+  map that is active in the package's own temporary buffers (for
+  example `C-c C-c` / `C-c C-k` in an edit buffer).
+- **Opinionated defaults** belong in the user's configuration, not in
+  the package.
+- **No workarounds for one configuration.**  When a package needs a
+  setting from the user, name it in the README.  Do not catch a
+  specific configuration inside the package.
+- **A minimal working example** configuration in the README reproduces
+  the demo pictures exactly.  Record the pictures with it, not with
+  the author's configuration.
+
 ## Publishing on MELPA
 
 1. Merge the work branch into the branch MELPA builds, and tag a
@@ -397,6 +410,9 @@ them.
   it says yes to characters that draw as a hex box.  On a graphical
   frame ask `(internal-char-font nil CHAR)` and keep a plain-text
   fallback.  Nerd font glyphs (private use area) always need this.
+- Icons in one row share weight and size: prefer thin, unfilled glyphs
+  that match the close button.  Give each icon a distinct plain-text
+  fallback, so that two buttons never look the same in a terminal.
 - `string-pixel-width` measures right-aligned icon groups; glyphs
   render wider than `string-width` counts.
 - The window parameters `tab-line-format`, `header-line-format` and

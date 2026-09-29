@@ -383,6 +383,23 @@ by name.
 5. **Stability guards** — regressions you have already been bitten
    by, each naming the symptom in a comment.
 
+### Tolerances that catch regressions
+
+A ground-truth bound is for regressions, not for precision claims.
+
+- Keep a bound between about **1.5x and 4x** of its measured value.
+  Below 1.5x it fails on another machine for no reason; above 4x it
+  catches nothing.  A deliberately wide bound carries a `"why"` note.
+- After a change that moves numbers, re-run **every** affected variant
+  and re-pin all centres from that run, not only the ones that failed.
+- Put a precision claim into its own tight metric.
+
+### Configs and names
+
+- Experiment configs write every option out, defaults included, so a
+  reader sees each network without knowing the framework's defaults.
+- Names follow the notation of the paper.
+
 ### test/README.md
 
 Document what the suite guarantees, not how to run it: the five

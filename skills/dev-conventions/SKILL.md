@@ -20,7 +20,8 @@ metadata:
 # Skill: Development Conventions
 
 These rules apply to every project.  A stack skill (`python-dev`,
-`emacs-package`, `ml-project`, ...) adds the rules of its stack.  If
+`ml-project`, `emacs-package`, `emacs-config`,
+`org-beamer-presentation`, ...) adds the rules of its stack.  If
 a project rule and this skill disagree, the project rule wins.
 
 All git rules (branches, commits, hooks, pushes, attribution, pull
@@ -44,8 +45,7 @@ not repeat them.
   a rare case seems to need machinery, discuss it with the user
   first and state the cost.
 - **Defaults only with a reason.**  Keep defaults few.  Opinionated
-  defaults go into the user's configuration, not into the package.
-  A package provides maps and commands; the user binds the keys.
+  defaults go into the user's configuration, not into the library.
 - **Explicit configuration.**  Experiment and deployment configs
   write every option out, defaults included, so that a reader sees
   the full setup without reading the framework.  Duplication is
@@ -128,9 +128,9 @@ not repeat them.
 - **Re-verify subagent findings.**  Subagent reports are often wrong
   about counts and reachable code paths.  Reproduce each finding
   before you act on it.
-- **Useful tolerances.**  A regression bound sits between about 1.5x
-  and 4x of the measured value.  After a change moves numbers, re-run
-  every affected case and re-pin all of them.
+- **Results against a reference.**  Research code is checked against
+  known ground truth; the `ml-project` skill has the rules for
+  references and tolerances.
 - **Iterate fast, finish complete.**  Check with reduced sizes (fewer
   epochs, test mode, a VM snapshot).  Run the full version once at the
   end.  When time is short, make all edits first, then one test run.
@@ -307,10 +307,9 @@ The user often leaves the agent alone for hours.
   into the agent's home.  The user's home and configuration are
   mounted separately.
 - **Never touch the user's environment.**  Do not create, sync or
-  change a project virtualenv, lock file or installed packages
-  (`uv sync`, a re-syncing `uv run`, `pip install`) unless the stack
-  skill allows it.  Use the system interpreter for quick checks.
-  Report a missing package.
+  change a project environment, lock file or installed packages.
+  Report a missing package.  The stack skill says which commands are
+  safe (for Python see `python-dev`, "UV environment").
 - **The user's uncommitted edits are sacred.**  Look for them before
   you switch a branch or reset a checkout.  Stash with a descriptive
   message; never drop them.  Look for unpushed commits as well
@@ -335,8 +334,7 @@ The user often leaves the agent alone for hours.
 - **Docs over comments.**  Important information goes into the README
   or a design doc, never buried in a comment.  Move a long comment
   into the docstring or the docs where it belongs.
-- **Descriptive names** for options, functions and files.  In research
-  code, follow the notation of the paper.
+- **Descriptive names** for options, functions and files.
 - **Same things look the same.**  Similar features share one code path,
   one naming scheme and one look.  Deduplicate.
 - **Self-contained scripts.**  Paths and arguments are explicit; a
@@ -357,10 +355,6 @@ The user often leaves the agent alone for hours.
   agent's memory or in a skill.
 - **One place per fact.**  Examples live in one place (for example the
   notebooks); other docs link there.  No documents outside the repos.
-- **Minimal working example.**  A package README has an example
-  configuration that reproduces its pictures exactly.
-- **Required user settings** are named in the README.  The package
-  does not work around the user's configuration.
 
 ## 9. Visual work
 
@@ -368,9 +362,9 @@ The user often leaves the agent alone for hours.
   or an icon set, look at the user's earlier work of the same kind and
   follow its tone.
 - **Slides are sober**: descriptive titles, short bullet points, no
-  punch lines, no sensational wording.  Figures carry the slide.
-- **Icons** in one row have the same weight and size.  Prefer thin,
-  unfilled glyphs, and give each a distinct plain-text fallback.
+  punch lines.  Figures carry the slide.  See
+  `org-beamer-presentation`.
+- **Icons** in one set have the same weight and size.
 - **Dashboards** put key metrics and aggregates at the top, detail
   views and logs at the bottom.  The plot type fits the data, and
   every panel has a complete legend and explains itself.
