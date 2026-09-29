@@ -1,0 +1,130 @@
+#+title: Optional header additions
+#+startup: show2levels
+
+Nothing here belongs in a default header. Add a stanza only when the
+slide that needs it exists. Use `#+BEAMER_HEADER:` throughout — it
+lands in the preamble like `#+LATEX_HEADER:` and keeps beamer-only
+settings together.
+
+* Figures in the sidecar folder
+Lets links use the bare filename instead of the folder path. Either
+this or full paths in the links — not both.
+
+#+begin_src org
+,#+BEAMER_HEADER: \graphicspath{{<identifier--slug__tags>}}
+#+end_src
+
+* Institute logos on the title slide
+Needs `\inst{n}` markers on the authors in `#+AUTHOR:`. One `\inst`
+block per affiliation, logos in the sidecar folder.
+
+#+begin_src org
+,#+BEAMER_HEADER: \institute[<Short Affiliation>]{%
+,#+BEAMER_HEADER:   \inst{1}%
+,#+BEAMER_HEADER:   \includegraphics[height=2.5em]{<logo1>.pdf}%
+,#+BEAMER_HEADER:   \hfill%
+,#+BEAMER_HEADER:   \inst{2}%
+,#+BEAMER_HEADER:   \includegraphics[height=2.5em]{<logo2>.png}%
+,#+BEAMER_HEADER: }
+#+end_src
+
+* Per-talk bibliography
+Default is the global bibliography. A local `.bib` needs the global one
+switched off in Local Variables, or entries appear twice.
+
+#+begin_src org
+,#+bibliography: <identifier--slug__tags>.bib
+
+# Local Variables:
+# org-cite-global-bibliography: nil
+# End:
+#+end_src
+
+* TikZ diagrams
+Only for frames with an inline `tikzpicture`. Load the libraries the
+picture actually uses.
+
+#+begin_src org
+,#+BEAMER_HEADER: \usepackage{tikz}
+,#+BEAMER_HEADER: \usetikzlibrary{positioning, arrows.meta}
+#+end_src
+
+** Overlay-aware TikZ styles
+The `visible on=<2->` idiom used in `layouts.org`. Add only with the
+first overlay-animated picture.
+
+#+begin_src org
+,#+BEAMER_HEADER: \tikzset{
+,#+BEAMER_HEADER:   % https://tex.stackexchange.com/a/55849
+,#+BEAMER_HEADER:   alt/.code args={<#1>#2#3}{%
+,#+BEAMER_HEADER:     \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}
+,#+BEAMER_HEADER:   },
+,#+BEAMER_HEADER:   invisible/.style={opacity=0},
+,#+BEAMER_HEADER:   visible on/.style={alt={#1{}{invisible}}},
+,#+BEAMER_HEADER: }
+#+end_src
+
+** Matplotlib-matching accent colours
+For TikZ that must sit next to a matplotlib figure.
+
+#+begin_src org
+,#+BEAMER_HEADER: \definecolor{mpl_blue}{HTML}{1f77b4}
+,#+BEAMER_HEADER: \definecolor{mpl_orange}{HTML}{ff7f0e}
+#+end_src
+
+* Occasional packages
+One line each, added when a slide uses it:
+
+| Package | Add when |
+|---------+---------------------------------------------|
+| `subcaption` | a figure has sub-panels with own captions |
+| `multirow` | a table spans a cell over several rows |
+| `booktabs` | a table is exported with `:booktabs t` |
+| `xfrac` | inline slanted fractions, `\sfrac{1}{3}` |
+| `xmpmulti` | `\multiinclude` figure sequences |
+| `tikzmark` | annotating an existing formula in place |
+
+* Link colours
+Theme-dependent — `mLightBrown` exists only under metropolis.
+
+#+begin_src org
+,#+BEAMER_HEADER: \hypersetup{colorlinks, linkcolor=, urlcolor=<theme accent>}
+#+end_src
+
+* Frame number in the footer
+Themes without a frame counter (Szeged, SimplePlus).
+
+#+begin_src org
+,#+BEAMER_HEADER: \addtobeamertemplate{navigation symbols}{}{%
+,#+BEAMER_HEADER:   \usebeamerfont{footline}\usebeamercolor[fg]{footline}%
+,#+BEAMER_HEADER:   \hspace{1em}\raisebox{1.4pt}[0pt][0pt]{\insertframenumber / \inserttotalframenumber}}
+#+end_src
+
+* Code slides
+Silences evaluation on export; only for a talk with `src` blocks.
+
+#+begin_src org
+,#+PROPERTY: header-args :results silent :eval never-export
+,#+LATEX_HEADER: \lstset{showstringspaces=false,breaklines=true,basicstyle=\small, keywordstyle=\color{mLightBrown},stringstyle=\color{mLightBrown},numberstyle=\color{mLightBrown},commentstyle=\color{lightgray}}
+#+end_src
+
+The =\lstset= colours are metropolis names (=mLightBrown=); swap them for
+the other themes.  Pin the backend at the end of the file:
+
+#+begin_src org
+,# Local Variables:
+,# org-latex-listings: listings
+,# End:
+#+end_src
+
+* Local package on TEXINPUTS
+A `.sty` kept outside the TeX tree — e.g. a personal colour package —
+must be findable at export time.
+
+#+begin_src org
+,#+BEAMER_HEADER: \usepackage[<options>]{<package>}
+
+# Local Variables:
+# eval: (setenv "TEXINPUTS" ".:<path/to/tex/sty>:")
+# End:
+#+end_src

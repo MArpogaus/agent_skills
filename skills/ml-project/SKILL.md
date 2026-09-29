@@ -4,7 +4,8 @@ description: >
   Research ML project conventions: DVC pipeline orchestration,
   MLflow experiment tracking, HPO study logs, paper-oriented
   code structure, per-target model configs, and reproducible
-  figure generation.
+  figure generation.  Use when setting up or changing the experiment
+  code of a research project.
 license: MIT
 compatibility: claude-code opencode
 metadata:
@@ -85,8 +86,8 @@ in `__init__.py`:
 
 from <package> import distributions as _distributions
 
-# Register custom log-normal parameterisation into hybrid_flows
-import hybrid_flows.distributions  # noqa: F811
+# Register the custom parameterisation into the upstream package
+import <upstream-package>.distributions  # noqa: F401
 ```
 
 This ensures the monkey-patch runs once when the package is
@@ -99,6 +100,8 @@ imported, before any model construction code executes.
 ### params.yaml — global configuration
 
 ```yaml
+targets: [<target-a>, <target-b>]
+
 data:
   raw_path: "data/raw"
   processed_path: "data/processed"
@@ -168,6 +171,7 @@ stages:
           --outdir results/${item}
       deps:
         - data/processed/${item}
+        - params/${item}.yaml
         - scripts/train.py
         - src/<package>/models.py
       params:
@@ -383,6 +387,23 @@ by name.
 5. **Stability guards** — regressions you have already been bitten
    by, each naming the symptom in a comment.
 
+### Tolerances that catch regressions
+
+A ground-truth bound is for regressions, not for precision claims.
+
+- Keep a bound between about **1.5x and 4x** of its measured value.
+  Below 1.5x it fails on another machine for no reason; above 4x it
+  catches nothing.  A deliberately wide bound carries a `"why"` note.
+- After a change that moves numbers, re-run **every** affected variant
+  and re-pin all centres from that run, not only the ones that failed.
+- Put a precision claim into its own tight metric.
+
+### Configs and names
+
+- Experiment configs write every option out (see `dev-conventions`,
+  "Explicit configuration").
+- Names follow the notation of the paper.
+
 ### test/README.md
 
 Document what the suite guarantees, not how to run it: the five
@@ -563,10 +584,11 @@ python scripts/hpo.py \
 
 - DVC documentation: https://dvc.org/doc
 - MLflow documentation: https://mlflow.org/docs
-- Existing project examples:
-  - `dcp_nf_forecast` — clean DVC foreach, Feather I/O, HPO study logs
-  - `hybrid_flows` — CI/CD, pdoc docs, experiment separation
-  - `gnn_regler` — DVC foreach with PyTorch Lightning
+- Earlier projects in the group are the best reference; look for one
+  that already solved the same piece:
+  - a forecasting project — clean DVC `foreach`, Feather I/O, HPO study logs
+  - a published library — CI/CD, pdoc docs, experiment separation
+  - a graph-model project — DVC `foreach` with PyTorch Lightning
 
 ---
 

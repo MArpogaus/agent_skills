@@ -5,6 +5,7 @@ description: >
   configuration (MArpogaus/emacs.d): org-only editing workflow, naming
   schemes, package idioms, the my/pycell notebook layer, header-line
   buttons, display-property rendering lore, and the repo's git flow.
+  Use when working in that configuration repository.
 license: MIT
 compatibility: claude-code opencode
 metadata:
@@ -86,7 +87,8 @@ setup.
 
 ## Git flow (see git-conventions skill)
 
-- Branches: `main` (kept with full old history) and `dev` (work).
+- Branches: `main` (full old history; a documented exception to
+  `git-conventions`, adopted going forward) and `dev` (work).
   Commits go to `dev`; merges to `main` are fast-forward, done when
   stable and after a `chore: tangle` commit brings `lisp/*.el`
   current.  Never rewrite pushed history.
@@ -102,3 +104,13 @@ setup.
   him precise probes and expected outputs, one hypothesis at a time.
 - UI alignment is tuned empirically: change one knob per iteration
   and say which number to tweak in which direction.
+
+---
+
+## Required skills
+
+This skill assumes the following prerequisite skills are loaded.
+Use the `skill` tool to load them before using this one:
+
+- **git-conventions** — two-branch flow, conventional commits,
+  pre-commit hooks, push and attribution rules, tagging and releases.

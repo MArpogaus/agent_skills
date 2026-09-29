@@ -3,7 +3,8 @@ name: python-dev
 description: >
   Python project conventions: setuptools, ruff I/E/F/D/UP,
   NumPy docstrings, pdoc, pytest xdist, uv, commitizen,
-  matplotlib figure patterns, and skeleton-based project setup.
+  matplotlib figure patterns, and skeleton-based project setup.  Use
+  when creating, changing or reviewing a Python project.
 license: MIT
 compatibility: claude-code opencode
 metadata:
@@ -51,7 +52,7 @@ skill is the authority — and fix the skeleton in the same pass.
    ```
    git init
    git add .gitignore .pre-commit-config.yaml
-   git commit -m "init"
+   git commit -m "chore: init"
    ```
 4. **Create `dev` branch** and switch to it:
    ```
@@ -332,7 +333,7 @@ repos:
       - id: commitizen
         stages: [commit-msg]
       - id: commitizen-branch
-        stages: [pre-push]   # checks every message on the branch
+        stages: [pre-push]   # checks origin/HEAD..HEAD
 ```
 
 Run `pre-commit autoupdate` periodically.  When updating revs,
@@ -647,6 +648,12 @@ layout python
 | `uv build` | build source + wheel |
 
 Commit `uv.lock`.
+
+`uv run` and `uv sync` re-sync `.venv` and can replace the interpreter
+under a running kernel.  In a project where the user manages the
+environment, an agent runs none of the commands above: it uses the
+existing `.venv/bin/python` read-only, or the system `python3` for a
+quick check, and reports a missing package.  When in doubt, ask.
 
 ---
 
@@ -1143,7 +1150,7 @@ in Emacs.  Each logical code unit gets its own block with a
 - Blocks without `:tangle` are for interactive inspection only
   and do not end up in the tangled file.
 
-### Example structure (from this repo)
+### Example structure
 
 ```
 *** Quick start

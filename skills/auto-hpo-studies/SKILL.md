@@ -4,6 +4,7 @@ description: >
   Autonomous hyperparameter optimization loop: define target and search
   space, then iterate update-config run monitor log commit until convergence.
   Uses MLflow for tracking, sleep-based polling for long-running tasks.
+  Use when the user asks to tune hyperparameters autonomously.
 license: MIT
 compatibility: claude-code opencode
 metadata:
@@ -96,7 +97,7 @@ No manual intervention between iterations.
 The user specifies:
 
 - **Target ID** — a short label used in commit messages and
-  MLflow tags (e.g. `dla-bernstein-nf`).
+  MLflow tags (e.g. `<dataset>-<model>`).
 - **Model/variant** — which model architecture to optimise.
 - **Search space** — a table of tunable parameters, their initial
   values, allowed ranges, and step sizes / strategies.
@@ -199,13 +200,16 @@ echo "<target-id>" > /tmp/hpo_<target-id>_target
 echo "<N>" > /tmp/hpo_<target-id>_iter
 echo "<param-name>:<old-value>-><new-value>" > /tmp/hpo_<target-id>_change
 
-# Launch
-nohup <run-command> > logs/iter<N>_<target-id>.log 2>&1 &
-PID=$!
-echo $PID > /tmp/hpo_iter<N>.pid
+# Launch in its own process group; the wrapper records the exit code
+nohup setsid sh -c '<run-command> > logs/iter<N>_<target-id>.log 2>&1
+                    echo $? > /tmp/hpo_<target-id>_exit' > /dev/null 2>&1 &
+echo $! > /tmp/hpo_<target-id>_pid
 ```
 
-Record the PID and redirect stdout/stderr to a log file.
+Each shell call of an agent is a new shell, so the run is not a child
+of the shell that later checks it.  The PID file and the exit file
+carry the state between calls.  The run command sits inside single
+quotes; if it contains a `'`, put it into a script and call that.
 
 If the pipeline has multiple stages (prepare → train → evaluate),
 invoke the top-level command that runs all of them.
@@ -215,69 +219,39 @@ invoke the top-level command that runs all of them.
 After launching, poll for completion.  This is the longest step —
 the agent must sleep and wait, not spin.
 
-**Shell-based polling (PID available):**
+Poll until the exit file appears.  Run the loop with the harness's
+monitor tool or as a background job, so that a run of several hours
+does not hit the tool timeout:
 
 ```bash
-# Poll until process exits
-while kill -0 $PID 2>/dev/null; do
+log=logs/iter<N>_<target-id>.log; last=0
+until [ -f /tmp/hpo_<target-id>_exit ]; do
     sleep 30
+    size=$(wc -c < "$log" 2>/dev/null || echo 0)
+    [ "$size" = "$last" ] && echo "no new output since the last check: possible stall"
+    last=$size
 done
-
-# Check exit code
-wait $PID
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
-    echo "Run failed with exit code $EXIT_CODE"
+if [ "$(cat /tmp/hpo_<target-id>_exit)" = 0 ]; then
+    echo "completed" > /tmp/hpo_<target-id>_status
+else
     echo "failed" > /tmp/hpo_<target-id>_status
     # Handle failure: revert config, log error, continue
 fi
 ```
 
-**File-based polling (agent has no PID access):**
-
-The launch command (step 6) already set the status file to
-`running`.  The training script must write `completed` on exit:
-
-```bash
-# Must be appended to the end of <run-command> or a wrapper:
-<run-command> > logs/iter<N>.log 2>&1
-echo "completed" > /tmp/hpo_<target-id>_status
-```
-
-Poll by reading the status file:
-
-```python
-import time
-import pathlib
-
-status_file = pathlib.Path("/tmp/hpo_<target-id>_status")
-while status_file.read_text().strip() == "running":
-    time.sleep(30)
-```
-
 **Polling interval:** 30–60 seconds for runs of minutes to hours.
 Adjust based on expected duration.
 
-**Stall detection:** check log file growth each cycle:
+**Stall:** when the loop reports no new output for several cycles,
+check the log tail for errors and GPU use with `nvidia-smi`.  If the
+run hangs, abort the whole process group, which also ends the loop:
 
-```python
-log_file = pathlib.Path("logs/iter<N>.log")
-last_size = log_file.stat().st_size
-
-while status_file.read_text().strip() == "running":
-    time.sleep(60)
-    current_size = log_file.stat().st_size
-    if current_size == last_size:
-        # No output appended for 60s — possible stall.
-        # Check if process is alive, abort if hung.
-        pass
-    last_size = current_size
+```bash
+kill -- -"$(cat /tmp/hpo_<target-id>_pid)"
+echo 143 > /tmp/hpo_<target-id>_exit
 ```
 
-On stall suspicion: check exit code, check GPU utilisation with
-`nvidia-smi`, check log tail for error messages.  If hung, abort
-(`kill <PID>`), write `failed` to status file, revert config,
-and try different params.
+Then revert the config and try different params.
 
 ### 8 — Read new metrics from MLflow
 
@@ -296,7 +270,7 @@ to status file and treat as run failure in step 9.
 ### 9 — Compare
 
 ```python
-improvement = old_val_loss - new_val_loss  # negative = better
+improvement = old_val_loss - new_val_loss  # positive = better
 ```
 
 | Condition | Action |
@@ -324,7 +298,7 @@ to this change.
 
 Evaluate against the user-defined criteria.  Typical rules:
 
-1. **Target reached** — `min_val_loss` meets or exceeds the target.
+1. **Target reached** — `min_val_loss` is at or below the target.
 2. **Plateau** — last N iterations (e.g. 5) without improvement.
 3. **Max iterations** — total iterations reached limit.
 4. **Search space exhausted** — all params at boundaries,
@@ -358,7 +332,7 @@ exactly where it left off.
 |--------|--------------------|
 | `hpo_study.md` exists? | Study was started. If missing, ask user for definition (step 1). |
 | Git log last commit | `git log --oneline -1 --grep="feat(hpo): <target-id>"` — the last committed iteration number. |
-| Status file | `/tmp/hpo_<target-id>_status` — `running`, `completed`, or missing. |
+| Status file | `/tmp/hpo_<target-id>_status` — `running`, `completed`, `failed`, or missing. |
 | Working tree diff | `git diff params/` — uncommitted config changes from the current iteration. |
 | MLflow last run | Query most recent run for this target — may have metrics from an uncommitted iteration. |
 
@@ -371,17 +345,20 @@ Does hpo_study.md exist?
 ├── No → study never started. Go to step 1 (ask user for definition).
 └── Yes → check status file.
        └── Status file says "running" → training process may still be alive.
-            ├── PID exists and process is running → resume monitoring (step 7).
+            ├── Process in /tmp/hpo_<target-id>_pid still running → resume monitoring (step 7).
             │    Poll the log file, wait for completion.
-            └── PID gone / process dead → run finished or crashed.
-                 Check MLflow for new metrics.
-                 ├── Metrics found → go to step 8 (read + compare).
-                 └── No metrics / NaN → run failed. Revert config,
-                      log failure in study log, start new iteration
-                      with different params (step 4).
+            └── PID gone / process dead → read /tmp/hpo_<target-id>_exit.
+                 ├── 0 → go to step 8 (read + compare).
+                 ├── non-zero → run failed. Revert config, log the
+                 │    failure in the study log, start a new iteration
+                 │    with different params (step 4).
+                 └── missing → the run crashed; treat it as failed.
 
        Status file says "completed" → run finished but loop was interrupted
        before commit.  Go to step 8 (read metrics → compare → commit).
+
+       Status file says "failed" → revert the config, log the failure in
+       the study log, and start a new iteration with other params (step 4).
 
        No status file → loop was interrupted between commit and next launch.
             Check git log for last HPO commit:
@@ -404,15 +381,17 @@ echo "<target-id>" > /tmp/hpo_<target-id>_target
 echo "<N>" > /tmp/hpo_<target-id>_iter
 echo "<param-name>:<old-value>-><new-value>" > /tmp/hpo_<target-id>_change
 
-# In monitoring (step 7), on completion:
+# In monitoring (step 7), on exit code 0 / non-zero:
 echo "completed" > /tmp/hpo_<target-id>_status
+echo "failed" > /tmp/hpo_<target-id>_status
 
 # In compare (step 9), if NaN/failure:
 echo "failed" > /tmp/hpo_<target-id>_status
 
 # Before next launch, clean up:
 rm -f /tmp/hpo_<target-id>_status /tmp/hpo_<target-id>_iter \
-      /tmp/hpo_<target-id>_change
+      /tmp/hpo_<target-id>_change /tmp/hpo_<target-id>_pid \
+      /tmp/hpo_<target-id>_exit
 ```
 
 ### Restoring the config after crash
@@ -467,8 +446,8 @@ Query pattern for the study log:
 runs = client.search_runs(
     experiment_ids=[exp.experiment_id],
     filter_string="tags.target = '<target-id>'",
-    order_by=["tags.hpo_iteration ASC"],
 )
+runs.sort(key=lambda r: int(r.data.tags["hpo_iteration"]))  # tags are text
 for r in runs:
     print(
         r.data.tags.get("hpo_iteration"),
@@ -505,7 +484,7 @@ The study log (e.g. `hpo_study.md`) is a living document and the
 | Situation | Response |
 |-----------|----------|
 | Run crashes on launch | Check config format, check dependencies, check GPU memory. Fix + re-run as same iteration. |
-| Run hangs / no output for 5 min | Abort (`kill <PID>`), note in log, try different params. |
+| Run hangs / no output for 5 min | Abort the process group as in step 7, note in log, try different params. |
 | NaN after 3 different attempts | Declare this model/variant unstable for this target. Document in study log. |
 | Δ < 0.1 for 5 consecutive iterations | Plateau reached. Stop optimisation for this target. |
 | val_loss improves but train_loss stays flat | Continue — val_loss is the primary metric. |

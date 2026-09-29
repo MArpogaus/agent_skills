@@ -43,10 +43,13 @@ All skills are licensed under MIT — see =LICENSE=.
 |------------------------+--------------------------------------------------|
 | python-dev             | Python conventions: setuptools, ruff, pytest, uv |
 | git-conventions        | Git workflow: two-branch, conventional commits   |
-| create-skill           | Guide for generating new opencode skills         |
+| create-skill           | Create a new agent skill in this collection      |
+| repo-tour              | Guided code tour of an unfamiliar repo: one stop at a time, linked, verified |
 | latex-paper-revision   | LaTeX paper revision and enhancement workflow    |
 | ml-project             | Research ML project conventions (DVC, MLflow, HPO) |
 | auto-hpo-studies       | Autonomous HPO loop: define target, iterate update-config run monitor commit until convergence. Uses MLflow, sleep-based polling |
 | paper-writing          | End-to-end paper writing workflow: figure generation, LaTeX templates (IEEE/Elsevier/UAI), revision cycles, venue submission |
 | emacs-config           | The literate Emacs configuration: org-only editing, naming, package idioms, git flow |
 | emacs-package          | Emacs Lisp packages: layout, the make check pipeline, ERT, display engine rules, MELPA |
+| org-beamer-presentation | Org → Beamer → PDF talks: three designs, denote naming, layout catalogue |
+| dev-conventions        | Cross-project way of working: principles, ask vs act, verification, commit-monitor review loop, autonomy, sandbox safety, style |

@@ -118,7 +118,7 @@ checkdoc and package-lint are strict about form:
 - Symbols are quoted `` `like-this' ``, never `` `like-this` ``.
 - A parenthesis at column zero inside a docstring needs `\(`.
 - Key sequences use `\\[command]`, not literal `mouse-1`.
-- Ambiguous names need `the variable `exec-path'` rather than the bare
+- Ambiguous names need ``the variable `exec-path'`` rather than the bare
   symbol.
 
 Nothing checks behaviour.  Write ERT tests for the logic that a
@@ -140,7 +140,7 @@ give, and the two ways to write one are easy to hit: a stub that
 records where the real thing would have acted (a stubbed tab switch
 that notes the buffer instead of changing it proves nothing), and an
 assertion on state that nothing in the failing path touches.  Watch
-what tests do to each other, too: `quit-window' kills the buffer of
+what tests do to each other, too: `quit-window` kills the buffer of
 the selected window, so a test that commits from a buffer it never
 displayed can take the next test's buffer with it.
 
@@ -241,6 +241,19 @@ marker cannot corrupt the result.
 A package must not set user options.  Recommend them in the README and
 in the commentary instead.
 
+- **No key bindings.**  A package provides keymaps and commands; the
+  user binds them in their configuration.  The only exception is a
+  map that is active in the package's own temporary buffers (for
+  example `C-c C-c` / `C-c C-k` in an edit buffer).
+- **Opinionated defaults** belong in the user's configuration, not in
+  the package.
+- **No workarounds for one configuration.**  When a package needs a
+  setting from the user, name it in the README.  Do not catch a
+  specific configuration inside the package.
+- **A minimal working example** configuration in the README reproduces
+  the demo pictures exactly.  Record the pictures with it, not with
+  the author's configuration.
+
 ## Publishing on MELPA
 
 1. Merge the work branch into the branch MELPA builds, and tag a
@@ -287,27 +300,76 @@ them.
 - A `display` string ignores `(space :align-to (- right ...))`.
   Right-aligned icons only work in overlay strings (`before-string`,
   `after-string`), never inside a `display` replacement.
+- For "how many columns does a row of this window have", use
+  `window-max-chars-per-line` and not `window-body-width`.  Measured in
+  an 800-pixel window at 8 px a character: body width 100 columns both
+  ways, `max-chars-per-line` 100 with no line numbers, **94** with them
+  on, and **91** with margins of 2 and 1.  Line numbers and margins are
+  both inside what `window-body-width` reports; `max-chars-per-line`
+  takes both off, and it accepts a WINDOW argument, so it needs no
+  `with-selected-window` the way `line-number-display-width` does.
+- Right-aligning with `(space :align-to (- right N))` needs a terminal
+  two columns of slack, not one: a row that reaches the last column
+  makes the line a continuation and the last glyph wraps to a row of
+  its own.
+- A string built for a window is baked: a label cut to fit is still cut
+  when the window grows, until whatever built it runs again.  Never
+  measure a fallback window a buffer is not shown in — with no window,
+  leave the string whole.  `get-buffer-window-list`'s ALL-FRAMES must be
+  `'visible`, or an invisible frame's narrow window decides.
+- A keymap on an overlay shadows every keymap inside the string that
+  overlay displays.  `get-char-property` answers an overlay before a
+  text property, so a row hung on a `display` string cannot have
+  per-word keymaps — a link rendered by shr ran the block's own command
+  instead of following its URL, for as long as the overlay carried one.
+  Where the string carries its own keymaps, put none on the overlay.
+- The same does NOT apply to an `after-string` or `before-string` shown
+  at the overlay's edge: those draw at a position the overlay's range
+  does not cover, so a keymap in them is not shadowed.  That is why
+  header-bar buttons on an after-string always worked while links in a
+  display string never did.
+- Emacs *does* consult a display string's own text properties for a
+  click: `posn-string` gives (STRING . INDEX), and the keymap is looked
+  up there.  So moving a keymap off the overlay and into the string
+  loses nothing.
+- To ask what a click would run, `key-binding` needs the POSITION
+  argument: `(key-binding [mouse-2] nil nil posn)`.  Without it the
+  answer is for point, which is somewhere else entirely — a probe that
+  omits it will report the global binding and look like a bug.
+- An overlay string is not displayed at all when its position sits in
+  invisible text.  A row that hides its line with `display ""` and shows
+  an image on its `after-string` draws that string at the overlay's END,
+  so a neighbouring invisible overlay that begins exactly there swallows
+  it -- silently, with valid image specs and files on disk.  Ride the
+  `before-string` instead: it draws at the overlay's start.  Measured on
+  a frame by counting the pixels of the image itself: 0 with the
+  invisible run at the end, 32 on the before-string.
+- The two rules above compose into a trap: a display property *inside* a
+  display string is never looked at either.  Anything a caller needs to
+  put on part of a row it hangs on one display property -- an image, a
+  size cap, a hidden delimiter -- has to be in the text, or on a
+  before/after-string, never a nested `display`.
 - An overlay string without a face inherits the face of the buffer
   text next to it.  Give every block a base face with
   `add-face-text-property` APPEND, or stray overlines spread.
 - An invisible overlay hides the `display` and the strings of every
   overlay below it, but only when it is wider than that overlay.
-- `outline-flag-region' hides up to the end of the last line of a
+- `outline-flag-region` hides up to the end of the last line of a
   subtree and stops one character short of the newline that ends it.
   A block that hangs on that newline survives every fold.  Advising
-  `outline-flag-region' and hiding the block by hand is the robust
+  `outline-flag-region` and hiding the block by hand is the robust
   way; guessing anchor positions is not.
-- A window can only start at a buffer position, so `next-line' crosses
-  a display block in one step.  Only `pixel-scroll-precision-mode'
+- A window can only start at a buffer position, so `next-line` crosses
+  a display block in one step.  Only `pixel-scroll-precision-mode`
   moves through it a part at a time.
-- `make-cursor-line-fully-visible' t plus a block taller than the
+- `make-cursor-line-fully-visible` t plus a block taller than the
   window makes redisplay throw the window start back below the block.
   With the default scroll options this resolves itself; do not set
   scroll options from a package.
-- `scroll-conservatively' above 100 forbids recentering.  Over two
+- `scroll-conservatively` above 100 forbids recentering.  Over two
   blocks taller than the window, redisplay then hands the window from
   one to the other with every scroll event, endlessly.  Keep it at
-  100, or set `scroll-margin' to 1 or more.
+  100, or set `scroll-margin` to 1 or more.
 - A block taller than the window cannot be scrolled past at all: the
   wheel bounces backwards off it and starts over.  Measured in a 437
   pixel text area, 25 pixels an event: a figure at 0.9 of the area
@@ -315,8 +377,23 @@ them.
   backwards.  Cap an inline image to a share of the window.
 - A window start cannot be put inside an overlay string, so line
   scrolling stops at such a block and stays there.  A page scroll and
-  `next-line' get past; the wheel gets past but does not come back to
+  `next-line` get past; the wheel gets past but does not come back to
   the same place.
+- Never hide the newline a block hangs on.  Rows that must be strings
+  (an image is swallowed by a display property, and `:align-to` is
+  ignored in one) belong on the after-string of an overlay that ends
+  *before* that newline, leaving the newline itself as real text.  With
+  the rows on the newline's own after-string and the newline replaced by
+  `display ""`, `pixel-scroll-precision-scroll-up` refuses to pass the
+  block: measured over six figures, 280 refusals with a
+  beginning-of-buffer error and a window stuck mid-buffer, where the
+  same buffer with the newline left alone scrolls to the top without
+  one.  Scrolling down shows nothing of this, so test both directions.
+- A `line-prefix` with a fringe bitmap applies to the rows of a string
+  only when the string carries the property itself; an overlay says
+  nothing about them.  A display property carries no fringe at all.  A
+  bitmap taller than a row and aligned `bottom` lands one row off beside
+  a string row, so feet at the ends of a bracket are not worth having.
 - Redisplay pays for face runs, not for size.  Forty lines of plain
   output scroll as cheaply as none; twelve lines full of face changes
   cost three times as much, and rendered Markdown carries hundreds of
@@ -327,35 +404,38 @@ them.
   whole on every redisplay: the same fixture went from 6.3 to 2.0
   milliseconds an event that way.  Lines with nothing to show go under
   an invisible run, and such a run must start at the end of a visible
-  line, never at the start of one, or `scroll-down' answers it with a
+  line, never at the start of one, or `scroll-down` answers it with a
   beginning-of-buffer error.
-- `char-displayable-p' answers for the character set, not the font:
+- `char-displayable-p` answers for the character set, not the font:
   it says yes to characters that draw as a hex box.  On a graphical
   frame ask `(internal-char-font nil CHAR)` and keep a plain-text
   fallback.  Nerd font glyphs (private use area) always need this.
-- `string-pixel-width' measures right-aligned icon groups; glyphs
-  render wider than `string-width' counts.
-- The window parameters `tab-line-format', `header-line-format' and
-  `mode-line-format' override per WINDOW without touching the buffer.
-  Changes only show after `force-mode-line-update'.
+- Icons in one row share weight and size: prefer thin, unfilled glyphs
+  that match the close button.  Give each icon a distinct plain-text
+  fallback, so that two buttons never look the same in a terminal.
+- `string-pixel-width` measures right-aligned icon groups; glyphs
+  render wider than `string-width` counts.
+- The window parameters `tab-line-format`, `header-line-format` and
+  `mode-line-format` override per WINDOW without touching the buffer.
+  Changes only show after `force-mode-line-update`.
 - Margins draw only along lines of text; fringes run the full window
   height.  Side borders that must reach the window bottom are fringes
   (graphic only).
-- In a tab/mode-line row, `(space :align-to (- right N))' aligns to
+- In a tab/mode-line row, `(space :align-to (- right N))` aligns to
   the TEXT area and leaves the fringes out — the right edge misses
   the window edge.  A fill that must span the whole row uses a huge
-  align-to (`:align-to 10000'); it clips at the row end exactly.
-- The `default' face specifies EVERY attribute, so a face plist like
-  `(:strike-through t :inherit default)' loses the strike-through to
+  align-to (`:align-to 10000`); it clips at the row end exactly.
+- The `default` face specifies EVERY attribute, so a face plist like
+  `(:strike-through t :inherit default)` loses the strike-through to
   the inherited nil.  Inherit from faces with unspecified attributes,
   or set the attribute to an explicit color.
-- `face-foreground' does not see buffer-local face remaps.  To let a
+- `face-foreground` does not see buffer-local face remaps.  To let a
   remap recolor derived UI, let the display engine resolve it:
-  `(:inherit the-face :inverse-video t)' turns the (possibly
+  `(:inherit the-face :inverse-video t)` turns the (possibly
   remapped) foreground into a background.
-- A row of a few pixels: a stretch space with `:height (N)' in the
-  display spec.  Do NOT add a face `:height' below one for this: in a
-  side window whose header line measures itself (`string-pixel-width'
+- A row of a few pixels: a stretch space with `:height (N)` in the
+  display spec.  Do NOT add a face `:height` below one for this: in a
+  side window whose header line measures itself (`string-pixel-width`
   re-enters redisplay), a fractional face height in the mode line
   sends Emacs into an endless measuring recursion and it dies of a
   stack overflow.  The display spec alone is safe.  Bisect such
@@ -364,7 +444,7 @@ them.
 - An overline is always one pixel, so a box built from overlines and
   drawn rows should be one pixel everywhere, or its edges carry
   different weights.
-- `window-total-width' counts the column a terminal spends on the
+- `window-total-width` counts the column a terminal spends on the
   separator between two windows side by side.  An edge string built
   from it is one column too long and loses its last glyph; use the
   body width plus the margins.
@@ -373,9 +453,31 @@ them.
 - A header or mode line row reaches past fringes and margins, so a
   border drawn from those cannot close that row's ends.  Let the row
   close itself with a glyph at each end.
+- Two overlays of the same priority over the same character: the
+  **narrower one wins**.  A one-character guide over a wide bookkeeping
+  overlay disappeared for that reason; the guide needs the higher
+  priority, whatever its width says.
+- `line-prefix` of a number draws no prefix at all.  It takes a string
+  or a display spec; a number is ignored silently.
+- `format-mode-line` with a FACE argument renders the construct in that
+  face but attaches no face to the string it answers with.  Put the face
+  on afterwards if the string is going anywhere else.
+- A theme is applied through `enable-theme`, so advice on `load-theme`
+  runs for the first load only.  Hook `enable-theme-functions` to follow
+  every theme change, `load-theme` from a customize buffer included.
+- `fringe-bitmap-p` is fringe.el's, not C's: `(require 'fringe)` or the
+  byte compiler on a nox build calls it unknown.  And a build without
+  fringes still has `define-fringe-bitmap` — fringe.el defines one that
+  defines nothing — so a test guard must ask
+  `(fringe-bitmap-p 'left-arrow)` instead of `fboundp`.
+- The REP function of `replace-regexp-in-string` must not clobber the
+  match data: the caller reads the match back after every call.  A REP
+  that searches (measuring columns, say) needs `save-match-data`, or the
+  replacement lands beside the fragment instead of over it and the text
+  is drawn twice.
 
-Pixel claims are testable: export the frame with `x-export-frames'
-inside Emacs (guard it with `declare-function', console builds lack
+Pixel claims are testable: export the frame with `x-export-frames`
+inside Emacs (guard it with `declare-function`, console builds lack
 it), then read the PNG with pillow and assert the edges' thickness
 and position.  Have the Emacs side write the window geometry to a
 file, because a frame holds more grey lines than the package draws,
@@ -412,17 +514,17 @@ in a real frame under Xvfb:
 - A probe script drives the session from a timer
   (`run-with-timer 0.5 nil #'main`), never from top-level code: the
   frame is not up while the file loads.  It writes results to a file;
-  `message' output is invisible and `send-string-to-terminal' fails
+  `message` output is invisible and `send-string-to-terminal` fails
   in a graphical session.
 - Scroll correctness is one invariant: while scrolling up, the window
   start must never move down.  Track `(cons (window-start)
-  (window-vscroll nil t))` after each event and `redisplay t'.
+  (window-vscroll nil t))` after each event and `redisplay t`.
 - Such a test belongs in CI.  The nix builds from purcell/setup-emacs
   have no X, so give the pixel tests their own job on the
   distribution Emacs: `apt-get install xvfb emacs-gtk`, then
   `xvfb-run make scroll`.  In batch the tests `skip-unless
   (display-graphic-p)`.
-- Demo GIFs need no screen recorder: `x-export-frames' returns the
+- Demo GIFs need no screen recorder: `x-export-frames` returns the
   frame as PNG from inside Emacs, without mouse pointer or window
   decoration.  Capture deterministically - one frame per scroll step,
   ten frames per second of hold - and never resample the frame rate
@@ -438,33 +540,45 @@ in a real frame under Xvfb:
         bayer_scale=3" -loop 0 raw.gif
       gifsicle -O3 --lossy=80 raw.gif -o img/demo.gif
 
-- An overlay's `line-prefix' stops at the end of the buffer, so a box
+- An overlay's `line-prefix` stops at the end of the buffer, so a box
   built from it leaves the rows below the last line open.  The
   buffer-local variable reaches them.  It is not a loss of window
   precision: a glyph bound for a margin renders only where there is a
   margin, so a per-window margin scopes a buffer-wide prefix.
 - A terminal has no overline, so anything that attaches an edge to an
   existing line is graphic-only; a terminal needs a row of its own.
-- Close a row at its right end by aligning to `right', not to a
+- Close a row at its right end by aligning to `right`, not to a
   measured width: a glyph can render a pixel wider than
-  `string-pixel-width' reports, and the corner misses by one.  A face
-  `:box' with `(:line-width (1 . 0))' draws the left end but its right
+  `string-pixel-width` reports, and the corner misses by one.  A face
+  `:box` with `(:line-width (1 . 0))` draws the left end but its right
   end is eaten by a trailing stretch glyph.
-- Record on the default theme, drive prompts with `cl-letf' on
-  `completing-read', and keep the driver script in `demo/` in the
+- Record on the default theme, drive prompts with `cl-letf` on
+  `completing-read`, and keep the driver script in `demo/` in the
   repository, with `demo` and `img` listed in `.elpaignore`.
 - For one pixel line art, encode at the frames' own size with
-  `paletteuse=dither=none' and no `gifsicle --lossy'.  Scaling turns a
+  `paletteuse=dither=none` and no `gifsicle --lossy`.  Scaling turns a
   one pixel line into two grey ones (measured: an edge column of 127
-  reads 178 after `scale=820'), and dithering scatters noise that also
+  reads 178 after `scale=820`), and dithering scatters noise that also
   makes the file bigger.  Record at a width the reader will not scale
   either.
 - Verify the encoding rather than trusting it: decode the GIF back to
   PNGs and compare a frame against its source, sampling the columns
   the border sits in.
-- `gifsicle -O3' collapses identical consecutive frames into one with
+- `gifsicle -O3` collapses identical consecutive frames into one with
   a long delay, so a five frame GIF of a five state demo is fully
   encoded, not truncated.  Count states, not frames.
 - A demo that toggles a mode shows every layout change the mode
   makes.  Measure it: the first pixel of a text row before and after
   must be the same column, and the first frame must equal the last.
+
+---
+
+## Required skills
+
+This skill assumes the following prerequisite skills are loaded.
+Use the `skill` tool to load them before using this one:
+
+- **git-conventions** — two-branch flow, conventional commits,
+  pre-commit hooks, push and attribution rules, tagging and releases.
+- **emacs-config** — the configuration a package is extracted from
+  and tested in.
