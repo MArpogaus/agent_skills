@@ -46,7 +46,7 @@ not repeat them.
   first and state the cost.
 - **Defaults only with a reason.**  Keep defaults few.  Opinionated
   defaults go into the user's configuration, not into the library.
-- **Explicit configuration.**  Experiment and deployment configs
+- **Explicit configuration.**  Configs of experiments and deployments
   write every option out, defaults included, so that a reader sees
   the full setup without reading the framework.  Duplication is
   acceptable there.  Keep the number of variants small.

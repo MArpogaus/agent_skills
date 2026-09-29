@@ -400,8 +400,8 @@ A ground-truth bound is for regressions, not for precision claims.
 
 ### Configs and names
 
-- Experiment configs write every option out, defaults included, so a
-  reader sees each network without knowing the framework's defaults.
+- Experiment configs write every option out (see `dev-conventions`,
+  "Explicit configuration").
 - Names follow the notation of the paper.
 
 ### test/README.md
