@@ -11,7 +11,7 @@
       "name": "marpogaus-skills",
       "source": "./",
       "version": "0.3.0",
-      "description": "Marcel's recurring project conventions as skills: Python, git, Emacs, ML research projects, paper writing, and Beamer presentations.",
+      "description": "Marcel's recurring project conventions as skills: the way of working (dev conventions, review loop), git, Python, Emacs, ML research projects, paper writing, Beamer presentations, and meta skills (create-skill, repo-tour).",
       "license": "MIT",
       "category": "productivity"
     }
