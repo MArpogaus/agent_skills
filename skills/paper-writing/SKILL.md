@@ -2,9 +2,11 @@
 name: paper-writing
 description: >
   End-to-end academic paper writing workflow for probabilistic ML research:
-  project scaffolding, DVC/MLflow experiment pipelines, figure generation,
-  LaTeX writing with IEEE/Elsevier/UAI templates, revision cycles, and
-  venue submission.
+  LaTeX project scaffolding, figure generation, writing with
+  IEEE/Elsevier/UAI templates, revision cycles, and venue submission.
+  Use when writing or submitting a paper; the experiment code follows
+  ml-project, and a revision of an existing draft follows
+  latex-paper-revision.
 license: MIT
 compatibility: claude-code opencode
 metadata:
@@ -56,7 +58,7 @@ and camera-ready submission.
 | Elsevier       | `elsarticle`                     | `[final,5p,times,twocolumn]`         |
 | UAI            | `uai2025` (custom class file)    | `[accepted]` or blank                |
 | ICML           | `article` + `icml2021` package   | `[accepted]` or blind for review     |
-| arXiv          | same as main class               | anonymised, remove copyright lines   |
+| arXiv          | same as main class               | remove copyright lines               |
 
 ### Preamble template
 
@@ -147,7 +149,9 @@ Prefer `biblatex` with `biber` backend:
 \printbibliography
 ```
 
-For Elsevier use `bibtex` with the `elsarticle-num` style:
+For Elsevier use `bibtex` with the `elsarticle-num` style, and drop
+the `biblatex` block from the preamble; the two cannot be loaded
+together:
 
 ```latex
 \bibliographystyle{elsarticle-num}
@@ -246,6 +250,7 @@ For data-driven plots that should match the document font, use
 
 \begin{figure}[t]
   \centering
+  \definecolor{mpl_blue}{HTML}{1F77B4}
   \begin{tikzpicture}
     \begin{axis}[
       width=\columnwidth,
@@ -372,7 +377,7 @@ latexmk -pdf main.tex
 ### Clean build for final submission
 
 ```bash
-git clean -xdf
+latexmk -C
 latexmk -lualatex -shell-escape main.tex
 latexmk -c
 ```
@@ -387,8 +392,9 @@ set -eux
 
 DEST="./final"
 
-# Clean and prepare
-git clean -xdf && git clean -Xdf
+# Clean and prepare (latexmk -C removes only LaTeX output, never sources)
+latexmk -C
+rm -rf "$DEST"
 mkdir -p "$DEST"
 cp -r gfx csv *.bib "$DEST"
 
@@ -401,13 +407,13 @@ latexdiff --flatten main.tex main.tex |
 cd "$DEST"
 zip -9r final_paper_src.zip *
 
-# Compile
+# Compile, and add the .bbl before the cleanup can remove it
 latexmk -lualatex -shell-escape final.tex
+zip -9 final_paper_src.zip final.bbl
 latexmk -c
 
 # Finalise
 mv final.pdf "FINAL_PAPER.PDF"
-zip -9 final_paper_src.zip final.bbl
 ```
 
 ---
@@ -502,7 +508,6 @@ v2 — Revised: expanded method section, added Experiment 3,
 
 - Use the same class file as the published version
 - **Remove:** copyright notice, IEEE DOI, `\markboth` headers
-- **Anonymise:** replace author names with placeholder
 - **Required:** source files for full compilation
 
 ---
@@ -515,11 +520,8 @@ v2 — Revised: expanded method section, added Experiment 3,
 - ICML style: https://icml.cc/Conferences/2021/StyleAuthorInstructions
 - latexmk: https://mg.readthedocs.io/latexmk.html
 - PGFPlots: https://pgfplots.sourceforge.net/
-- Earlier papers in the group are the best reference for a venue; look
-  for one that already used the target class and copy its setup:
-  - an IEEE transactions paper — latexdiff flatten, PGFPlots data plotting
-  - an Elsevier elsarticle paper — revision cycle with latexdiff, changelog
-  - a UAI/NeurIPS-style paper — TikZ overlays, supplementary material
+- An earlier paper that used the target class is the best reference
+  for a venue: ask the user for one and copy its setup.
 
 ---
 
