@@ -54,13 +54,13 @@ Every file, companions and test files included:
 ```elisp
 ;;; foo.el --- One line, no trailing period -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2026 Marcel Arpogaus
+;; Copyright (C) <year> <Author Name>
 
-;; Author: Marcel Arpogaus <znepry.necbtnhf@tznvy.pbz>
+;; Author: <Author Name> <email>
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "29.1"))
 ;; Keywords: convenience
-;; URL: https://github.com/MArpogaus/foo
+;; URL: https://github.com/<owner>/foo
 
 ;; This file is not part of GNU Emacs.
 ;; <GPLv3 blurb, 14 lines>
@@ -74,7 +74,8 @@ Every file, companions and test files included:
 ;;; foo.el ends here
 ```
 
-- The email is ROT13 obfuscated on purpose; keep it that way.
+- The author may give the email ROT13 obfuscated against scrapers;
+  keep whatever form the existing files use.
 - `Package-Requires` in the **main file** decides what MELPA installs;
   companions declare their own but nothing installs them, so a
   companion needing a newer Emacs forces the main file up too.
@@ -261,7 +262,7 @@ in the commentary instead.
 2. Fork `melpa/melpa`, add `recipes/<package>`:
 
    ```elisp
-   (foo :fetcher github :repo "MArpogaus/foo")
+   (foo :fetcher github :repo "<owner>/foo")
    ```
 
    Add `:branch "main"` when the default branch is the working branch.
