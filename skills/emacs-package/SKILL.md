@@ -32,7 +32,7 @@ Layout, identical in every package:
 
 ```
 .dir-locals.el              indentation, fill column, double space
-.elpaignore                 files MELPA leaves out of the tarball
+.elpaignore                 GNU ELPA leaves these out, package.el skips compiling them; MELPA ignores it
 .github/workflows/test.yml  CI, one job per supported Emacs version
 .gitignore
 COPYING                     GPLv3
@@ -54,13 +54,13 @@ Every file, companions and test files included:
 ```elisp
 ;;; foo.el --- One line, no trailing period -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2026 Marcel Arpogaus
+;; Copyright (C) <year> <Author Name>
 
-;; Author: Marcel Arpogaus <znepry.necbtnhf@tznvy.pbz>
+;; Author: <Author Name> <email>
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "29.1"))
 ;; Keywords: convenience
-;; URL: https://github.com/MArpogaus/foo
+;; URL: https://github.com/<owner>/foo
 
 ;; This file is not part of GNU Emacs.
 ;; <GPLv3 blurb, 14 lines>
@@ -74,7 +74,8 @@ Every file, companions and test files included:
 ;;; foo.el ends here
 ```
 
-- The email is ROT13 obfuscated on purpose; keep it that way.
+- The author may give the email ROT13 obfuscated against scrapers;
+  keep whatever form the existing files use.
 - `Package-Requires` in the **main file** decides what MELPA installs;
   companions declare their own but nothing installs them, so a
   companion needing a newer Emacs forces the main file up too.
@@ -261,12 +262,14 @@ in the commentary instead.
 2. Fork `melpa/melpa`, add `recipes/<package>`:
 
    ```elisp
-   (foo :fetcher github :repo "MArpogaus/foo")
+   (foo :fetcher github :repo "<owner>/foo")
    ```
 
    Add `:branch "main"` when the default branch is the working branch.
-   No `:files` keyword: `.elpaignore` already excludes the tests, the
-   Makefile and the CI files.
+   No `:files` keyword: MELPA's default files spec takes only the
+   top-level `*.el` (and `lisp/*.el`) and excludes `*-test.el`, so the
+   tests, the Makefile and the CI files stay out.  MELPA does not read
+   `.elpaignore`.
 3. Verify locally in the melpa checkout: `make recipes/foo` and
    `make sandbox INSTALL=foo`.
 4. One pull request per package.  Its checklist asks for lint-clean
@@ -554,7 +557,8 @@ in a real frame under Xvfb:
   end is eaten by a trailing stretch glyph.
 - Record on the default theme, drive prompts with `cl-letf` on
   `completing-read`, and keep the driver script in `demo/` in the
-  repository, with `demo` and `img` listed in `.elpaignore`.
+  repository.  MELPA's default files spec leaves `demo/` and `img/`
+  out; list them in `.elpaignore` too, for GNU ELPA and package-vc.
 - For one pixel line art, encode at the frames' own size with
   `paletteuse=dither=none` and no `gifsicle --lossy`.  Scaling turns a
   one pixel line into two grey ones (measured: an edge column of 127

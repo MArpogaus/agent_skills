@@ -139,6 +139,11 @@ updates:
     schedule:
       interval: "weekly"
     target-branch: "dev"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
 ```
 
 ---
@@ -843,7 +848,7 @@ destroy diffs and merge conflicts become unresolvable.
 |----------|-------|---------|
 | `test.yaml` | push | matrix (ubuntu + windows) × Python 3.11–3.13 |
 | `pre-commit.yaml` | push | `pre-commit/action@v3.0.1` |
-| `docs.yaml` | push (branch/tag) | `pdoc -d numpy`, deploy to Pages |
+| `docs.yaml` | push to `main`, `dev`, `dev-*` | `pdoc -d numpy`, deploy to Pages |
 | `release.yaml` | push (tag) | build → PyPI + TestPyPI + GitHub Release |
 | `example.yaml` | push | run `examples/minimal.py` across Python versions |
 
@@ -925,9 +930,7 @@ jobs:
 name: Generate documentation using pdoc and deploy as gh page.
 on:
   push:
-    branches:
-    tags:
-    - '*'
+    branches: [main, dev, 'dev-*']
 permissions:
   contents: read
 jobs:
@@ -1015,6 +1018,11 @@ that group, and then the step fails with `Group 'docs' is not defined`.
 version: 2
 updates:
   - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"

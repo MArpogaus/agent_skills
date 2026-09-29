@@ -180,63 +180,9 @@ Use in text: `\gls{BNF}` (first use expands full form), `\glspl{BNF}`
 ### Python → PDF → LaTeX workflow
 
 Generate publication-quality figures in Python and include the
-resulting PDF in LaTeX:
-
-```python
-"""scripts/plot_reliability.py"""
-
-import matplotlib.pyplot as plt
-import numpy as np
-
-
-def plot_reliability(
-    forecasts: np.ndarray,
-    observations: np.ndarray,
-    *,
-    ax: plt.Axes | None = None,
-) -> plt.Figure:
-    """Plot reliability diagram.
-
-    Parameters
-    ----------
-    forecasts : np.ndarray
-        Predictive samples, shape ``(n_samples, n_timesteps)``.
-    observations : np.ndarray
-        Observed values, shape ``(n_timesteps,)``.
-    ax : plt.Axes | None, optional
-        Matplotlib axes, by default ``None`` (creates new figure).
-
-    Returns
-    -------
-    plt.Figure
-        The figure object.
-    """
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(8, 4.5))
-    else:
-        fig = ax.figure
-    # ... plotting logic ...
-    fig.tight_layout()
-    return fig
-
-
-if __name__ == "__main__":
-    fig = plot_reliability(...)
-    fig.savefig("figures/reliability_diagram.pdf", dpi=300)
-    fig.savefig("figures/reliability_diagram.png", dpi=150)
-    plt.close(fig)
-```
-
-### Colour palette for paper consistency
-
-| Role | Colour |
-|------|--------|
-| Observed data | `#333333` |
-| Predicted median | `#1f77b4` |
-| Reference / perfect line | `#d62728` |
-| Primary CI fill | `#1f77b4` with `alpha=0.25` |
-| Secondary CI fill | `#2c8ad4` |
-| Histogram bars | `steelblue` with white edge |
+resulting PDF in LaTeX.  Figure scripts follow the plotting pattern
+and the colour palette in the `python-dev` skill ("Matplotlib
+plotting"); `ml-project` says where the scripts and figures live.
 
 ### TikZ / PGFPlots for inline figures
 

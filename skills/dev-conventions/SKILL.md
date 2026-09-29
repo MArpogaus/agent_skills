@@ -79,11 +79,18 @@ not repeat them.
 - **Numbered options.**  Give findings and choices as a numbered
   list.  The user answers in short form (`1: yes, 2: drop, 3:
   explain`).  Keep the numbers stable until the list is done.
-- **Interviews.**  When the user says "ask me" or "interview me",
-  use the question tool (Claude Code: `AskUserQuestion`), one
-  decision at a time, with enough background to decide.
-- **Open questions go to the chat**, never into a code comment or a
-  doc.
+- **Ask open questions with the question tool.**  In an interactive
+  session, put every open question and every decision that is the
+  user's (open review findings, design choices, scope) to the user
+  with the question tool (Claude Code: `AskUserQuestion`).  Give
+  enough background to decide and a recommended option first.  Do
+  not end a report with a list of open questions instead.  Do the
+  same when the user says "ask me" or "interview me".
+- **Not in autonomous work.**  When the user is away (section 5), do
+  not ask and do not wait: continue with the best default and collect
+  the questions in the report or the notification channel.
+- **Never in code.**  An open question never goes into a code comment
+  or a doc.
 - **Plain explanations.**  When the user does not understand, explain
   the mechanism with a short example, not with more jargon.
 - **Outward text is a draft.**  Show issue replies, forum posts,
@@ -272,9 +279,10 @@ one at a time with the question tool.
 
 The user often leaves the agent alone for hours.
 
-- **Do not block on the user.**  Continue with the best default.
-  Collect decisions for the user in the report or the notification
-  channel, and work on something else meanwhile.
+- **Do not block on the user.**  Do not use the question tool.
+  Continue with the best default, collect decisions for the user in
+  the report or the notification channel, and work on something else
+  meanwhile.
 - **Notification channel.**  If the project has one (for example a
   push topic), post one or two sentences per milestone or decision,
   and poll it for replies.

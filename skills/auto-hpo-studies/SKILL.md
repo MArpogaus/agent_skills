@@ -288,7 +288,7 @@ After keeping: update the study log row with metrics and status
 `committed`:
 
 ```
-feat(hpo): <target-id> iter<N> — <param> <old>→<new> (val: <old>→<new>)
+feat(hpo): <target-id> iter <N>: <param> <old>→<new> (val: <old>→<new>)
 ```
 
 The commit body may contain notes about the diagnosis that led
@@ -310,7 +310,7 @@ If stopping criterion met:
 2. Clean up status files: `rm -f /tmp/hpo_<target-id>*`
 3. Commit:
    ```
-   feat(hpo): <target-id> — optimisation complete (val_loss: <best>)
+   feat(hpo): <target-id> done: best val_loss <best>
    ```
 4. Report results to the user.
 

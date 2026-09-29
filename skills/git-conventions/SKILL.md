@@ -171,13 +171,6 @@ Conventional commits:
 
 ```yaml
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.10
-    hooks:
-      - id: ruff
-        args: [--fix]
-      - id: ruff-format
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -198,7 +191,6 @@ repos:
         args: [--autofix, --indent, "2"]
       - id: pretty-format-toml
         args: [--autofix]
-        exclude: ^uv\.lock$   # uv owns it; formatting reorders the whole file
       - id: pretty-format-ini
         args: [--autofix]
 
@@ -211,8 +203,8 @@ repos:
         stages: [pre-push]
 ```
 
-The example is for a Python repo; the stack skill gives the hooks for
-other stacks.  `commitizen-branch` checks the messages in
+These hooks apply to every repo.  The stack skill adds its own (for
+example ruff in `python-dev`).  `commitizen-branch` checks the messages in
 `origin/HEAD..HEAD`.  A repo created locally and pushed later has no
 `origin/HEAD`; set it once with `git remote set-head origin -a`.
 
@@ -256,12 +248,13 @@ jobs:
 ## Dependabot
 
 `.github/dependabot.yml` — target `dev` branch for automated
-dependency PRs:
+dependency PRs.  Every repo watches its actions; the stack skill adds
+its package ecosystem (for example `pip` in `python-dev`):
 
 ```yaml
 version: 2
 updates:
-  - package-ecosystem: "pip"
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"

@@ -297,7 +297,9 @@ Add `mlruns/` to `.gitignore`.  Use `mlflow ui` to inspect runs.
 ## HPO study structure
 
 Document hyperparameter optimisation as a structured log in
-`hpo_study.md`.  Each phase is a single commit with results.
+`hpo_study.md`.  A manual study commits once per phase.  The
+autonomous loop (`auto-hpo-studies`) commits once per iteration
+instead, in its own format; that skill wins while it runs.
 
 ### Template
 
@@ -332,8 +334,8 @@ Document hyperparameter optimisation as a structured log in
 
 ### Conventions
 
-- One phase per commit with message:
-  `feat(hpo): <target> Phase <N> -- <summary>`
+- Manual studies: one phase per commit with message
+  `feat(hpo): <target> phase <N>: <summary>`
 - The commit body includes the markdown table from `hpo_study.md`.
 - File results from intermediate runs are cleaned up:
   `git rm -r results/*_v2 results/*_v3` before committing.
@@ -423,59 +425,11 @@ skill's CI split).
 All paper figures live in `figures/` at repo root.  Each figure
 has a script in `scripts/` that regenerates it.
 
-### Figure generation script pattern
+### Figure scripts and palette
 
-```python
-def plot_calibration(
-    forecasts: np.ndarray,
-    observations: np.ndarray,
-    *,
-    ax: plt.Axes | None = None,
-) -> plt.Figure:
-    """Plot reliability diagram.
-
-    Parameters
-    ----------
-    forecasts : np.ndarray
-        Predictive samples, shape ``(n_samples, n_timesteps)``.
-    observations : np.ndarray
-        Observed values, shape ``(n_timesteps,)``.
-    ax : plt.Axes | None, optional
-        Matplotlib axes, by default ``None`` (creates new figure).
-
-    Returns
-    -------
-    plt.Figure
-        The figure object.
-    """
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(8, 4.5))
-    else:
-        fig = ax.figure
-
-    # ... plotting logic ...
-
-    fig.tight_layout()
-    return fig
-
-
-if __name__ == "__main__":
-    fig = plot_calibration(...)
-    fig.savefig("figures/reliability_diagram.pdf", dpi=300)
-    fig.savefig("figures/reliability_diagram.png", dpi=150)
-    plt.close(fig)
-```
-
-### Color palette (for paper consistency)
-
-| Role | Colour |
-|------|--------|
-| Observed data | `#333333` |
-| Predicted median | `#1f77b4` |
-| Reference / perfect line | `#d62728` |
-| Primary CI fill | `#1f77b4` with `alpha=0.25` |
-| Secondary CI fill | `#2c8ad4` |
-| Histogram bars | `steelblue` with white edge |
+Each figure script follows the plotting pattern and the colour
+palette in the `python-dev` skill ("Matplotlib plotting"), and its
+`__main__` block saves the figure into `figures/`.
 
 ### README.org for paper reproduction
 
