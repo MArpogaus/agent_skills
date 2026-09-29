@@ -275,6 +275,7 @@ testpaths = ["test"]
 
 ```toml
 [tool.commitizen]
+annotated_tag = true
 major_version_zero = true
 name = "cz_conventional_commits"
 tag_format = "v$version"
