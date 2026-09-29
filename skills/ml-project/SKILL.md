@@ -541,7 +541,7 @@ python scripts/hpo.py \
 - Earlier projects in the group are the best reference; look for one
   that already solved the same piece:
   - a forecasting project — clean DVC `foreach`, Feather I/O, HPO study logs
-  - a published library — CI/CD, pdoc docs, experiment separation
+  - a published library — CI/CD, MkDocs docs, experiment separation
   - a graph-model project — DVC `foreach` with PyTorch Lightning
 
 ---
