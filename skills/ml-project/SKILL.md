@@ -86,7 +86,7 @@ in `__init__.py`:
 from <package> import distributions as _distributions
 
 # Register the custom parameterisation into the upstream package
-import <upstream-package>.distributions  # noqa: F811
+import <upstream-package>.distributions  # noqa: F401
 ```
 
 This ensures the monkey-patch runs once when the package is
@@ -99,6 +99,8 @@ imported, before any model construction code executes.
 ### params.yaml — global configuration
 
 ```yaml
+targets: [<target-a>, <target-b>]
+
 data:
   raw_path: "data/raw"
   processed_path: "data/processed"
@@ -168,6 +170,7 @@ stages:
           --outdir results/${item}
       deps:
         - data/processed/${item}
+        - params/${item}.yaml
         - scripts/train.py
         - src/<package>/models.py
       params:
