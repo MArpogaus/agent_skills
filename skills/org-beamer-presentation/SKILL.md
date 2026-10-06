@@ -310,6 +310,38 @@ tools/contact-sheet.py "<file>.pdf" /tmp/sheet   # then READ every sheet
 - Render any figure you generated on its own too, at 120 dpi or better.
   A defect that is invisible in a slide thumbnail is obvious there.
 
+## 7a1. A literate deck: figures and tables from src blocks
+
+A deck can compute its own numbers. Put the shared imports in a
+`#+name: setup` block with `:eval no`, pull it into each block with
+`<<setup>>` and `:noweb yes`, and run the file once with
+`org-babel-execute-buffer` before exporting. Header line:
+
+```
+#+PROPERTY: header-args:python :python <venv>/bin/python :eval never-export
+   :exports results :results output drawer :noweb yes
+```
+
+- **Never use `:results file` for a figure.** Org writes the block's
+  return value *into* the file you named, so the saved PDF is replaced
+  by a line of text and the export dies on `reading image failed`.
+  Print the org instead, from a `:results output drawer` block:
+  `print("#+ATTR_LATEX: :width \\linewidth")` then
+  `print(f"[[file:{path}]]")`. A drawer exports its contents, so the
+  same trick carries tables: print the `#+ATTR_LATEX:` line and the org
+  table rows.
+- **`-l ob-python` is required** in a headless run; `-l org` alone gives
+  `No org-babel-execute function for python`.
+- **A failed block leaves a half-filled drawer**, because stdout up to
+  the exception is still captured. Check for `code 1` in the babel
+  output and look for short drawers; a header row with no body is the
+  signature.
+- **Watch for column names that collide with the dataframe API.** A
+  column called `iat` is reached by `frame["iat"]` only: `frame.iat` is
+  pandas' scalar indexer and silently returns that instead.
+- **A line that begins with a number and a period becomes a list item.**
+  Reflow so a wrapped sentence never starts `1435. The …`.
+
 ## 7b. Figures for a dark 16:9 deck
 
 Everything here was a real defect found by looking:
@@ -338,6 +370,25 @@ Everything here was a real defect found by looking:
   background is about `#23373B`; a node filled with the same colour
   vanishes. Keep figure backgrounds transparent and pick fills against
   the slide, not against white.
+- **Draw on the slide, not in a white box on it.** Set the whole figure
+  transparent and lift its furniture once, through rcParams:
+  `savefig.transparent`, `figure.facecolor`/`axes.facecolor`/
+  `savefig.facecolor` to `"none"`, and `text.color`, `axes.labelcolor`,
+  `axes.edgecolor`, `axes.titlecolor`, `xtick.color`, `ytick.color` to a
+  near-white. Then hunt the colours rcParams cannot reach: an explicit
+  `color=` on a grid, a marker `mec="white"`, a `bbox` facecolor.
+- **A figure from a library needs recolouring, not rcParams.** A plot
+  drawn by someone else's function paints node fills light and labels
+  dark. Walk the returned axes: drop every non-arrow patch's facecolor,
+  lift any artist whose colour is dark, and clear each text's
+  `get_bbox_patch()` — a label's own box is not in `ax.patches`.
+- **Sum nothing that is not comparable.** A per-epoch loss summed over
+  nodes puts a five-node and a six-node model on different scales, so no
+  zoom can compare them. Plot the one node the deck reads instead.
+- **A zoom on a noisy series shows the noise.** Give the full range one
+  panel, often on a log axis, and the settled range a second; in the
+  second plot a rolling mean of the validation series, not the raw
+  per-epoch train curve.
 - **State what a band or a dot is, in the figure.** If a reader has to
   ask what the grey band means, the figure is not finished. Prefer a
   labelled span from min to max over a scatter of unlabelled dots when
