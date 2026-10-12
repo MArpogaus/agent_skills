@@ -149,6 +149,12 @@ Some of these stop the compile, which is the easy case. The dangerous
 ones below compile cleanly and put the wrong thing on the slide — a
 drawer as body text, a table row split in two. Only §7a catches those.
 
+- **No `babel` for the language.** Under lualatex his Emacs loads
+  `polyglossia` and `\setmainlanguage` from `#+language:` itself. A
+  `\usepackage[ngerman]{babel}` beside it stops his export with
+  `Command \defineshorthand already defined` and `Incomplete \iffalse`.
+  An `emacs -Q` export loads no polyglossia and hides this; the
+  headless command in §7 sets his package list for that reason.
 - **Math is LaTeX, always.** The header loads `unicode-math` under
   lualatex, so a Unicode math character in *text* mode (β, ≈, →, ≤, ×,
   −, ², ≙) raises `Missing $ inserted`. Write `$\beta_{12} = 2$`,
@@ -275,6 +281,9 @@ environment; `<test rig>/rig tex` reinstalls TeX Live. Then:
 emacs -Q --batch -l org -l ox-beamer \
   --eval '(setq enable-local-variables :all
                 org-latex-remove-logfiles nil
+                org-latex-packages-alist
+                (quote (("" "xcolor" t) ("" "listings" t)
+                        ("AUTO" "polyglossia" t ("xelatex" "lualatex"))))
                 org-latex-pdf-process
                 (list "latexmk -f -pdf -%latex -interaction=nonstopmode \
                        -output-directory=%o %f"))' \
