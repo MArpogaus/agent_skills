@@ -172,6 +172,14 @@ drawer as body text, a table row split in two. Only §7a catches those.
   the line — inside a table that eats the row separator and the next row
   merges, raising `Extra alignment tab has been changed to \cr`. Write a
   plain `%`.
+- **Tighten a list through `:environment`, not by hand.** ox-beamer
+  reads only `:environment`, `:overlay` and `:options` on a list, and
+  `:options` is no spacing. Define the list once in the header,
+  `\newenvironment{tightitemize}{\begin{itemize}\setlength{\itemsep}{-2pt}}{\end{itemize}}`,
+  and put `#+ATTR_BEAMER: :environment tightitemize` above each list.
+  Three stacked blocks of three bullets need it: at the default
+  spacing they run about 30pt past the slide; a smaller font barely
+  helps.
 - **No `*bold*` inside a `p{}` table column.** Org exports bold as
   `\alert{}`, which beamer starts on a new line inside a paragraph
   column, so the label drops below its own numbers. Use an `l` column for
