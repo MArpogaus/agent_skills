@@ -91,6 +91,10 @@ sit beside the org file. Never edit the `.tex`.
 
 - `* Section` → `\section`, and the `\AtBeginSection` hook auto-emits a
   TOC frame highlighting it. Do not write agenda frames by hand.
+- A short talk with a slide limit (one frame per section) drops the
+  hook and adds `sectionpage=none` to the metropolis options: metropolis
+  emits its own section page for every `\section` too, so four sections
+  would add eight frames.
 - `** Frame title` → one frame. No `#+BEAMER:` scaffolding needed.
 - `*** Name :BMCOL:` / `:B_block:` / `:B_onlyenv:` → environments
   inside the frame, see `templates/layouts.org`.
