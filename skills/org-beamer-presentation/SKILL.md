@@ -251,7 +251,21 @@ Figure captions name their source: `#+CAPTION: … Figure from
 
 ## 7. Export
 
-Export from Emacs (`C-c C-e l P`), or headless:
+Export from Emacs (`C-c C-e l P`), or headless.
+
+**In the agent sandbox** neither `emacs` nor `lualatex` is on `PATH`.
+Use the emacs.d test rig in `<test rig>`: its conda environment `env/bin`
+holds Emacs, `latexmk`, `pdfinfo`, `pdftoppm` and `pdftotext`, and its
+TeX Live `tex/bin/x86_64-linux` holds `lualatex`, `biber` and
+metropolis. Put both in front of `PATH`, TeX first, so its `kpsewhich`
+wins:
+
+```bash
+export PATH=<test rig>/tex/bin:<test rig>/env/bin:$PATH
+```
+
+If `<test rig>/env/bin/emacs` does not start, `<test rig>/rig setup` rebuilds the
+environment; `<test rig>/rig tex` reinstalls TeX Live. Then:
 
 ```bash
 emacs -Q --batch -l org -l ox-beamer \
