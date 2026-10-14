@@ -110,11 +110,35 @@ Conventions that hold across all existing talks:
 - **Sober tone.**  No punch lines, no sensational titles, no aphorism
   blocks, no pay-offs revealed by overlay.  Read earlier decks of the
   same kind first and follow their tone.
-- 3–6 bullets per frame, `*bold lead-in* followed by the point`.  The
-  lead-in names the subject ("Data", "Training"); it is never a teaser
-  such as "The catch:".
+- **Density follows the audience.** An internal fact deck is verbose and
+  self-explanatory: 3–6 bullets, `*bold lead-in* followed by the point`,
+  the lead-in naming the subject ("Data", "Training"), never a teaser
+  such as "The catch:". A talk for an outside audience (clinicians,
+  partners, a retreat) lets the figures speak: at most 3–4 short plain
+  statements per frame, no bold lead-ins, and no frame of pure text
+  with more than three points.
+- **Text does not repeat the figure.** A number the figure shows is not
+  restated beside it; the text says what the figure cannot: the setting,
+  the reading, the caveat.
+- **Plain statements.** No semicolons, no arrows, no one-item lists (a
+  single line needs no bullet), no "previously" or version history: show
+  the current state. Spell out jargon for the audience ("neural
+  network", not "network").
+- **No overlay reveals** (`BEAMER_act`) by default; show everything at
+  once. Overlays only for a deliberate build, such as a figure sequence.
+- **Never invent content.** Numbers and claims come from the sources or
+  the run; anything schematic says so on the slide. Ask before adding
+  what the sources do not hold.
+- **Orthography of the deck's language**: a German deck writes ß, not
+  the Swiss ss, except in official names.
 - A frame is either mostly figure or mostly text; the standard shape is
-  a 0.4/0.6 or 0.5/0.5 two-column split of the two.
+  a 0.4/0.6 or 0.5/0.5 two-column split of the two, figure left at
+  0.55–0.62 for results.
+- **Fewer, contrasting examples.** Two DAGs with the largest difference,
+  drawn at one shared scale, beat six small ones.
+- **Entity grids** (partners, projects): one block per entity, title
+  `[[url][Name]] (place)`, two or three labelled lines (`*Idee:*`,
+  `*Status:*`) joined with `\\`, the same fields in every block.
 - Sections follow the paper arc: Motivation → Methodology → Results →
   Conclusion, then `Thanks`, then `Appendix`, then `References`.
 - `:noexport:` on a heading parks a slide without deleting it. Use it
@@ -376,10 +400,36 @@ A deck can compute its own numbers. Put the shared imports in a
   pandas' scalar indexer and silently returns that instead.
 - **A line that begins with a number and a period becomes a list item.**
   Reflow so a wrapped sentence never starts `1435. The …`.
+- **A block must never print an Org heading.** A printed `*** Col
+  :BMCOL:` ends the results drawer: the next run appends a second copy
+  and the stale headings stay in the file. For columns, print beamer
+  export blocks (`\begin{columns}[T]` … `\end{columns}`) through two
+  small helpers, `column(width, first)` and `end_columns()`.
+- **Cache the data in the sidecar.** One `collect` block copies the run's
+  numbers into CSVs beside the figures, and every other block reads only
+  those, so the deck rebuilds after the scratch results are gone. When
+  results are still pending, build the frames to fill themselves at
+  export time, and mark a stale result (older than its config) with a
+  dagger.
 
 ## 7b. Figures for a dark 16:9 deck
 
 Everything here was a real defect found by looking:
+
+- **Few colours.** Prefer the theme's own: foreground `#E8EDEE` and
+  accent `#EB811B` on the `#23373B` surface, with line style and marker
+  carrying the distinction. Where more are needed, give each category
+  (data set, cohort, model family) one colour for the whole deck and
+  check it for colour-blind readers
+  (`validate_palette.js --mode dark --surface "#23373B"`).
+- **A shared legend goes in figure coordinates**:
+  `fig.legend(..., bbox_transform=fig.transFigure)`. An axes-fraction
+  `bbox_to_anchor` fights `tight_layout(rect=...)`.
+- **A log axis needs a clip floor** for values that reach zero; label
+  that tick for what it is, not `0`.
+- **Sizes**: a full-width strip about 5.5 x 1.3–2.2 in, a figure beside
+  text about 5.2–6.4 x 3.3–3.9 in; no text under about 6.5 pt after
+  scaling.
 
 - **Add a legend entry once, not once per panel.** A label passed inside
   a per-axis loop is added once per axis; three copies stack and cover
@@ -429,6 +479,13 @@ Everything here was a real defect found by looking:
   labelled span from min to max over a scatter of unlabelled dots when
   the reader cannot tell which comparison a dot belongs to.
 
+## 7c. Review loop
+
+Look at every page after every build (§7a), then end with a numbered,
+critical review of the deck: one line per problem, so the author can
+accept items by number ("1, 3, 6 anpassen"). On a tight budget, one
+build and one contact-sheet read replace reviewer subagents.
+
 ## 8. Checklist
 
 - [ ] Design chosen **by asking the user**, one theme stanza kept
@@ -452,6 +509,9 @@ Everything here was a real defect found by looking:
       for the deck, and each generated figure on its own
 - [ ] No legend duplicated, overlapping a title, or keyed in the wrong
       colour; no marker hidden under another
+- [ ] Density matches the audience; no text repeats a figure's numbers;
+      no semicolons, arrows or one-item lists
+- [ ] Numbered review list handed over
 
 ## Required skills
 
