@@ -31,14 +31,31 @@ not repeat them.
 
 ## 1. Design principles
 
-- **The simplest thing that works.**  Every file, function, branch,
-  option and line must fight for its life.  If it has no clear
-  reason to exist, delete it.
+The simplest solution wins.  This is the first rule and it overrules
+taste, habit and "best practice".  The user corrects over-engineering
+more than anything else.
+
+- **Justify every addition.**  Before you add a file, class, option,
+  flag, script, dependency, stage or code path, name the simpler
+  alternative: delete it, reuse existing machinery, write a config, or
+  write one more line in an existing place.  Use the simpler one
+  unless you can say why it fails.  Say the alternative in your reply
+  when the choice is not obvious.
+- **Every file and line fights for its life.**  If it has no clear
+  reason to exist, delete it.  Deletion beats addition.  A change that
+  removes code is better than one that adds code for the same result.
 - **Do not reinvent.**  Before you write code, look for the feature
   in this order: the repo, the standard library, the platform
   (systemd, the editor, the framework), a stock or upstream module,
   an installed dependency.  A reimplementation of existing machinery
   is a defect, even when it works.
+- **No special treatments.**  No registries, mixins, plugins, generic
+  frameworks or wrapper scripts for one use.  No class where a
+  function does the job.  No generator that writes a file you can
+  write by hand (no Org from Org, no script that wraps one command).
+- **Scripts stay dumb.**  A script does one thing with explicit
+  arguments.  No mode switches: write one config or one script per
+  variant.  Duplication there is fine.
 - **No code for rare edge cases.**  Do not re-validate the arguments
   of the library below you; let it fail with its own error.  No
   magic, no hacks, no surprising handling of a misconfiguration.  If
