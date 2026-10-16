@@ -39,6 +39,8 @@ metadata: {stack: emacs, requires: [dev-conventions, emacs-package, git-conventi
 - Org blocks can be evaluated with `:lexical no`. Avoid closures that
   capture locals. Pass arguments through `run-with-timer`,
   `apply-partially`, or global or buffer-local state.
+- Arm the review monitor with `REVIEW_SKIP='*.md'`: `emacs.org` holds
+  the code.
 
 ## Repo layout and style
 
