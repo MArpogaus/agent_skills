@@ -28,7 +28,7 @@ memory of yours.
 ## findings.md
 
 When the user wants the review written down, write `findings.md` in
-the repo root. It is a handoff file, not a plan that waits for approval:
+the repo root. It is a report file, not a plan that waits for approval:
 
 - Never commit it: list it in `.git/info/exclude` (or in the repo's
   `.gitignore` if that file already ignores it).
@@ -45,7 +45,8 @@ time with the question tool.
 
 - **Rewritten history** (an amend or a rebase of local commits) resets
   the range to the merge base. The monitor then reviews the rewritten
-  commits again.
+  commits again. When the stored commit no longer exists, the monitor
+  restarts from the current head.
 - **Pushed work in several repos:** the same loop can read the remote.
   Use `gh api repos/OWNER/REPO/commits/BRANCH -q .sha` for the tip and
   `gh api repos/OWNER/REPO/compare/OLD...NEW` for the files and lines.

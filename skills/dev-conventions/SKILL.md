@@ -26,8 +26,8 @@ branch, attribution and the report format.
 ## Hard rules
 
 - **Justify every addition.** Before you add a file, option, script,
-  dependency, stage or code path, name the simpler alternative (delete,
-  reuse, a config, one line). Use it unless it fails. State it when the
+  dependency, stage or code path, name the simpler alternative: delete,
+  reuse, a config or one line. Use it unless it fails. State it when the
   choice is not obvious.
 - **Deletion beats addition.** Delete what has no clear reason to exist.
 - **Do not reinvent.** Look in the repo, the standard library, the
@@ -39,7 +39,6 @@ branch, attribution and the report format.
 - **Run it and look at it before you report.** Never report "fixed" on
   reasoning. Screenshot what draws (UI, plots, slides, GIFs) in each
   theme and mode the project supports.
-- **No AI attribution:** see `git-conventions`, "Hard rules".
 - **Never touch the user's environment:** no project environment, lock
   file or package changes. Report a package that the project
   environment lacks. Safe commands: the stack skill (`python-dev`,
@@ -124,8 +123,8 @@ The simplest solution wins, over taste, habit and "best practice".
 - **Never in code:** no open question in a comment or a doc.
 - **Outward text is a draft.** Show issue replies, posts, emails and
   pull request texts to the user before you send them. No emojis, no
-  marketing. Exception: no draft is needed for an issue in a repo that
-  the user owns when it records a blocker or the user asked for it.
+  marketing. Exception: an issue in a repo that the user owns needs no
+  draft when it records a blocker or the user asked for it.
 - **Plain text deliverables:** reports and analyses are Markdown in the
   chat. Make no HTML page, artifact or chart unless the user asks for
   one.
