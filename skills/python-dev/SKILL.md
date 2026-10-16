@@ -35,18 +35,16 @@ or docs configuration.
 - Use setuptools. Do not use hatchling.
 - Do not accept a keyword argument that the function does not use.
   Do not add `**kwargs` "for later".
-- Apply each generic config change to the skeleton too (section
-  "Project setup").
+- Apply each config change that fits every project (hook revisions,
+  CI, ruff rules) to the skeleton too (section "Project setup").
 
 ## Design
 
 These rules extend the principles in `dev-conventions`.
 
-- Write functions. Write a class only when state and behaviour
-  really belong together.
-- Use built-ins before custom machinery. Select an implementation
-  with `getattr` or an `importlib` dotted path, not a registry.
-  Check subclasses with `__init_subclass__`, not with a metaclass.
+- Select an implementation with `getattr` or an `importlib` dotted
+  path. Check subclasses with `__init_subclass__`, not with a
+  metaclass.
 - Annotate every function signature. Use `X | None` and `list[X]`.
 - Do not use `ty`.
 
@@ -62,10 +60,10 @@ When the skeleton and this skill disagree, this skill is correct.
 3. Adapt the metadata, the package directory and the dependencies.
    Commit on `dev`.
 
-A generic config change (hook revisions, CI, ruff rules) also goes to
-the skeleton, for example `chore: bump pre-commit ruff rev`. When the
-skeleton checkout is mounted, apply the change there as a separate
-commit. Otherwise list it under "Open".
+For the skeleton change, use a message such as
+`chore: bump pre-commit ruff rev`. When the skeleton checkout is
+mounted, apply the change there as a separate commit. Otherwise list
+it under "Open".
 
 Layout:
 
@@ -100,7 +98,7 @@ dependencies = []  # keep minimal
 [project.optional-dependencies]
 test = ["pytest", "pytest-xdist"]
 docs = ["mkdocs-material", "mkdocstrings[python]", "mike"]
-develop = ["<package>[test]", "commitizen", "pre-commit", "ruff"]
+develop = ["<hyphenated-name>[test]", "commitizen", "pre-commit", "ruff"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -161,9 +159,10 @@ The environment and the lock file belong to the user. `uv run` and
 `uv sync` re-sync `.venv` and can replace the interpreter under a
 running kernel.
 
-- Run code and tests with `.venv/bin/python`. Install nothing into
-  it. Without `.venv`, use the system `python3`.
-- Report a missing package. Do not install it.
+- Run code and tests with `.venv/bin/python`. Without `.venv`, use
+  the system `python3`.
+- Install nothing into the project `.venv`. Report a package that the
+  project `.venv` lacks. A tool for your own use follows `sandbox-env`.
 - `uv.lock` is committed. `.envrc` holds `layout python` for direnv.
 
 ## Docstrings
@@ -179,8 +178,6 @@ docstring. Ruff `D` checks presence and form.
   write `type, optional` and end with `by default <value>.`
 - Write mathematics in LaTeX: `:math:` inline, `.. math::` for a
   block.
-- Put no examples, tutorials or background in a docstring or on an
-  API page.
 
 ## Notebooks
 
@@ -204,7 +201,7 @@ output and regenerate it in the same commit as its `.py`.
 
 | Workflow | Trigger | Job |
 |---|---|---|
-| `test.yaml` | push, PR | ubuntu, windows, macos, each with the oldest and newest supported Python (now 3.11 and 3.14); `-m "not slow"` |
+| `test.yaml` | push, PR | ubuntu, windows, macos, each with the oldest supported Python (`requires-python`) and the newest Python release; `-m "not slow"` |
 | `test.yaml` | nightly cron, `workflow_dispatch` | full suite, `timeout-minutes` set |
 | `pre-commit.yaml` | push | `pre-commit/action` |
 | `docs.yaml` | push to `main`, `dev`, `dev-*` | MkDocs with mike to `gh-pages` |
@@ -228,6 +225,10 @@ branch to `gh-pages`.
   `::: <package>.<module>`.
 - Set GitHub Pages to branch `gh-pages`, path `/ (root)`. A `/docs`
   path fails the build.
+- Keep one `.bib` file, rendered in the docs in author-year style.
+  Cite in a docstring only when the function implements that
+  reference. Put no citations in configs. Background and references
+  go to the guide pages in `docs/`.
 
 ## README.org
 
@@ -237,8 +238,7 @@ branch to `gh-pages`.
 - Structure, after the Best-README-Template: badges, title, local
   TOC, About The Project, Getting Started (Installation, Usage),
   Contributing, License, Contact.
-- The only code block is the install command, `uv add <package>`.
-  Usage links to the demo notebook in `notebooks/` with a full
+- The install command is `uv add <package>`. Usage links to the demo notebook in `notebooks/` with a full
   GitHub URL.
 
 ## Figures
@@ -246,6 +246,8 @@ branch to `gh-pages`.
 - A plot function accepts an optional `ax`, creates a figure only when
   `ax` is `None`, and returns the `plt.Figure`.
 - The caller saves PDF and PNG and then calls `plt.close(fig)`.
+- Put a shared legend above the axes with `fig.legend`, never inside
+  an axes.
 - Write labels with mathematics in LaTeX, for example
   `r"$\sigma^2$"`.
 - Colours follow the target medium. For a slide deck, use the theme
