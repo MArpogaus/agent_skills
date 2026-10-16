@@ -57,3 +57,4 @@ All skills are licensed under MIT — see =LICENSE=.
 | selfhosted             | Self-hosting on CoreOS: Ansible with run0 become, rootless podman quadlets, repo split, VM-first tests, root gate |
 | gtd                    | The Org agenda routine: capture, day review, inbox triage, retro and journal, weekly review |
 | session-finish         | End-of-session cleanup: jobs, leftovers, final review, git state, agenda, lessons, report |
+| sandbox-env            | Dev tools for the agent in its own home: uv, micromamba with conda-forge, nix when present |
