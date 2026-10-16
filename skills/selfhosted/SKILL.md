@@ -129,9 +129,8 @@ with a screenshot.
 ## Releases and CI
 
 - Pin actions as git-conventions, "CI workflows" says.
-- Dependabot updates actions and pre-commit hooks (git-conventions,
-  "Dependabot"). In service repos,
-  Renovate (`.github/renovate.json`, a regex manager over the `*_image`
+- Dependabot updates actions, and pre-commit hooks follow
+  git-conventions, "Pre-commit hooks". In service repos, Renovate (`.github/renovate.json`, a regex manager over the `*_image`
   defaults) opens image update PRs against `dev`.
 - The user tags service repos by hand with the upstream version:
   <service> uses the <service> major (`35`, then `35.1`), bunker the
