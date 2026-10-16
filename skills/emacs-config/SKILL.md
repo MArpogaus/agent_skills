@@ -14,7 +14,7 @@ metadata: {stack: emacs, requires: [git-conventions]}
 
 # Skill: Emacs Config (MArpogaus/emacs.d)
 
-## Cardinal rules
+## Hard rules
 
 - **`emacs.org` is the single source of truth.** `lisp/*.el`, `init.el` and `early-init.el` are tangled artifacts: never edit them. Tangle only when the user asks for it ("retangle", "you may tangle"). Otherwise the user tangles.
 - **No test files.** Do not create `test/` or ERT suites.
@@ -26,7 +26,7 @@ metadata: {stack: emacs, requires: [git-conventions]}
 
 - Literate config, `#+PROPERTY: header-args :mkdirp yes :comments org`. Each `***` section sets `:header-args+: :tangle lisp/my-<name>.el`. `README.org` is a symlink to `emacs.org`.
 - Package manager: elpaca and use-package. Style: `:preface` for defuns, defvars and defaces, then `:custom`, `:bind`, `:hook`, `:config`. Built-ins get `:ensure nil`. Do not add `:ensure t`. Generic config lives in `(use-package emacs :ensure nil ...)` blocks.
-- Loading: every package loads through its own `use-package` block. No `use-package` inside another form, and never a `require` or another loading path as a fallback. Global modes start with `:hook (elpaca-after-init . foo-mode)`. Use `with-eval-after-load` only for code that needs a package that is not loaded yet. A window rule stays in the `auto-side-windows` block.
+- Loading: every package loads through its own `use-package` block. No `use-package` inside another form, and never a `require` or another loading path as a fallback. Global modes start with `:hook (elpaca-after-init . foo-mode)`. Use `with-eval-after-load` only for code that needs a package that is not loaded yet. A window rule stays in the `auto-side-windows` block. A hook that needs a depth keeps `add-hook` in `:init`.
 - Naming: commands and helpers `my/...` (internals `my/foo--bar`), faces `my/...-face`.
 - Modal editing is **meow**. Normal state shadows plain single-key bindings in mode maps, so never define speed keys. Use modified keys (the `<return>` family, `C-<up>/<down>`) and repeat-maps under the leader (`my/leader-map`, for example `SPC j` → `my/code-cells-repeat-map`), as in `my/debug-map`. Do not add `C-c` prefix bindings.
 - Side windows come from the user's `auto-side-windows` package: buffer-name and mode lists per side. The window parameter `header-line-format` drives the custom header (`my/header-line-format-top`).
@@ -49,7 +49,7 @@ Keep one copy of the code. The org block is a `use-package` block that configure
 
 ## Git flow
 
-- `main` holds `chore: init` and `--no-ff` merges from `dev`. Commits go to `dev`. Push over HTTPS (see git-conventions).
+- Git flow as `git-conventions`; merges into `main` use `--no-ff`.
 - Conventional commits, one concern each. Agent work commits contain **emacs.org only**.
 - Tangled files go into a separate `chore: tangle` commit. When the user allowed tangling, the agent makes this commit. Otherwise the user does.
 - To split mixed changes, build intermediate `emacs.org` states by splicing org subtrees (headline to next `**** `) between the committed and the working version. Commit each state.
