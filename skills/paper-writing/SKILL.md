@@ -26,8 +26,8 @@ submission. For a revision, use `latex-paper-revision`.
   `\TODO{...}`.
 - A new paper puts sections in `tex/` and figures in `gfx/`. An
   existing draft keeps its directory names.
-- Before a submission, `pdftotext main.pdf - | grep -c 'TODO:'`
-  prints `0`.
+- Before `compile.sh` or a submission, build `main.pdf` with `latexmk`.
+  Then `pdftotext main.pdf - | grep -c 'TODO:'` prints `0`.
 - Load `biblatex` or `\bibliography`, never both.
 - Take the class options from the venue template. Never guess them.
 - Compile before each commit and check that the log has no undefined
