@@ -83,8 +83,8 @@ Use the first row that fits.
   `micromamba install -y -n <project> -c conda-forge <pkg>`.
 - Run a command in the env without activation:
   `micromamba run -n <project> <command>`.
-- Pin versions that the project pins, for example `rust=<ver>` from
-  `rust-toolchain.toml`.
+- Pin versions that the project pins. Rust: see `rust-dev`, "Toolchain
+  and environment".
 - Use `micromamba` for every conda command.
 
 ### nix
@@ -92,7 +92,8 @@ Use the first row that fits.
 - Use nix only when `command -v nix` finds it or `~/.nix-profile`
   exists.
 - One command: `nix shell nixpkgs#<pkg> -c <command>`. A tool for
-  more than one session: `nix profile install nixpkgs#<pkg>`.
+  more than one session: `nix profile add nixpkgs#<pkg>` (older nix:
+  `nix profile install`).
 
 ### Downloaded binary or tarball
 
@@ -132,7 +133,7 @@ session reads this entry and reuses the env.
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: design principles, verification, review
   loop, code and documentation style.
