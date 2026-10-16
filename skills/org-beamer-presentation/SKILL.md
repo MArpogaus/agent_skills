@@ -48,8 +48,8 @@ message.
 
 ## 1. Before writing
 
-Read two of the user's earlier decks in `<presentations dir>`,
-the newest first, plus one of the same talk type. Their density is the
+Read the two newest decks in `<presentations dir>`. When neither is of
+the same talk type, also read the newest deck of that type. Their density is the
 target: about 20 words per frame, one figure and 1 or 2 short bullets.
 
 Ask for the talk length and the audience when the request does not
@@ -82,11 +82,10 @@ complexity per frame. A frame is mostly figure or mostly text. For a
 figure beside text, use a 0.55/0.45 or 0.5/0.5 column split with the
 figure on the left. Text does not repeat numbers that the figure
 shows. Use `:noexport:` to park a frame. Lines that start with `# `
-inside a frame are the user's speaker prose: do not change them. A
-German deck writes ß, not ss.
+inside a frame are the user's speaker prose: do not change them.
 
-**Scope.** The hard rules apply to talks. An internal fact deck that
-the user asks for is exempt from the time budget and may hold up to 6
+**Scope.** The hard rules apply to every deck. An internal fact deck
+that the user asks for has two exceptions: no time budget, and up to 6
 bullets per frame. Every deck is self-contained with its own sidecar
 folder. Copy a figure from another deck when necessary.
 
@@ -112,8 +111,8 @@ a `#+MACRO` (stanza in `header-extras.org`) and write
 another Org file.
 
 **Export in the agent sandbox.** `emacs` and `lualatex` are not on
-`PATH`. Use `<test rig>`. Put TeX
-first, so that its `kpsewhich` wins:
+`PATH`. Use `<test rig>`. Put TeX first, so that its `kpsewhich`
+wins:
 
 ```bash
 export PATH=<test rig>/tex/bin/x86_64-linux:<test rig>/env/bin:$PATH

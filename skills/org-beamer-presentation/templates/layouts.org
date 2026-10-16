@@ -10,7 +10,7 @@ One figure and at most two short lines. Plain lines need no bullets
 when there is only one.
 
 #+begin_src org
-,#+ATTR_LATEX: :width \linewidth
+,#+ATTR_LATEX: :width \linewidth :height 0.7\textheight :options keepaspectratio
 [[file:<figure>.pdf]]
 
 - <line of at most 12 words> [cite:@Key]
@@ -26,7 +26,7 @@ Figure left, text right. Org wraps consecutive =:BMCOL:= siblings in
 :PROPERTIES:
 :BEAMER_col: 0.55
 :END:
-,#+ATTR_LATEX: :width \linewidth
+,#+ATTR_LATEX: :width \linewidth :height 0.7\textheight :options keepaspectratio
 [[file:<figure>.pdf]]
 
 ,*** Text :BMCOL:
@@ -46,14 +46,14 @@ two.
 :PROPERTIES:
 :BEAMER_col: 0.5
 :END:
-,#+ATTR_LATEX: :width \linewidth
+,#+ATTR_LATEX: :width \linewidth :height 0.7\textheight :options keepaspectratio
 [[file:<example-a>.pdf]]
 
 ,*** B :BMCOL:
 :PROPERTIES:
 :BEAMER_col: 0.5
 :END:
-,#+ATTR_LATEX: :width \linewidth
+,#+ATTR_LATEX: :width \linewidth :height 0.7\textheight :options keepaspectratio
 [[file:<example-b>.pdf]]
 #+end_src
 

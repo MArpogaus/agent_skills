@@ -8,7 +8,7 @@
 #+identifier: <YYYYMMDDTHHMMSS>
 
 #+SUBTITLE: <optional subtitle>
-#+AUTHOR: <Author> \and <Co-Author>
+#+AUTHOR: <Author>
 
 #+STARTUP: beamer show2levels indent
 #+OPTIONS: TeX:t LaTeX:t H:2 toc:nil date:nil
@@ -43,7 +43,7 @@
 
 * <Section>
 ** <Frame title>
-#+ATTR_LATEX: :width \linewidth
+#+ATTR_LATEX: :width \linewidth :height 0.7\textheight :options keepaspectratio
 [[file:<figure>.pdf]]
 
 <one short line, no bullet>
