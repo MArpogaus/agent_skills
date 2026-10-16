@@ -129,9 +129,8 @@ A deck can compute its figures and tables in Python `src` blocks.
 - **Scaling shrinks text.** A 1200pt-wide graphviz graph at `\linewidth`
   scales to 0.33, so 11pt labels become 4pt. Shorten the labels or raise
   the font size.
-- **Legends.** Put a shared legend at the top of the figure
-  (`fig.legend`), never inside an axes. In a per-axis loop, add the label on
-  the first axis only. An empty artist such as `ax.bar([], [])` draws no
+- **Legends.** Place the legend as `python-dev` ("Figures") says. In
+  a per-axis loop, add the label on the first axis only. An empty artist such as `ax.bar([], [])` draws no
   key colour, so use `matplotlib.patches.Patch` proxies.
 - **Overlap.** Never overlay two translucent histograms. Draw them side
   by side on shared bins. Give series that coincide their own offset

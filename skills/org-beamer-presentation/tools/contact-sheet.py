@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Tile a deck's pages into numbered sheets, so every page gets looked at.
 
-    tools/contact-sheet.py deck.pdf /tmp/sheet [cols] [rows]
+    tools/contact-sheet.py deck.pdf <scratch dir>/sheet [cols] [rows]
 
-Writes /tmp/sheet-1.png, -2.png … each holding cols*rows pages, framed
+Writes <scratch dir>/sheet-1.png, -2.png … each holding cols*rows pages, framed
 and numbered. Read all of them: a clean LaTeX log says nothing about a
 legend covering a title or a drawer typeset onto a slide.
 

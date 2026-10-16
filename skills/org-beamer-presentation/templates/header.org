@@ -39,7 +39,7 @@
 # -----------------------------------------------------------------------
 
 #+BEAMER_HEADER: \setbeamertemplate{bibliography item}[text]
-#+BEAMER_HEADER: \graphicspath{{<YYYYMMDDTHHMMSS>--<slug>__<tags>}}
+#+BEAMER_HEADER: \graphicspath{{<YYYYMMDDTHHMMSS>--<slug>__<tags>/}}
 
 * <Section>
 ** <Frame title>

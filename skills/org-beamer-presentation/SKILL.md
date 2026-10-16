@@ -165,7 +165,7 @@ those in `dev-conventions`, "4.3 Reviewers":
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: autonomous defaults and the review loop.
 - **git-conventions**: commits when the deck lives in a tracked repo.

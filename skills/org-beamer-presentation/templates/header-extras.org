@@ -30,8 +30,8 @@ A plain line, or logos with `\inst{n}` markers on the authors in
 #+end_src
 
 * TikZ diagrams
-Only for frames with an inline `tikzpicture`. Load the libraries that the
-picture uses. Use theme colours (`mLightBrown`, `mDarkTeal`) for fills.
+Only for frames with an inline `tikzpicture`. Load the libraries that
+the picture uses. Use theme colours (`mLightBrown`, `mDarkTeal`) for fills.
 
 #+begin_src org
 ,#+BEAMER_HEADER: \usepackage{tikz}
@@ -73,8 +73,9 @@ Only for a specialist audience. Stops evaluation on export.
 ,#+LATEX_HEADER: \lstset{showstringspaces=false,breaklines=true,basicstyle=\small, keywordstyle=\color{mLightBrown},stringstyle=\color{mLightBrown},numberstyle=\color{mLightBrown},commentstyle=\color{lightgray}}
 #+end_src
 
-The =\lstset= colours are metropolis names. Pin the backend at the end
-of the file:
+The =\lstset= colours are metropolis names. Pin the backend in the
+local-variables block at the end of the file. A deck has one such
+block:
 
 #+begin_src org
 ,# Local Variables:
@@ -84,11 +85,9 @@ of the file:
 
 * Local package on TEXINPUTS
 A `.sty` outside the TeX tree must be on `TEXINPUTS` at export time.
+Add `eval: (setenv "TEXINPUTS" ".:<path>:")` to the deck's
+local-variables block.
 
 #+begin_src org
 ,#+BEAMER_HEADER: \usepackage[<options>]{<package>}
-
-# Local Variables:
-# eval: (setenv "TEXINPUTS" ".:<path/to/tex/sty>:")
-# End:
 #+end_src

@@ -17,15 +17,13 @@ if len(sys.argv) < 2:
 
 threshold = float(sys.argv[2]) if len(sys.argv) > 2 else 5.0
 
-for log in sys.argv[1:2]:
-    print("==", log)
-    page, pending = 0, []
-    for line in open(log, errors="replace"):
-        for shipout in re.finditer(r"\[(\d+)", line):
-            page = int(shipout.group(1))
-            for kind, size in pending:
-                print(f"   page {page:>3}  {kind}box {size:.1f}pt")
-            pending = []
-        found = re.match(r"Overfull \\(v|h)box \(([0-9.]+)pt", line)
-        if found and float(found.group(2)) > threshold:
-            pending.append((found.group(1), float(found.group(2))))
+page, pending = 0, []
+for line in open(sys.argv[1], errors="replace"):
+    for shipout in re.finditer(r"\[(\d+)", line):
+        page = int(shipout.group(1))
+        for kind, size in pending:
+            print(f"page {page:>3}  {kind}box {size:.1f}pt")
+        pending = []
+    found = re.match(r"Overfull \\(v|h)box \(([0-9.]+)pt", line)
+    if found and float(found.group(2)) > threshold:
+        pending.append((found.group(1), float(found.group(2))))
