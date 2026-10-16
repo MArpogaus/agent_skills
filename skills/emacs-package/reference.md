@@ -1,4 +1,4 @@
-# Emacs Package: display engine reference
+# Emacs Package: reference
 
 Read this before you build or debug an overlay-heavy UI, a pixel test or a demo recording.
 
@@ -68,7 +68,7 @@ Read this before you build or debug an overlay-heavy UI, a pixel test or a demo 
 
 ## Measure in a real frame
 
-Test redisplay claims in a graphical frame, not from the manual. In the sandbox, use `rig gui` (see `<test rig>/README.md`). Elsewhere:
+Test redisplay claims in a graphical frame, not from the manual. In the sandbox, use `<test rig>/rig gui` (its `README.md` explains it). Elsewhere:
 
     Xvfb :99 -screen 0 1280x900x24 &
     DISPLAY=:99 emacs -Q -l probe.el
@@ -77,7 +77,7 @@ Test redisplay claims in a graphical frame, not from the manual. In the sandbox,
 - Start the probe from a timer (`run-with-timer 0.5 nil #'main`), not from top-level code. Write results to a file: `message` output is invisible.
 - Export the frame with `x-export-frames` (guard it with `declare-function`) and read the PNG with pillow. Have Emacs write the window geometry to a file, because the frame holds more grey lines than the package draws.
 - Scroll invariant: while scrolling up, the window start never moves down. Track `(cons (window-start) (window-vscroll nil t))` after each event and `redisplay t`.
-- In CI, the purcell/setup-emacs builds have no X. Give pixel tests their own job: `apt-get install xvfb emacs-gtk`, then `xvfb-run make scroll`. In batch the tests `skip-unless (display-graphic-p)`.
+- In CI, the purcell/setup-emacs builds have no X. Give pixel tests their own job: `apt-get install xvfb emacs-gtk`, then `xvfb-run make <pixel-test target>`. The project's Makefile defines that target. In batch the tests `skip-unless (display-graphic-p)`.
 
 ## Demo recordings
 
@@ -95,3 +95,26 @@ Test redisplay claims in a graphical frame, not from the manual. In the sandbox,
 - `gifsicle -O3` merges identical consecutive frames. Count states, not frames.
 - A demo that toggles a mode shows every layout change. The first pixel of a text row is the same column before and after, and the first frame equals the last.
 - Record on the default theme, drive prompts with `cl-letf` on `completing-read`, and keep the driver in `demo/`. List `demo/` and `img/` in `.elpaignore`.
+
+## Recurring defects in code grown in a configuration
+
+Check every package that comes from a configuration for these. Run every path with `emacs -Q` values:
+
+- **Undeclared buffer-local variables.** `setq-local` on an undeclared symbol compiles silently. Declare it with `defvar-local`. Then `boundp` and `local-variable-if-set-p` are always true for it, so test the value instead.
+- **`if-let*` in the else branch.** It binds for the then branch only. The variable is void in the else branch.
+- **Options the author always sets.** Arithmetic on `window-sides-slots` fails on its default nil.
+- **Advice removed by closure identity.** Each constructor call returns a new closure, so `advice-remove` finds nothing. Name the advice: `(advice-add sym :around fn '((name . my-advice)))`.
+- **`(funcall orig-fun args)`** where `(apply orig-fun args)` is correct.
+- **Doubled quoting** in a defcustom default: `'(("k" . '(:a 1)))` puts `(quote (:a 1))` where a plist belongs.
+- **Symbols outside the package prefix**, and typos in the prefix. package-lint catches both, byte-compile does not.
+- **`plist-put` on user data** mutates the user's customization. Return a new list (`append`, `copy-sequence`). Test every value shape the docstring promises.
+- **`listp` before `functionp`.** An interpreted lambda is a list. Check `functionp` first.
+- **Private API of other packages** (`project--find-in-directory`). Use the public entry. When there is none, say so in a comment at the call.
+- **Docstrings copied from a sibling mode.** Read every docstring once as a user.
+- **`copy-marker` on a number** marks the current buffer. Make markers before `with-current-buffer` changes it.
+- **`comint-last-prompt` during output** points inside the output. Copy to the end of the buffer and strip the prompt from the text.
+- **A declaration between `;;;###autoload` and its definition** takes the cookie. Check the generated autoloads file.
+- **A buffer-local minor mode dies with the major mode** (`kill-all-local-variables`). Mark it `permanent-local` and re-apply its setup from `after-change-major-mode-hook`.
+- **A new window inherits the fringes and margins of the window it was split from.** To restore a window, ask what the frame or the buffer gives it, not what the window has now.
+- **A rule that reads the window reads the package's own values.** Ask the buffer as well.
+- **`(setq some-mode 1)` in documentation** does not run the mode body. Document the mode function call.
