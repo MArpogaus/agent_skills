@@ -14,28 +14,30 @@ metadata: {stack: meta, requires: []}
 # Skill: Create a New Agent Skill
 
 This skill creates a skill: a reusable SKILL.md that agents load on
-demand. The result is generic, except a skill for one named workspace
-(for example the agenda or one config repo), which names its paths. It
-contains all the specifics that the domain needs.
+demand. The result is generic and contains all the specifics that the
+domain needs. For a change to an existing skill, do steps 5, 6, 8 and 9
+only.
 
 ## Hard rules
 
-- The description ends with a trigger sentence: "Use when ...", which
-  names the files, commands or user words that load the skill.
-- `SKILL.md` has at most about 1,500 words. Rare detail (pitfall lists,
+- The description ends with a trigger sentence that starts with "Use
+  when", "Use in" or "Use before". It names the files, commands or user
+  words that load the skill.
+- `SKILL.md` has at most 1,500 words (`wc -w`); `dev-conventions` is
+  exempt. Rare detail (pitfall lists,
   long config files, arithmetic) goes into one `reference.md` beside
   it, or a `reference/` folder when there are several files. One line
   in `SKILL.md` says when to read it.
-- Every `SKILL.md` over about 600 words starts with `## Hard rules`: 5
-  to 10 short imperative bullets with the rules that the agent breaks
+- Every `SKILL.md` over 600 words has `## Hard rules` as its first H2:
+  5 to 10 short imperative bullets with the rules that the agent breaks
   most. The sections below do not restate them.
 - Write only what tools do not enforce. Do not restate what a linter,
   formatter or pre-commit hook already checks.
 - Do not restate a rule that another skill owns. Point to it by skill
   name and section heading, and check that the heading exists.
 - State what is. No history, no incident stories.
-- No private or environment detail, except the paths of a workspace
-  skill.
+- The repo is public. No private paths, hosts, names or project names:
+  use the placeholders of `dev-conventions` section 6.
 
 ## Working directory
 
@@ -94,9 +96,9 @@ metadata: {stack: <words>, requires: [<skill>, ...]}
 ```
 
 - `license: MIT`
-- `compatibility`: a space-separated list of the harnesses where you
-  loaded and used the skill (`claude-code`, `opencode`). Do not list a
-  harness speculatively.
+- `compatibility`: a space-separated list of harnesses (`claude-code`,
+  `opencode`). Start with the harness of this session; add another only
+  after the skill loaded there.
 - `metadata.stack`: space-separated words for the domain (`python`,
   `org-mode latex beamer`, `meta`).
 - `metadata.requires`: the skills this one depends on, as a flow list
@@ -113,8 +115,7 @@ Create `skills/<name>/SKILL.md` with:
 - the H1 `# Skill: <Title>`,
 - clear sections (phases, steps, conventions, references),
 - placeholders such as `<project>`, `<package>` or `<your-org>` instead
-  of paths, project names or environment details (the workspace
-  exception is in the introduction),
+  of paths, project names or environment details,
 - code examples that use the agent's tools (Claude Code: Read, Edit,
   Write, Bash),
 - a **Required skills** section at the end when `metadata.requires` is
@@ -157,18 +158,7 @@ on the change:
 
 ### 9. Verification
 
-After writing, verify:
-
-- [ ] Frontmatter is valid YAML and includes `name` and `description`
-- [ ] `name` matches the regex `^[a-z0-9]+(-[a-z0-9]+)*$`
-- [ ] `description` has 1 to 1024 characters and ends with a trigger
-      sentence
-- [ ] The skill uses the patterns of nearby skills
-- [ ] The file is named `SKILL.md` (all caps)
-- [ ] `SKILL.md` keeps to the hard rules
-- [ ] If `metadata.requires` is not empty, a **Required skills**
-      section after a `---` line at the end tells the agent to load
-      each listed skill
+After writing, verify: the hard rules and steps 1 to 5 hold.
 
 ### 10. Register in repo
 
