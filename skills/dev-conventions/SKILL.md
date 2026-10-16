@@ -2,257 +2,158 @@
 name: dev-conventions
 description: >
   How the user and the agent work together on software projects, in any
-  language: the simplest solution wins (justify every addition, delete
-  before you add, no special treatments), when to ask and when to act
-  (question rounds with context, at most three questions, push back on
-  blockers), verification by running and by looking, the continuous
-  review loop with sceptical reviewer views, autonomous sessions,
-  sandbox safety, and code, comment and documentation style.  Load at
-  the start of any development session.
+  language: the simplest solution wins, when to ask and when to act,
+  verification by running and by looking, the continuous review loop,
+  autonomous sessions, sandbox safety, and code and documentation
+  style. Load before the first edit, commit or review in any
+  repository, and when the user says "plan first", "ask me", "interview
+  me", "review loop", "autonomous" or "where are we".
 license: MIT
 compatibility: claude-code opencode
-metadata:
-  stack: meta
-  requires:
-    - git-conventions
-    - gtd
-    - session-finish
+metadata: {stack: meta, requires: [git-conventions]}
 ---
 
 # Skill: Development Conventions
 
-These rules apply to every project.  A stack skill (`python-dev`,
-`ml-project`, `emacs-package`, `emacs-config`,
-`org-beamer-presentation`, ...) adds the rules of its stack.  If
-a project rule and this skill disagree, the project rule wins.
-
-All git rules (branches, commits, hooks, pushes, attribution, pull
-requests, releases) live in the `git-conventions` skill.  Load it
-before any git operation and follow it strictly.  This skill does
-not repeat them.
+These rules apply to every project. A stack skill adds the rules of
+its stack. A project rule wins over this skill.
 
 ## 1. Design principles
 
-The simplest solution wins.  This is the first rule and it overrules
-taste, habit and "best practice".  The user corrects over-engineering
-more than anything else.
+The simplest solution wins, over taste, habit and "best practice".
 
-- **Justify every addition.**  Before you add a file, class, option,
-  flag, script, dependency, stage or code path, name the simpler
-  alternative: delete it, reuse existing machinery, write a config, or
-  write one more line in an existing place.  Use the simpler one
-  unless you can say why it fails.  Say the alternative in your reply
-  when the choice is not obvious.
-- **Every file and line fights for its life.**  If it has no clear
-  reason to exist, delete it.  Deletion beats addition.  A change that
-  removes code is better than one that adds code for the same result.
-- **Do not reinvent.**  Before you write code, look for the feature
-  in this order: the repo, the standard library, the platform
-  (systemd, the editor, the framework), a stock or upstream module,
-  an installed dependency.  A reimplementation of existing machinery
-  is a defect, even when it works.
-- **No special treatments.**  No registries, mixins, plugins, generic
-  frameworks or wrapper scripts for one use.  No class where a
-  function does the job.  No generator that writes a file you can
-  write by hand (no Org from Org, no script that wraps one command).
-- **Scripts stay dumb.**  A script does one thing with explicit
-  arguments.  No mode switches: write one config or one script per
-  variant.  Duplication there is fine.
-- **No code for rare edge cases.**  Do not re-validate the arguments
-  of the library below you; let it fail with its own error.  No
-  magic, no hacks, no surprising handling of a misconfiguration.  If
-  a rare case seems to need machinery, discuss it with the user
-  first and state the cost.
-- **Defaults only with a reason.**  Keep defaults few.  Opinionated
-  defaults go into the user's configuration, not into the library.
-- **Explicit configuration.**  Configs of experiments and deployments
-  write every option out, defaults included, so that a reader sees
-  the full setup without reading the framework.  Duplication is
-  acceptable there.  Keep the number of variants small.
-- **No backwards compatibility before 1.0.**  No obsolete aliases, no
-  deprecation warnings, no text about earlier versions.  A 1.0 is a
+- **Justify every addition.** Before you add a file, option, script,
+  dependency, stage or code path, name the simpler alternative (delete,
+  reuse, a config, one line). Use it unless it fails. State it when the
+  choice is not obvious.
+- **Deletion beats addition.** Delete what has no clear reason to exist.
+- **Do not reinvent.** Look in the repo, the standard library, the
+  platform, upstream, the installed dependencies. A reimplementation is
+  a defect.
+- **No special treatments.** No registries, mixins, plugins, frameworks
+  or wrappers for one use, no class where a function does, no generator
+  for a file you can write by hand.
+- **Scripts stay dumb.** One task, explicit arguments, no mode switches:
+  one config or script per variant.
+- **No code for rare edge cases,** no re-validation of library
+  arguments, no magic, no hacks. Discuss machinery for a rare case with
+  the user first.
+- **Defaults only with a reason.** Opinionated defaults go into the
+  user's configuration, not into the library.
+- **Explicit configuration:** experiment and deployment configs list
+  every option, defaults included.
+- **No backwards compatibility before 1.0.** No obsolete aliases, no
+  deprecation warnings, no text about earlier versions. A 1.0 is a
   clean cut.
-- **Assume a clean install.**  Write no migration code and no cleanup
-  of old state.  List one-off migration steps for the user to do by
-  hand.
-- **Stay in the idiom of the repo.**  Use the language and file format
-  the repo already uses (YAML over JSON, shell with `yq` over a new
-  Python script in a shell repo), so that the existing linters cover
-  the new file.
-- **Contain guesses.**  When code infers data, keep the inferred
-  result apart from verified data, mark it, keep it reversible, and
-  give a switch to turn it off.  Verified facts always win.
-- **Release scope.**  In a polishing or release session, fix only
-  bugs, security holes and wrong docs.  Add no features and do not
-  refactor working code that nobody asked about.  For each finding
-  ask: "Does it break or endanger what exists today?"  If not, put
-  it on the list for after the release.
+- **Assume a clean install.** No migration or cleanup code. List
+  one-off migration steps for the user.
+- **Stay in the idiom of the repo** (its language and formats), so
+  that its linters apply.
+- **Contain guesses.** Keep inferred data apart from verified data:
+  marked, reversible, with an off switch.
+- **Release scope:** in a release or polishing session, fix only
+  bugs, security holes and wrong docs; defer the rest.
 
 ## 2. Asking and acting
 
-- **A question is a question.**  When the user asks "do we need X?",
-  answer it and change nothing.
-- **"Plan first", "discuss first", "report first"** mean: no edits
-  until the user agrees.  Give the plan in the chat, unless the user
-  asks for a file.
-- **Numbered options.**  Give findings and choices as a numbered
-  list.  The user answers in short form (`1: yes, 2: drop, 3:
-  explain`).  Keep the numbers stable until the list is done.
-- **Ask open questions with the question tool.**  In an interactive
-  session, put every open question and every decision that is the
-  user's (open review findings, design choices, scope) to the user
-  with the question tool (Claude Code: `AskUserQuestion`).  Do not
-  end a report with a list of open questions instead.  Do the same
-  when the user says "ask me" or "interview me".  Each round follows
-  three rules:
-  1. **Context first.**  Put the findings or the report in the chat
-     before the questions.  Each option must make sense without the
-     session history: say what it changes, where, and at what cost.
-     Put the recommended option first.
-  2. **At most three questions per round.**  Ask the most important
-     ones first.  More questions wait for the next round.
-  3. **Continue at once.**  When the user submits the answers, act
-     on them in the same turn.  Read the free text beside the
-     choices: it often changes the task.
-- **Push back on blockers.**  A blocker is a wrong premise, a conflict
-  with a rule or another skill, a missing access, a failing check you
-  cannot fix, or a decision that is not yours.  Stop that part and
-  say so at once, with the evidence.  Never work around a blocker in
-  silence, and never weaken a test or a rule to get past it.
-- **Not in autonomous work.**  When the user is away (section 5), do
-  not ask and do not wait: continue with the best default and collect
-  the questions in the report or the notification channel.  Record
-  each blocker as described in section 5.
-- **Never in code.**  An open question never goes into a code comment
-  or a doc.
-- **Plain explanations.**  When the user does not understand, explain
-  the mechanism with a short example, not with more jargon.
-- **Outward text is a draft.**  Show issue replies, forum posts,
-  emails and pull request texts for other people before you send
-  them.  Write natural, simple language: no em or en dashes, no
-  emojis, no marketing, no overselling.
-- **Plain text deliverables.**  Analyses and reports are Markdown in
-  the chat.  No HTML pages, artifacts or charts unless asked.
-- **Mixed languages.**  The user writes German, English or both, fast
-  and with typos.  Answer in the language of the prompt unless a
-  style skill says otherwise.
+**When to ask.** Apply in this order. A stack skill's "ask" means this
+rule.
+
+1. A blocker (wrong premise, conflict with a rule or skill, missing
+   access, a check you cannot fix, a decision not yours) always stops
+   that part of the work. Report it with evidence. Never work around
+   it in silence or weaken a test or rule to pass it.
+2. Interactive (section 5): ask each decision that is the user's
+   (findings, design, scope) with the question tool (Claude Code:
+   `AskUserQuestion`), also on "ask me" or "interview me".
+   - **Context first.** Each option makes sense without the session
+     history: what it changes, where, at what cost. Recommended first.
+   - **At most three questions per round,** most important first.
+   - **Continue at once** on submit, in the same turn. Read the free
+     text: it can change the task.
+3. Autonomous: never ask, never wait. Record the blocker as an agenda
+   inbox item and a GitHub issue (`gtd` skill, "Capture from another
+   repo") with evidence and options. Take the default the stack skill
+   names, or work on something else. Do not decide the blocker.
+
+- **Findings and questions.** Put findings in the chat as a numbered
+  list with stable numbers. Ask for the decisions with the question
+  tool, citing item numbers. A final report's "Open" part lists open
+  items, not questions.
+- **"Do we need X?" is a question:** answer, change nothing.
+- **"Plan first", "discuss first", "report first":** no edits until the
+  user agrees. Plan in the chat unless the user asks for a file.
+- **Never in code:** no open question in a comment or a doc.
+- **Outward text is a draft.** Show issue replies, posts, emails and
+  pull request texts to the user before you send them. No em or en
+  dashes, no emojis, no marketing.
+- **Reports are Markdown in the chat** unless the user asks otherwise.
+- **Mixed languages.** The user writes German, English or both, fast
+  and with typos. Answer in the language of the prompt unless a style
+  skill says otherwise.
+- **Language of written text.** Write technical explanations of code,
+  models and fixes in English, even when the prompt is German. Use
+  German, with German spelling (ß, 15.000), for German notes, agenda
+  entries and German decks. Over a notification channel always write
+  English.
 - **"Sorry, wrong terminal"** means: ignore that prompt and continue
   the earlier task.
-- **Honest assessments.**  Give a critical opinion directly when asked,
-  including "this was not worth it".  When the user contradicts a
-  claim, check it again instead of repeating it.
+- **Be honest and plain.** Give a critical opinion directly. Explain
+  with an example, not jargon. When contradicted, check again.
 
 ## 3. Verification
 
-- **Test before you report.**  A change is done only when you ran it.
-  Never report "fixed" on reasoning alone.
-- **Measure every claim.**  A number, a count, a citation or a
-  "raises X" in code, docs or a commit message comes from running
-  code.  For claims about another repo, read its source (for example
-  `gh api repos/OWNER/REPO/contents/PATH`).
-- **Install what you need** in the agent's home (`~/.local`) and test
-  end to end.  If that is impossible, say which claims are not
+- **Run it before you report.** Never report "fixed" on reasoning.
+- **Measure every claim** (numbers, citations, "raises X") by running
+  code or reading the source (`gh api repos/O/R/contents/PATH`).
+- **Install what you need** to test end to end, or name what is not
   verified.
-- **Reproduce in the user's real setup**: their configuration, window
-  size, theme and data shape.  A fault that depends on the setup
-  hides in a clean one.  Use a minimal documented configuration only
-  for demos and pictures.
-- **Look at it.**  For anything that draws (UI, plots, slides,
-  dashboards, GIFs), make screenshots and look at them, in every mode
-  the output has (for example GUI and terminal).  Measure pixels where
-  alignment matters.
-- **Regenerate all pictures** after every change to drawing code.
-  Never assume a change cannot affect a picture.  Use one width and
-  one theme for all pictures of a project.
-- **Prove a test red.**  A new test is done only when it fails against
-  a copy of the code with the fix removed.
-- **Re-verify subagent findings.**  Subagent reports are often wrong
-  about counts and reachable code paths.  Reproduce each finding
-  before you act on it.
-- **Results against a reference.**  Research code is checked against
-  known ground truth; the `ml-project` skill has the rules for
-  references and tolerances.
-- **Iterate fast, finish complete.**  Check with reduced sizes (fewer
-  epochs, test mode, a VM snapshot).  Run the full version once at the
-  end.  When time is short, make all edits first, then one test run.
+- **Reproduce in the user's real setup** (configuration, window size,
+  theme, data shape). Minimal configurations are for demos only.
+- **Look at it.** Screenshot what draws (UI, plots, slides, GIFs) in
+  every output mode. Measure pixels where alignment matters.
+- **Regenerate all pictures** after a change to drawing code, with one
+  width and one theme per project.
+- **Prove a test red** against the code with the fix removed.
+- **Re-verify subagent findings** before you act on them.
+- **Results against a reference:** see `ml-project`.
+- **Iterate fast, finish complete:** check with reduced sizes, run the
+  full version once at the end. Short on time: all edits, one run.
 
 ## 4. Continuous review
 
-Review is not a phase at the end.  It runs during the whole session:
-a monitor watches the commits, and when enough unreviewed change has
-piled up, a round of reviewers starts on that range.  **This is the
-default.**  Turn it off only when the user says so ("no reviews",
-"save tokens", "no subagents"); then review your own changes before
-you report.  When the user asks for a review only ("report back,
-change nothing"), change nothing.
+Review runs all session by default. On "no reviews", "save tokens" or
+"no subagents", review your own changes. On review-only requests,
+change nothing.
 
 ### 4.1 Arm the commit monitor
 
-At the start of a session that will commit, start one watcher for all
-repos of the session.  Run it with the harness's monitor tool (Claude
-Code: `Monitor`), or as a background job that you poll.  Write the
-script to the agent's cache, not into the repo:
+Before the first commit in any repo except `<agenda repo>`, start one
+watcher for all repos of the session: `tools/review-watch.sh REPO...`
+(relative to this skill's directory), with the monitor tool (Claude
+Code: `Monitor`) or as a polled background job. It watches the current
+branch (override: `BRANCH`). Re-arm it when it times out.
 
-```bash
-#!/bin/bash
-# review-watch.sh REPO...: print one REVIEW line when the unreviewed
-# range on $BRANCH crosses the threshold, then mark it as handed out.
-BRANCH=${BRANCH:-dev} REVIEW_LINES=${REVIEW_LINES:-100} REVIEW_COMMITS=${REVIEW_COMMITS:-5} EVERY=${EVERY:-300}
-STATE=${STATE:-$HOME/.cache/review-watch}; mkdir -p "$STATE"
-while true; do
-  for r in "$@"; do
-    f=$STATE/$(realpath "$r" | tr / _)
-    head=$(git -C "$r" rev-parse -q --verify "$BRANCH") || continue
-    [ -s "$f" ] || { echo "$head" > "$f"; continue; }
-    last=$(cat "$f")
-    [ "$head" = "$last" ] && continue
-    git -C "$r" merge-base --is-ancestor "$last" "$head" || last=$(git -C "$r" merge-base "$last" "$head")
-    n=$(git -C "$r" rev-list --count "$last..$head" -- . ':!*.md' ':!*.org')
-    code=$(git -C "$r" diff --numstat "$last" "$head" -- . ':!*.md' ':!*.org' | awk '{s+=$1+$2} END {print s+0}')
-    if [ "$code" -ge "$REVIEW_LINES" ] || [ "$n" -ge "$REVIEW_COMMITS" ]; then
-      echo "REVIEW $r ${last:0:7}..${head:0:7} commits=$n code_lines=$code"
-      echo "$head" > "$f"
-    fi
-  done
-  sleep "$EVERY"
-done
-```
-
-- **Trigger:** 100 or more changed lines outside docs, or 5 or more
-  commits that touch code.  Smaller changes accumulate until they
-  cross the line.  Changes to docs only wait for the final round.
-  Tune `REVIEW_LINES` and `REVIEW_COMMITS` per project.
-- **Rewritten history** (an amend or rebase of local commits) resets
-  the range to the merge base, so the rewritten commits are reviewed
-  again.
-- **Pushed work in several repos:** the same loop can read the remote
-  instead: `gh api repos/OWNER/REPO/commits/BRANCH -q .sha` for the
-  tip and `gh api repos/OWNER/REPO/compare/OLD...NEW` for the files
-  and lines.
-- **Re-arm** the monitor when it times out.  Keep the state directory,
-  so that no range is lost or reviewed twice.
+- **Trigger:** 100 or more changed lines outside `*.md` and `*.org`, or
+  5 or more commits that touch code (`REVIEW_LINES`, `REVIEW_COMMITS`).
+  Smaller changes accumulate. Docs-only changes wait for the final
+  round.
+- Rewritten history, pushed work, state: `reference.md`.
 
 ### 4.2 Run a round on each event
 
-When a `REVIEW` line arrives:
+On a `REVIEW` line:
 
-1. **Continue your own work.**  The reviewers run in the background.
-   Start no second round on an overlapping range while one runs.
-2. **Spawn the reviewers** for that range (section 4.3), one subagent
-   per view, in parallel.
-3. **Verify** each finding yourself (section 3).
-4. **Fix** in small commits, as `git-conventions` requires.  The fixes
-   are new commits, so the monitor sends them into the next round.
-   That is intended: a second round often catches regressions in the
-   fixes of the first.
-5. **Keep a "checked and rejected" list** with the reason for each
-   item, so that later rounds do not raise it again.
+1. Continue your own work. No second round on an overlapping range.
+2. Spawn the reviewers in parallel, one subagent per view.
+3. Verify each finding yourself.
+4. Fix in small commits; the monitor sends them into the next round.
+5. Keep a "checked and rejected" list with reasons.
 
-### 4.3 Reviewer views
+### 4.3 Reviewers
 
-Every round uses the three core views.  Add the others when the range
-touches their subject.  One subagent per view; a view never shares a
-subagent with another view.
+One subagent per view. Every round runs the three views marked
+"always"; add the others when the range touches their subject.
 
 | View | Looks for | When |
 |---|---|---|
@@ -265,200 +166,111 @@ subagent with another view.
 | **Usability** | public API, CLI, configuration, UI and UX, looks in every mode | user-facing surface changed |
 | **Results** | numbers against the reference; the data source of every figure and table by file path; labels, sides and groups that match the data | research code, figures or slides changed |
 | **Attacker** | tries to break into or bring down a test system | on request only, never against a production host |
+| **Coverage** | rules the user stated in past sessions (their messages, memory notes) that the changed skills, AGENTS.md or docs miss, weaken or contradict | a skill, AGENTS.md or another agent rules file changed |
 
-The Simplicity view is adversarial.  It challenges every decision in
-the range, including decisions that the session agreed on.  A
-Simplicity report without a concrete deletion or simplification must
-say for each addition why no simpler form works.
+Read `reference.md`, "Reviewer brief", before you spawn.
 
-Brief each reviewer with **minimal context**: the repo path, the
-range, the view, and the rules below.  Do not give it your own
-findings, the session history or your memory, so that it looks with
-fresh eyes and does not inherit your decisions.
+The Simplicity reviewer loads the `ponytail-review` skill when it is
+available and challenges every decision, also agreed ones.
 
-```
-You are a read-only, sceptical reviewer. Repo: <path>. Range:
-<old>..<new> (read the diff and the files it touches). View: <view
-and its "looks for" text>.
-Rules: do not read agent memory or handoff files; question every
-decision in the range. Change no file; run no git command that
-changes state; contact no host; run no deploy. Report each finding
-with file:line, severity (breaks / endangers / simplifies / nit) and
-how to reproduce or what to delete. If you find nothing that
-matters, answer "clean".
-```
+Each brief includes the rules of section 1 and the hard rules of the
+stack skill, but not your findings, the session history or your memory.
 
-Severity decides what you do with a finding:
-
-- **breaks** and **endangers**: verify, then fix.
+- **breaks**, **endangers**: verify, then fix.
 - **simplifies**: verify, then apply, unless it changes behaviour the
   user asked for; then ask (section 2).
-- **nit**: fix only when it is a one-line change in a file you touch
-  anyway.  Nits never keep a loop going.
+- **nit**: fix only as a one-line change in a file you touch anyway.
+  Nits never keep a loop going.
 
 ### 4.4 Final round
 
-Before a merge, a release or the end of the session, and when the
-user says "review loop", "cleanup cycle", "polishing round" or "loop
-until clean", review the whole range since the last clean state,
-whatever its size:
+Before a merge, a release or the end of the session, and on "review
+loop", "cleanup cycle", "polishing round" or "loop until clean", review
+the whole range from the commit where the last final round came back
+clean, or the session's first commit:
 
 1. Spawn all views that apply, with fresh reviewers.
 2. Verify, fix, commit.
-3. Repeat until **two rounds in a row** come back clean.  A round is
-   clean when it has no finding of severity breaks, endangers or
-   simplifies that survives your verification.
-4. Report what changed, what was rejected and why, and what is open.
+3. Repeat until **two rounds in a row** are clean: no breaks, endangers
+   or simplifies finding survives verification.
+4. Report what changed, what was rejected and why, what is open.
 
-There is no round limit.  When rounds keep finding things, the cause
-is upstream: the fixes add code, or a view drifts.  Then pause,
-look for that pattern, and fix the pattern, not the instance.
+There is no round limit. When rounds keep finding things, fix the
+upstream pattern (fixes add code, a view drifts). A written review:
+`reference.md`, "findings.md".
 
-### 4.5 findings.md
+## 5. Interactive and autonomous sessions
 
-When the user wants the review written down, write `findings.md` in
-the repo root.  It is a handoff file, not a plan waiting for
-approval:
+A session is autonomous only when the user says so ("I'm away", "work
+alone", "autonomous", "bis später", "über Nacht", "loop until clean"
+while away), or when it runs without a user (headless, scheduled, a
+notification channel only). Silence alone never makes a session
+autonomous. Every other session is interactive.
 
-- never committed: list it in `.git/info/exclude` (or the repo's
-  `.gitignore` if it already ignores it),
-- numbered sections, `file:line` on every finding, ranked by cost to
-  the reader,
-- the reproduction output for each correctness finding,
-- a "checked and rejected" section at the end.
+Autonomous:
 
-Commits that fix a finding can cite it ("findings.md, section A").
-When the user says "read the findings and ask me", go through them
-one at a time with the question tool.
+- **Arm a watchdog:** a wake-up at a fixed interval (Claude Code:
+  `ScheduleWakeup` or a cron or loop) that resumes the work until it is
+  done.
+- **Report on your own:** post one line when a background job ends or a
+  milestone lands; do not wait for "status?". Poll the notification
+  channel for replies.
+- **Run independent work in parallel** by default, within the resource
+  limits the user stated.
+- **Resume after limits** and relaunch failed subagents with the same
+  brief.
+- **Keep monitors armed** for commits and each long job. Restart a
+  process only after you checked it is gone.
+- **When idle**, clean leftovers, drifted docs and drift between repos.
 
-## 5. Autonomous sessions
+Always:
 
-The user often leaves the agent alone for hours.
-
-- **Do not block on the user.**  Do not use the question tool.
-  Continue with the best default, collect decisions for the user in
-  the report or the notification channel, and work on something else
-  meanwhile.
-- **Notification channel.**  If the project has one (for example a
-  push topic), post one or two sentences per milestone or decision,
-  and poll it for replies.
-- **Resume after limits.**  When a rate or session limit stops work,
-  resume when it resets and relaunch failed subagents with the same
-  brief.  Do not wait to be asked.
-- **Keep monitors armed**: the commit monitor (section 4.1) and one
-  for each long job (deploy, copy, training run).  Report each stage
-  as it lands.  Check that a process is still alive before you
-  restart it.
-- **When idle**, do hygiene work: leftovers, drifted docs, alignment
-  across repos.
-- **End of session.**  Run the `session-finish` skill before you
-  report "done" or hand over.
-- **Blockers when alone.**  Record each blocker in two places: an
-  inbox item in the user's agenda (the `gtd` skill, "Capture from
-  another repo") and an issue in the repo (`gh issue create`) with the
-  evidence and the options.  Then continue with other work.  Do not
-  decide the blocker yourself.
-- **Other agents.**  When the user says "another agent works on X",
-  do not touch X.  When the user says "just file issues", file issues
-  and fix nothing.
-- **Status on request.**  "Where are we?" asks for a short report:
-  done, running, next, blocked.
+- **Other agents.** "Another agent works on X": do not touch X. "Just
+  file issues": file issues, fix nothing.
+- **"Where are we?"**: done, running, next, blocked.
+- **End of session.** Run the `session-finish` skill once per session:
+  when the user ends the session ("finish", "wrap up", "Feierabend",
+  "session beenden", "done for today"), or before the last message of an
+  autonomous session. Not after each task.
 
 ## 6. Sandbox and environment safety
 
-- **Work only on the mounted checkouts.**  If a path is missing or
-  read-only, stop and tell the user.  Never clone a copy to work
-  around it, and never push from a container-local copy.
-- **Agent home is not user home.**  Tools, caches and test rigs go
-  into the agent's home.  The user's home and configuration are
-  mounted separately.
-- **Never touch the user's environment.**  Do not create, sync or
-  change a project environment, lock file or installed packages.
-  Report a missing package.  The stack skill says which commands are
-  safe (for Python see `python-dev`, "UV environment").
-- **The user's uncommitted edits are sacred.**  Look for them before
-  you switch a branch or reset a checkout.  Stash with a descriptive
-  message; never drop them.  Look for unpushed commits as well
-  (`git log --oneline @{u}..`).
-- **The working directory can reset between shell calls.**  `cd`
-  inside each command, or use `git -C <path>`.
-- **Do not edit what a running job reads.**  A deploy renders the live
-  working tree, and bash reads a running script as it goes.  Wait for
-  the job to end, or edit in a worktree.
-- **Commands for the host.**  When a command must run on the user's
-  host, give the exact command, or write a script to a file for the
-  user to run.
+- **Work only on the mounted checkouts.** Report a missing or
+  read-only path. Never clone around it or push from a local copy.
+- **Install tools for yourself** as the `sandbox-env` skill says.
+- **Never touch the user's environment:** no project environment, lock
+  file or package changes; report a missing package. Safe commands:
+  the stack skill (`python-dev`, "uv and the environment").
+- **The user's uncommitted edits are sacred.** Check for them and for
+  unpushed commits (`git log --oneline @{u}..`) before a branch switch
+  or a reset. Stash with a message; never drop.
+- **The working directory can reset:** `cd` per command or `git -C`.
+- **Do not edit what a running job reads.** Wait, or use a worktree.
+- **Commands for the host:** give the exact command or a script file.
 
-## 7. CI workflows
+Pin GitHub Actions: see `git-conventions`, "CI workflows".
 
-- **Pin every action to a SHA** with `pinact`, in every repo, after
-  any change to a workflow:
-  `PINACT_GITHUB_TOKEN=$(gh auth token) pinact run -u`.  It pins each
-  `uses:` to a commit SHA with the tag as a comment, and `-u` updates
-  to the latest release.
-- **A branch ref cannot be pinned.**  `pinact` pins tags only; for an
-  action on a branch (for example `@release/v1`), set its latest
-  release tag first, then run `pinact` again.
-- **Check that nothing is left:**
-  `grep -rn 'uses:' .github/workflows | grep -v '@[0-9a-f]\{40\}'`
-  prints nothing.  Keep a tag only where a tool requires one (for
-  example the SLSA generator), and say so in a comment.
-- Dependabot keeps the pins current (see `git-conventions`,
-  "Dependabot").
+## 7. Style
 
-## 8. Code style (all languages)
-
-- **Code speaks for itself.**  Comment only a short "why" that the
-  code cannot say.  No comments that repeat the code, no long
-  explanations, no separator banners beyond the section markers the
-  stack skill defines.
-- **No anecdotes.**  Code and docs state what is, not what was: no
-  "previously", no incident stories, no before/after numbers.
-- **Docs over comments.**  Important information goes into the README
-  or a design doc, never buried in a comment.  Move a long comment
-  into the docstring or the docs where it belongs.
-- **Descriptive names** for options, functions and files.
-- **Same things look the same.**  Similar features share one code path,
-  one naming scheme and one look.  Deduplicate.
-- **Self-contained scripts.**  Paths and arguments are explicit; a
-  script does not need to know the project layout.
-- **Complexity limits** are enforced by hooks where the stack has a
-  tool for it.  Split a function instead of raising the limit.
-
-## 9. Documentation
-
-- **Simplified Technical English**: sentences of 25 words or fewer,
-  active voice, one idea per sentence, one word for one thing, no em
-  or en dashes, no first person.
-- **The README is the entry point for a person.**  It says what the
-  project is, how to install and run it, and where to read more.  It
-  is short and task oriented.  It is not a rules file for agents.
-- **Details live in `docs/`** (implementation, design, measurements).
-  Contributor rules live in `CONTRIBUTING`.  Agent rules live in the
-  agent's memory or in a skill.
-- **One place per fact.**  Examples live in one place (for example the
-  notebooks); other docs link there.  No documents outside the repos.
-
-## 10. Visual work
-
-- **Match the existing style.**  Before you make a deck, a dashboard
-  or an icon set, look at the user's earlier work of the same kind and
-  follow its tone.
-- **Slides are sober**: descriptive titles, short bullet points, no
-  punch lines.  Figures carry the slide.  See
-  `org-beamer-presentation`.
-- **Icons** in one set have the same weight and size.
-- **Before you report**, check plots and slides for overlaps, overfull
-  frames and broken math.
+- **Naming.** Use the most obvious name that matches the code. Use the
+  same name in code, configs, stages, plot labels and slides. Do not
+  invent terms.
+- **Spacing.** One space after a sentence. Only Emacs docstrings and
+  `;;; Commentary:` keep two spaces.
+- **Simplified Technical English** in docs: at most 25 words per
+  sentence, active voice, one word for one thing, no em or en dashes,
+  no first person.
+- Before you write comments, docs, plots or slides, read
+  `reference.md`, "Code, documentation and visual style".
 
 ## Checklist before "done"
 
-- [ ] For each addition I can say why no simpler form works.
-- [ ] I ran it in the user's real setup and looked at the output.
-- [ ] Every `REVIEW` range got its round, and the final round came
-      back clean twice in a row.
+- [ ] Each addition has a reason why no simpler form works.
+- [ ] The change ran in the user's real setup; the output was inspected.
+- [ ] Every `REVIEW` range got its round; the final round was clean
+      twice in a row.
 - [ ] Blockers are reported, or recorded in the agenda and as issues.
-- [ ] The `session-finish` skill ran.
+- [ ] At the end of the session, `session-finish` ran.
 
 ---
 
@@ -467,7 +279,5 @@ The user often leaves the agent alone for hours.
 This skill assumes the following prerequisite skills are loaded.
 Use the `skill` tool to load them before using this one:
 
-- **git-conventions** — two-branch flow, conventional commits,
+- **git-conventions**: two-branch flow, conventional commits,
   pre-commit hooks, push and attribution rules, tagging and releases.
-- **gtd** — where blockers and follow-ups go in the user's agenda.
-- **session-finish** — the cleanup to run at the end of each session.
