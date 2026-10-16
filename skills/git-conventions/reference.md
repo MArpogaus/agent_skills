@@ -89,9 +89,7 @@ feat/<topic>  ->  PR  ->  dev-<name>  ->  PR  ->  main
 
 ## Repos you do not own
 
-In a repo of another owner, these conventions are not a mandate. The
-repo's own `CONTRIBUTING.md`, `CLAUDE.md` or `AGENTS.md` outranks this
-skill. Read it first.
+In a repo of another owner, these conventions are not a mandate.
 
 | Adopt freely: objective improvements | Leave alone: the owner's call |
 |---|---|
@@ -139,11 +137,24 @@ The clean-`main` rule then applies to all commits after the switch.
 
 ## Rewrite `main` to the flow
 
-Do this only when the user asks for it, and only when the conditions
-in SKILL.md ("History is append-only once pushed") are true. It
-replaces `main` with a `chore: init` commit plus one squashed
-snapshot. Do it before any cleanup commits, so that the snapshot is
-the unchanged prior state.
+Do a rewrite of pushed history only when the user asks for it. In a
+repo with more than one owner, all four conditions must be true, else
+do not rewrite:
+
+1. Every owner agrees in writing.
+2. The old tip stays reachable: an `archive/*` tag and a branch, both
+   pushed before the rewrite.
+3. The push uses `--force-with-lease`, never plain `--force`.
+4. Open pull requests are retargeted, and every collaborator is told
+   to re-clone or hard-reset.
+
+A repo with one owner is an exception to the archive rule. Keep a
+local `git bundle` as backup, push no archive tag or branch, and push
+with `--force-with-lease`.
+
+The procedure below replaces `main` with a `chore: init` commit plus
+one squashed snapshot. Do it before any cleanup commits, so that the
+snapshot is the unchanged prior state.
 
 Count the unmerged branches first
 (`git rev-list --count main..<branch>` for each branch). If more than
@@ -151,9 +162,10 @@ two branches carry work, or outside forks exist, tell the user that
 the rewrite costs more than it gives.
 
 Merge `dev` into `main` first, or stop when
-`git rev-list --count main..dev` is not 0. When other agents or the
-user have uncommitted edits, rewrite with `git commit-tree` and
-`git update-ref`, so the working tree stays untouched.
+`git rev-list --count main..dev` is not 0. The procedure never touches
+the working tree or the index, so uncommitted edits of the user or
+other agents stay. It builds the commits with `git commit-tree` and
+moves the branches with `git update-ref`.
 
 ```bash
 OLD=$(git rev-parse main)
@@ -166,31 +178,31 @@ git push origin "$OLD":refs/heads/dev-<owner>
 #    one owner: keep a local bundle and push nothing
 git bundle create ../<repo>-pre-rewrite.bundle --all
 
-# 2. new main: orphan root, then one snapshot commit
-git checkout --orphan main-new "$OLD"
-git rm -r --cached . -q
-git add .gitignore
-[ -f .pre-commit-config.yaml ] && git add .pre-commit-config.yaml
-git commit -m "chore: init"
-git read-tree "$OLD"                               # exactly the old tree
-git commit -m "chore: import <project> <version> from the prior history"
+# 2. new main: a root with the hook files, then one snapshot commit
+#    that records exactly the old tree
+I=$(git ls-tree "$OLD" .gitignore .pre-commit-config.yaml | git mktree)
+I=$(git commit-tree "$I" -m "chore: init")
+S=$(git commit-tree "$OLD^{tree}" -p "$I" -m "chore: import <project> <version> from the prior history")
+git branch main-new "$S"
 
 # 3. link the histories once, or each later pull request fails with
 #    "refusing to merge unrelated histories"
-git switch -c dev-<owner> "$OLD"
-git merge --allow-unrelated-histories main-new -m "chore: adopt the new main root"
+M=$(git commit-tree "$OLD^{tree}" -p "$OLD" -p "$S" -m "chore: adopt the new main root")
+git branch dev-<owner> "$M"
 
 # 4. publish
-git branch -f main main-new
+git update-ref refs/heads/main "$S" "$OLD"
+git branch -D main-new
 git push --force-with-lease origin main
 git push origin dev-<owner>
 ```
 
-- Step 3 is necessary. The snapshot commit must record the same tree
-  as the old tip, else the merge conflicts.
+- `git update-ref` also moves a checked-out `main`. Its tree equals the
+  old tree, so the working tree and the index still match.
 - Existing release tags keep the old commits reachable.
 - After the rewrite, retarget open pull requests onto `dev-<owner>`,
   delete merged branches and protect `main`.
 - In a repo with one owner, use `dev` in place of `dev-<owner>`. In
-  step 3, run `git switch dev` and `git merge --ff-only "$OLD"`
-  instead of `git switch -c`, because `dev` exists.
+  step 3, run `git update-ref refs/heads/dev "$M"` instead of
+  `git branch`, because `dev` exists. When `dev` is checked out, first
+  check that `git rev-parse dev` prints `$OLD`.

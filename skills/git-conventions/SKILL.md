@@ -38,7 +38,8 @@ pushed history.
   `gh run list` and `gh run view`.
 - **Stage paths by name.** Do not use `git commit -a`, a blind
   `git add -A` or `git add -p`. The first two pick up submodule
-  pointers, symlinks and the user's own uncommitted edits.
+  pointers, symlinks and the user's own uncommitted edits. `git add -p`
+  needs interactive input.
 - **Rewrite pushed history only when the user asks** (section "History
   is append-only once pushed").
 - **Never replace a pushed tag.** If one was replaced, cancel the
@@ -55,10 +56,10 @@ pushed history.
   was developed with the help of LLM coding assistants. The authors
   reviewed and take responsibility for all content." It names no
   vendor or model.
-- **Repos with only `main`.** If the repo has no `dev` branch, commit
-  on the current branch only when the repo's AGENTS.md, CLAUDE.md or
-  CONTRIBUTING allows it. Otherwise ask (autonomous: use the current
-  branch and report it). Never create `dev` unasked.
+- **Repos with only `main`.** If the repo has no `dev` branch, read
+  its AGENTS.md, CLAUDE.md or CONTRIBUTING. Commit on the current
+  branch only when one of them allows it. Otherwise ask (autonomous:
+  use the current branch and report it). Never create `dev` unasked.
 - **Untested work.** When the user asks to save untested work, commit
   it on `dev` with a normal type and `WIP, untested` in the body. It is
   the only exception to the rule that each commit passes the hooks and
@@ -85,9 +86,8 @@ pushed history.
   nothing else. Merge with `git merge --no-ff dev`, so that each
   merge makes a merge commit. The root commit contains exactly
   `.gitignore` (and `.pre-commit-config.yaml` if it exists at that
-  point). Its message
-  is `chore: init` with no body. A bare `init` fails the commitizen
-  hooks.
+  point). Its message is `chore: init` with no body. A bare `init`
+  fails the commitizen hooks.
 - **`dev`** is the working branch. All commits and pull requests
   target `dev`. Never commit directly to `main`.
 
@@ -97,23 +97,10 @@ Use no `rebase`, no `commit --amend`, no `reset --hard` and no
 force-push on a branch that another person can have fetched. The one
 exception is a rebase of your own `dev-<name>` onto `main`. Correct a
 pushed mistake with a new commit (`git revert`, or a `fix:` commit on
-top). Before the first push, `amend` and
-interactive rebase are the correct tools to clean up local commits.
-
-In a repo with more than one owner, all four conditions must be true
-for a rewrite, else do not rewrite:
-
-1. Every owner agrees in writing.
-2. The old tip stays reachable: an `archive/*` tag and a branch, both
-   pushed before the rewrite.
-3. The push uses `--force-with-lease`, never plain `--force`.
-4. Open pull requests are retargeted, and every collaborator is told
-   to re-clone or hard-reset.
-
-A repo with one owner is an exception to the archive rule. When the
-user asks for a rewrite, keep a local `git bundle` as backup, push no
-archive tag or branch, and push with `--force-with-lease`. The
-procedure is in [reference.md](reference.md).
+top). Before the first push, `amend` and interactive rebase are the
+correct tools to clean up local commits. For the conditions and the
+backup of a rewrite, read [reference.md](reference.md), "Rewrite
+`main` to the flow".
 
 ## Commit workflow (plan-first)
 
@@ -211,7 +198,7 @@ stack skill adds its package ecosystem.
   commits, so push the tag with
   `git push --no-verify origin refs/tags/<tag>`.
 - **Release:** run `cz bump` on `dev`, then `git merge --no-ff dev`
-  into `main`, then push the tag.
+  into `main`. Push `dev` and `main` before the tag.
 - On a tag push, `.github/workflows/release.yaml` builds, publishes
   and creates a GitHub Release. A replaced tag starts the release
   again, and PyPI refuses a version it already has.
