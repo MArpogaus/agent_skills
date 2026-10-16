@@ -173,8 +173,8 @@ Elsewhere:
 ## Demo recordings
 
 - Capture frames with `x-export-frames`: one frame per scroll step, 13
-  frames per second of hold (`-framerate 13`). Do not resample the frame rate (ffmpeg
-  `fps=` drops frames unevenly). Hold the final view with `tpad`:
+  frames per second of hold (`-framerate 13`). Do not resample the frame
+  rate (ffmpeg `fps=` drops frames unevenly). Hold the final view with `tpad`:
 
   ```bash
   ffmpeg -framerate 13 -i frames/f%04d.png -filter_complex \

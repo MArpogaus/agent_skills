@@ -25,8 +25,8 @@ metadata: {stack: emacs, requires: [git-conventions]}
 - After an extraction, one copy of the code exists: the configuration
   only configures the package.
 - Add `;; Assisted-by: <tool name>` to every file of a package that is
-  on MELPA or that you prepare for MELPA, and keep it where it exists
-  ("File headers").
+  on MELPA or that the user asked to submit to MELPA. Keep it where it
+  exists ("File headers").
 
 Read [reference.md](reference.md) before you build or debug overlays,
 display properties, margins, fringes, header lines, scrolling over tall
@@ -86,7 +86,7 @@ Every file, companions and test files included:
 ;; Package-Requires: ((emacs "29.1"))
 ;; Keywords: convenience
 ;; URL: https://github.com/<owner>/foo
-;; Assisted-by: <tool name>
+;; Assisted-by: <tool name>  (MELPA packages only)
 
 ;; This file is not part of GNU Emacs.
 ;; <GPLv3 blurb, 14 lines>
@@ -100,10 +100,9 @@ Every file, companions and test files included:
 ;;; foo.el ends here
 ```
 
-- `<tool name>`: Use the value that the package's other files use. In a
+- `<tool name>`: use the value that the package's other files use. In a
   new package, use the harness name (for example `Claude Code`), never a
-  model name. The `Assisted-by` line goes only into a package that is
-  on MELPA or that you prepare for MELPA (hard rules).
+  model name.
 - The email can be ROT13 obfuscated. Keep the form the existing files
   use.
 - `Package-Requires` in the main file decides what MELPA installs.
