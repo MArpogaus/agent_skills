@@ -17,7 +17,7 @@ A structured workflow to revise, polish and enhance academic papers
 or reports written in LaTeX.
 
 New text follows the rule on numbers, results and citations in
-`paper-writing` ("Hard rules"). The build and check commands are in
+`paper-writing` ("Hard rules"). The build commands are in
 `paper-writing` ("Phase 4: Build and compilation").
 
 ## Phase 1: Initial Analysis and Structural Setup
@@ -37,7 +37,8 @@ structural improvements.
    - Scan the document for placeholders, missing values or incomplete
      sections (for example "xx", "...", comments like
      `% Add figure here`).
-   - Define a `\TODO{}` macro in the preamble if none exists.
+   - If the preamble has no `\TODO{}` macro, add the one from
+     `paper-writing` ("TODO macros").
    - Insert `\TODO{...}` markers for all missing information.
 
 ## Phase 2: Content Generation and Integration
@@ -51,7 +52,7 @@ Goal: turn raw data and results into clear, scientifically sound text.
 2. **Draft Results Section:**
    - Insert a new subsection or replace a `\TODO{}` marker.
    - Write concise, objective descriptions. Refer to tables and
-     figures with `\ref{}` or `\autoref{}`.
+     figures with `\Cref{}`.
 
 3. **Integrate Figures and Tables:**
    - Use the standard LaTeX environments (`figure`, `table`).
@@ -78,8 +79,8 @@ Goal: improve the language and make the formatting consistent.
      the main findings.
    - Remove leftover comments, outdated `\TODO{}` markers and
      redundant information.
-   - Compile, and check that the log has no undefined references or
-     citations and that `pdftotext main.pdf - | grep -c '??'`
+   - Compile and check the log as `paper-writing` ("Hard rules")
+     says. Then check that `pdftotext main.pdf - | grep -c '??'`
      prints 0.
 
 ## Phase 4: Revision cycle
@@ -122,16 +123,6 @@ Write `response_to_reviewers.tex` as a standalone LaTeX document:
 ...
 
 \end{document}
-```
-
-### Changelog
-
-Keep a `changelog.txt` with the major changes between versions:
-
-```
-v1: initial submission
-v2: revised, expanded method section, added Experiment 3,
-    updated figures 2 to 4
 ```
 
 ---
