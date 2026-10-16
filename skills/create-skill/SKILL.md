@@ -41,9 +41,9 @@ changed.
 
 ## Working directory
 
-All skills live in `<repo>/skills/<name>/SKILL.md`. Both harnesses read
-the checkout in place. Edit the files in the checkout. There is nothing
-to copy or sync.
+All skills live in `skills/<name>/SKILL.md` of this collection's
+checkout. Both harnesses read the checkout in place. Edit the files in
+the checkout. There is nothing to copy or sync.
 
 ## Procedure
 
@@ -184,8 +184,8 @@ After you create the skill file:
 
 ## Required skills
 
-This skill assumes the following prerequisite skills are loaded. Use the
-`skill` tool to load them before using this one:
+This skill assumes the following prerequisite skills are loaded.
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: workspace placeholders, the Coverage review view,
   and documentation style.
