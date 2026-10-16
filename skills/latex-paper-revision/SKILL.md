@@ -66,8 +66,9 @@ Goal: improve the language and make the formatting consistent.
 1. **Proofread and Polish Language:**
    - Review each section for clarity, conciseness, scientific tone
      and grammar.
-   - Make targeted edits. Rewrite a full section only when more than
-     half of it changes.
+   - Make targeted edits. Before you rewrite a section, estimate the
+     share of sentences you will change. Above half, write a new
+     version of the section instead.
 
 2. **Enhance Structure and Flow:**
    - Assess the transitions between sections.
@@ -94,7 +95,7 @@ follows the `\input` files of both versions:
 
 ```bash
 latexdiff --flatten original.tex revised.tex > diff.tex
-latexmk -pdf diff.tex
+latexmk -lualatex diff.tex  # or -pdf: the engine follows the venue
 ```
 
 The output shows additions in blue underline and deletions in red
