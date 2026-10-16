@@ -1,1224 +1,271 @@
 ---
 name: python-dev
 description: >
-  Python project conventions: setuptools, ruff I/E/F/D/UP,
-  NumPy docstrings, MkDocs + mkdocstrings + mike docs, pytest xdist,
-  uv, commitizen,
-  matplotlib figure patterns, and skeleton-based project setup.  Use
-  when creating, changing or reviewing a Python project.
+  Python project conventions: skeleton-based setup, setuptools with
+  one version source, uv without touching the user's environment,
+  NumPy docstrings, pytest-xdist, CI matrix, MkDocs + mkdocstrings +
+  mike docs, commitizen, README.org and matplotlib figures.  Use when
+  creating, changing or reviewing a Python project.
 license: MIT
 compatibility: claude-code opencode
 metadata:
   requires:
+    - dev-conventions
     - git-conventions
   stack: python
 ---
 
 ## When to use
 
-Load before creating or modifying one of my Python projects —
-writing `pyproject.toml`, source files, docstrings, tests, CI
-workflows, or configuration files.  Also use when porting
-generic config improvements back to the skeleton template.
+Load this skill before you create or change a Python project of the
+user: `pyproject.toml`, source, docstrings, tests, CI, docs or
+configuration.  Also load it to port a generic improvement back to
+the skeleton.
 
----
+This skill holds only what no tool enforces.  Ruff and pre-commit
+enforce quotes, line length, import order, formatting and whitespace.
+Do not hand-check these rules; run the hooks.
 
-## Git workflow
+Full CI and docs configuration is in [reference.md](reference.md).
 
-This skill covers Python-specific conventions.  For git workflow
-(two-branch flow, conventional commits, pre-commit hooks,
-dependabot, tagging/releases), load the `git-conventions` skill.
+## Design
 
-### Skeleton repo
+These rules extend the principles in `dev-conventions`.
 
-The skeleton template lives at
+- Write functions.  Write a class only when state and behaviour
+  really belong together.
+- Do not write mixins.
+- Use built-ins before custom machinery.  Select an implementation
+  with `getattr` or an `importlib` dotted path, not a registry.
+  Check subclasses with `__init_subclass__`, not with a metaclass.
+- Do not accept a keyword argument that the function does not use.
+  Do not add `**kwargs` "for later".
+- Scripts have no mode switches.  Write one config file for each
+  variant.  Duplication between configs is acceptable.
+- Annotate every function signature.  Use `X | None` and `list[X]`.
+- Do not use `ty`.
+
+## Project setup
+
+New projects start from the skeleton
 <https://github.com/MArpogaus/minimal_python_project_skeleton>.
-It is the starting point for new projects and is kept in sync with
-this skill (last aligned 2026-08-10).  Where the two disagree, this
-skill is the authority — and fix the skeleton in the same pass.
+When the skeleton and this skill disagree, this skill is correct.
+Fix the skeleton in the same pass.
 
-### Initial project setup
+1. Clone the skeleton and remove its `.git` folder.
+2. Run `git init`.  Commit only `.gitignore` and
+   `.pre-commit-config.yaml` as `chore: init`.
+3. Create the `dev` branch and switch to it.
+4. Adapt the metadata, the package directory and the dependencies.
+   Commit on `dev`.
 
-1. **Clone the skeleton** to the desired project location:
-   ```
-   git clone https://github.com/MArpogaus/minimal_python_project_skeleton <new-project>
-   cd <new-project>
-   ```
-2. **Remove the `.git` folder** to detach from upstream:
-   ```
-   rm -rf .git
-   ```
-3. **Re-initialise** with just `.gitignore` and
-   `.pre-commit-config.yaml` staged:
-   ```
-   git init
-   git add .gitignore .pre-commit-config.yaml
-   git commit -m "chore: init"
-   ```
-4. **Create `dev` branch** and switch to it:
-   ```
-   git branch dev
-   git checkout dev
-   ```
-5. **Adapt files** for the new project — `pyproject.toml` metadata,
-   package directories, source module names, and any project-
-   specific dependencies.
-6. **Commit the adaptations** on `dev`.
-7. **Start implementation.**
+When you make a generic config change (hook revisions, CI, ruff
+rules), apply the same change to the skeleton.  Commit it there
+separately, for example `chore: bump pre-commit ruff rev`.
 
-### Skeleton update flow
-
-When making a generic config improvement that could benefit
-future projects (e.g. updating pre-commit hook revs, adding
-dependabot, improving CI workflows, refining ruff rules), also
-apply the same change to the skeleton repository.
-
-This keeps the skeleton evergreen and avoids repeating the
-same update across every project.
-
-Procedure:
-1. Clone the skeleton if not already present:
-   ```
-   git clone https://github.com/MArpogaus/minimal_python_project_skeleton
-   ```
-2. Change config in current project on `dev`.
-3. Cherry-pick / copy the same change to the skeleton.
-4. Commit skeleton update separately with message like:
-   `chore: bump pre-commit ruff rev to v0.11.10`
-   or
-   `ci: add dependabot config`
-
----
-
-## Project structure
-
-Follow the skeleton layout exactly:
+Layout:
 
 ```
-<project>/
-├── .github/
-│   └── workflows/
-│       ├── docs.yaml           # MkDocs + mike → gh-pages
-│       ├── example.yaml        # (optional) run examples/
-│       ├── pre-commit.yaml     # pre-commit/action@v3
-│       ├── release.yaml        # build → PyPI + GitHub Release
-│       └── test.yaml           # matrix test on push
-├── .gitignore                  # generated by gi
-├── .pre-commit-config.yaml     # ruff, hooks, commitizen
-
-├── CONTRIBUTING.md             # adapted from skeleton
-├── LICENSE
-├── README.org                  # primary docs (org-mode)
-├── pyproject.toml              # build, deps, tool config
-├── src/
-│   └── <package_name>/
-│       ├── __init__.py         # docstring, public API
-│       ├── module_a.py
-│       └── module_b.py
-├── test/
-│   ├── conftest.py             # shared fixtures
-│   ├── test_module_a.py
-│   └── test_module_b.py
-├── examples/                   # (optional) runnable examples
-│   └── minimal.py
-├── .envrc                      # direnv: layout python
-└── uv.lock                     # committed
+.github/workflows/   test, pre-commit, docs, release (+ example)
+src/<package>/       __init__.py has a one-line docstring
+test/                conftest.py, test_<module>.py
+docs/                index.md, api/<module>.md
+notebooks/           jupytext py:percent files
+README.org           source; README.md is exported and committed
+CHANGELOG.md         written by `cz bump` only
+pyproject.toml  mkdocs.yml  uv.lock  .envrc  .pre-commit-config.yaml
 ```
 
-`CHANGELOG.md` is tracked, but never edited by hand — `cz bump`
-regenerates it during the release process.
-
-### Dependabot
-
-`.github/dependabot.yml`:
-
-```yaml
-version: 2
-updates:
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    target-branch: "dev"
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    target-branch: "dev"
-```
-
----
+Source modules use `# %%` cell markers for sections: description,
+imports, globals, private helpers, public functions.
 
 ## pyproject.toml
 
-### Build system
+Use setuptools.  Do not use hatchling.
 
 ```toml
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = ["setuptools >= 61", "setuptools_scm>=7"]
-```
 
-### Project metadata
-
-```toml
 [project]
+name = "<hyphenated-name>"
 dynamic = ["version"]
 requires-python = ">=3.11"
-readme = "README.md"   # generated from README.org, committed
-name = "<hyphenated-package-name>"
-classifiers = [
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-]
+readme = "README.md"
 dependencies = []  # keep minimal
 
-[project.urls]
-Repository = "https://github.com/<org>/<repo>"
-Issues = "https://github.com/<org>/<repo>/issues"
-Changelog = "https://github.com/<org>/<repo>/blob/dev/CHANGELOG.md"
+[project.optional-dependencies]
+test = ["pytest", "pytest-xdist"]
+docs = ["mkdocs-material", "mkdocstrings[python]", "mike"]
+develop = ["<package>[test]", "commitizen", "pre-commit", "ruff"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
-```
-
-### Version — exactly one source
-
-The version lives in **git tags only** (`dynamic = ["version"]` +
-`setuptools_scm`).  Never write a literal version string into
-`pyproject.toml` or `__init__.py`.
-
-When the package needs `__version__` at runtime, read it back from
-the installed metadata — never retype it:
-
-```python
-from importlib.metadata import version
-
-__version__ = version("<hyphenated-package-name>")
-```
-
-A hardcoded `version = "0.3.0"` in `pyproject.toml` **and** a
-`__version__ = "0.3.0"` in `__init__.py` is the common failure: the
-two drift on the first release someone rushes.  This applies to any
-build backend, including hatchling.
-
-### Optional dependency groups
-
-```toml
-[project.optional-dependencies]
-test = [
-  "pytest",
-  "pytest-xdist",
-]
-docs = [
-  "mkdocs-material",
-  "mkdocstrings[python]",
-  "mike",
-]
-develop = [
-  "<package_name>[test]",
-  "commitizen",
-  "ipykernel",
-  "pre-commit",
-  "pylsp-rope",
-  "python-lsp-ruff",
-  "python-lsp-server[all]",
-  "ruff",
-]
-```
-
-Keep package names in `develop` aligned with the project.
-
-### Ruff
-
-```toml
-[tool.ruff]
-indent-width = 4
-line-length = 88
-target-version = "py311"
 
 [tool.ruff.lint]
 select = ["I", "E", "F", "D", "UP"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
-```
 
-**Always set `convention = "numpy"`.**  Without it ruff warns on
-every run that `D203`/`D211` and `D212`/`D213` are mutually
-incompatible, and it reports rules numpy style does not use.
-Measured on a 3 000-line package: 203 findings without the
-setting, 181 with it — the 22 it drops are `D107`, `D402`,
-`D413` and `D417`, none of which belong to numpy style.
-
-| Select | Purpose |
-|--------|---------|
-| `I` | isort / import ordering |
-| `E` | pycodestyle errors (indentation, whitespace, blanks) |
-| `F` | pyflakes (undefined names, unused imports, syntax errors) |
-| `D` | pydocstyle (missing or malformed docstrings) |
-| `UP` | pyupgrade (modern syntax like f-strings, `set` literals) |
-
-### Pytest
-
-```toml
 [tool.pytest.ini_options]
 addopts = ["-v", "--tb=short", "-n", "auto", "--dist=loadfile"]
 testpaths = ["test"]
-```
 
-### Commitizen
-
-```toml
 [tool.commitizen]
-annotated_tag = true
-major_version_zero = true
 name = "cz_conventional_commits"
-tag_format = "v$version"
-update_changelog_on_bump = true
 version_provider = "scm"
 version_scheme = "pep440"
+tag_format = "v$version"
+annotated_tag = true
+major_version_zero = true
+update_changelog_on_bump = true
 ```
 
-### Coverage (optional, when tests matter)
+Always set `convention = "numpy"`.  Without it, ruff reports rules
+that NumPy style does not use.
 
-```toml
-[tool.coverage.report]
-fail_under = 90
-show_missing = true
+### One version source
 
-[tool.coverage.run]
-branch = true
-omit = ["test/*"]
-source = ["src/<package_name>"]
-```
-
----
-
-## Pre-commit config
-
-### File: `.pre-commit-config.yaml`
-
-```yaml
-repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.10  # run `pre-commit autoupdate` periodically
-    hooks:
-      - id: ruff
-        args: [--fix]
-      - id: ruff-format
-
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: check-added-large-files
-      - id: check-executables-have-shebangs
-      - id: check-merge-conflict
-      - id: check-shebang-scripts-are-executable
-      - id: check-toml
-      - id: check-yaml
-      - id: end-of-file-fixer
-      - id: mixed-line-ending
-      - id: trailing-whitespace
-
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.14.0
-    hooks:
-      - id: pretty-format-yaml
-        args: [--autofix, --indent, "2"]
-      - id: pretty-format-toml
-        args: [--autofix]
-        exclude: ^uv\.lock$   # uv owns it; formatting reorders the whole file
-      - id: pretty-format-ini
-        args: [--autofix]
-
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.7.2
-    hooks:
-      - id: commitizen
-        stages: [commit-msg]
-      - id: commitizen-branch
-        stages: [pre-push]   # checks origin/HEAD..HEAD
-```
-
-Run `pre-commit autoupdate` periodically.  When updating revs,
-also update the skeleton.
-
----
-
-## Coding style — precise rules
-
-### Line length & formatting
-
-- Hard limit: **88 characters** (enforced by ruff-format).
-- Indent: **4 spaces per level** (no tabs).
-- Continuation lines: use parentheses or backslash; ruff-format
-  handles this automatically.
-
-### Quotes
-
-- **Double quotes** for all Python strings (`"hello"`, not
-  `'hello'`).
-- Exception: single quotes for strings that contain double
-  quotes (`'say "hello"'`), but this is rare.
-- Docstrings: triple double quotes (`"""..."""`) always.
-
-### Imports
-
-Order: **stdlib → third-party → local** (enforced by ruff `I`).
-Sections separated by a single blank line.  Within each section,
-sort alphabetically by full module path.
+The version is in git tags only.  Never write a literal version into
+`pyproject.toml` or `__init__.py`.  When the package needs
+`__version__`, read the installed metadata:
 
 ```python
-# correct
-import logging
-import sys
-from pathlib import Path
+from importlib.metadata import version
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-
-from . import utils
-from .models import DensityRegressionModel
+__version__ = version("<hyphenated-name>")
 ```
 
-Rules:
-- **No blank lines within stdlib section** — all stdlib imports
-  form one contiguous block.
-- Always use `import numpy as np` / `import pandas as pd` /
-  `import matplotlib.pyplot as plt`.
-- `from` imports for specific names: `from pathlib import Path`,
-  `from collections.abc import Callable`.
-- Avoid star imports (`from X import *`) — never.
-- Type-only imports go inline to avoid circular imports:
-  `from typing import TYPE_CHECKING` / `if TYPE_CHECKING:`.
-
-### Type annotations
-
-- Annotate **every function signature**: parameters and return
-  type.
-- Prefer Python 3.10+ syntax: `X | None` not `Optional[X]`,
-  `list[X]` not `List[X]`.
-- Exception: if `requires-python` is `<3.10` (unlikely for my
-  projects), use `from __future__ import annotations` at the
-  top of the module.
-
-```python
-# correct (py311+)
-def fit(
-    x: np.ndarray,
-    y: np.ndarray | None = None,
-    alpha: float = 0.05,
-) -> tuple[np.ndarray, np.ndarray]:
-    ...
-
-# correct with TYPE_CHECKING guard for complex types
-if TYPE_CHECKING:
-    from matplotlib.figure import Figure
-```
-
-### Naming
-
-| Element | Convention | Examples |
-|---------|-----------|----------|
-| **Packages/modules** | `snake_case` | `probabilistic_forecast_validation`, `reliability.py` |
-| **Classes** | `PascalCase` | `DensityRegressionModel`, `TestReliability` |
-| **Functions/methods** | `snake_case` | `plot_reliability_diagram()`, `_get_bin_edges()` |
-| **Private** | leading `_` | `_consistency_resample()`, `_bin_data()` |
-| **Constants** | `UPPER_SNAKE_CASE` | `__LOG_LEVEL__`, `DEFAULT_N_BINS` |
-| **Type vars** | short `PascalCase` | `T`, `T_co` |
-
-### String formatting
-
-- **f-strings** always (never `%`-formatting or `.format()`).
-
-```python
-# correct
-logger.info("Processing %d samples", n_samples)
-name = f"{prefix}_{timestamp}"
-```
-
-For logging, use lazy `%`-style formatting (as above) —
-loggers don't evaluate the string until the level is enabled.
-
-Whitespace & blank lines
-
-- Two blank lines before class definitions.
-- One blank line between function/method definitions.
-- One blank line between import sections.
-- No trailing whitespace (enforced by pre-commit).
-- One trailing newline at EOF (enforced by pre-commit).
-
----
-
-## Docstring style — precise NumPy specification
-
-### Rule: every public function, method, and class gets a docstring
-(ruff D enforces this).  Private functions (prefixed `_`) may
-optionally have docstrings.
-
-### Function docstring
-
-```python
-def func_name(
-    param1: type,
-    param2: type,
-    *,
-    kwarg1: type = default,
-) -> ReturnType:
-    """Short single-line description ending with a period.
-
-    Optional second paragraph with more detail, wrapping at
-    72 characters per line.
-
-    Parameters
-    ----------
-    param1 : type
-        Description of the parameter.  Wrap at 72 chars.
-    param2 : type
-        Description.
-    kwarg1 : type, optional
-        Description, by default ``default``.
-
-    Returns
-    -------
-    ReturnType
-        Description of the return value.
-
-    Raises
-    ------
-    ValueError
-        If some condition is met.
-
-    Examples
-    --------
-    >>> func_name(1.0, 2.0)
-    3.0
-    """
-```
-
-### Class docstring
-
-```python
-class MyModel:
-    """Short description of the model.
-
-    Parameters
-    ----------
-    param1 : type
-        Passed to __init__.
-
-    Attributes
-    ----------
-    attr1 : type
-        Description.
-    """
-
-    def method1(self) -> ReturnType:
-        """Short description.
-
-        Parameters
-        ----------
-        param1 : type
-            Description.
-
-        Returns
-        -------
-        ReturnType
-            Description.
-        """
-```
-
-### Formatting rules (exact)
-
-1. **Section headers**: the header name, then a line of dashes
-   **exactly as long as the header** underneath.  numpydoc and
-   ruff `D` both reject a shorter or longer underline.
-
-   ```
-   Parameters
-   ----------
-   Returns
-   -------
-   Raises
-   ------
-   ```
-
-2. **Parameter entries**: `name : type` — exactly one space before
-   and after the colon.  Type on same line.  Description indented
-   on the next line.
-
-3. **Optional parameters**: append `, optional` after the type.
-   End the description with `, by default ``value``.`
-
-4. **Multi-line descriptions**: continuation lines indented to
-   align with the first description line.
-
-5. **Types**: use the actual Python type annotation string:
-   `np.ndarray`, `str`, `int`, `tuple[int, int]`,
-   `plt.Axes | None`.
-
-6. **Inline code / literals**: double backticks: `` ``"csv"`` ``,
-   `` ``"feather"`` ``, `` ``ffill`` ``.
-
-7. **Summary line**: must be a complete sentence ending with a
-   period.  No blank line after the triple-quote opening.
-
-8. **Sections to include** (in order, as needed):
-   - `Parameters` (omit if none)
-   - `Returns` (always, even if `None`)
-   - `Raises` (omit if none)
-   - `Attributes` (for classes)
-   - `Methods` (for classes)
-   - `Examples`
-   - `References`
-   - `Notes`
-
-### Module docstring
-
-```python
-"""Build feature matrix X and target matrix Y from raw CSV data."""
-```
-
-### `__init__.py` docstring
-
-A one-line summary of the package, like any module docstring.  The
-README reaches the docs through `docs/index.md` (see "docs.yaml").
-
----
-
-## Imports — precise conventions
-
-### Order (within each section, alphabetical by full module path)
-
-```python
-# ── stdlib ──────────────────────────────────────────────────────
-import argparse
-import logging
-import sys
-from collections.abc import Callable
-from pathlib import Path
-
-# ── third-party ─────────────────────────────────────────────────
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import tensorflow as tf
-import tensorflow_probability as tfp
-import yaml
-from tensorflow_probability import distributions as tfd
-
-# ── local ───────────────────────────────────────────────────────
-from . import utils
-from .models import DensityRegressionModel
-```
-
-### Aliases (standard)
-
-| Full path | Alias |
-|-----------|-------|
-| `numpy` | `np` |
-| `pandas` | `pd` |
-| `matplotlib.pyplot` | `plt` |
-| `tensorflow` | `tf` |
-| `tensorflow.keras` | `K` |
-| `tensorflow_probability` | `tfp` |
-| `tensorflow_probability.distributions` | `tfd` |
-| `tensorflow_probability.bijectors` | `tfb` |
-
----
-
-## UV environment
-
-### `.envrc` (direnv)
-
-```bash
-export VIRTUAL_ENV=".venv"
-layout python
-```
-
-### Commands
-
-| Command | Purpose |
-|---------|---------|
-| `uv sync` | create venv + install deps from lockfile |
-| `uv lock` | update lockfile after changing `pyproject.toml` |
-| `uv run python` | run within the venv |
-| `uv run pytest` | run tests within the venv |
-| `uv add <pkg>` | add runtime dependency |
-| `uv add --dev <pkg>` | add dev dependency |
-| `uv remove <pkg>` | remove dependency |
-| `uv build` | build source + wheel |
-
-Commit `uv.lock`.
-
-`uv run` and `uv sync` re-sync `.venv` and can replace the interpreter
-under a running kernel.  In a project where the user manages the
-environment, an agent runs none of the commands above: it uses the
-existing `.venv/bin/python` read-only, or the system `python3` for a
-quick check, and reports a missing package.  When in doubt, ask.
-
----
-
-## Matplotlib plotting
-
-### Pattern (exact)
-
-```python
-def plot_something(
-    data: np.ndarray,
-    *,
-    ax: plt.Axes | None = None,
-) -> plt.Figure:
-    """Short description.
-
-    Parameters
-    ----------
-    data : np.ndarray
-        Description.
-    ax : plt.Axes | None, optional
-        Matplotlib axes to plot on, by default ``None`` (creates
-        new figure).
-
-    Returns
-    -------
-    plt.Figure
-        The figure object.
-    """
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(8, 4.5))
-    else:
-        fig = ax.figure
-
-    ax.plot(data, ...)
-    ax.axhline(1.0, color="#d62728", linestyle="--", linewidth=0.7)
-    fig.tight_layout()
-    return fig
-```
-
-### Rules
-
-1. **Always return `plt.Figure`** — never `None`, never `plt`.
-2. **Accept optional `ax`** parameter — lets callers compose
-   subplots.
-3. **Call `fig.tight_layout()`** before returning.
-4. **Global settings** at module top via `plt.rcParams.update()`.
-5. **Close figures** downstream: `plt.close(fig)` after saving.
-6. **Save both formats**: PDF (dpi=300) + PNG (dpi=150).
-7. **Color palette**:
-   | Role | Colour |
-   |---|---|
-   | Actual data / observations | `#333333` |
-   | Model / predicted median | `#1f77b4` |
-   | Reference line (perfect) | `#d62728` |
-   | CI fill (primary) | `#1f77b4` with `alpha=0.25` |
-   | CI fill (secondary) | `#2c8ad4` |
-   | CI fill (tertiary) | `#3a9ee6` |
-   | Histogram bars | `steelblue` with white edge |
-
----
-
-## Test conventions
-
-### Structure
-
-- Tests live in `test/`, mirroring `src/` layout.
-- Class-based: `class TestFunctionName:`.
-- One test class per function / logical unit.
-- One file per source module: `test_<module>.py`.
-
-### conftest.py
-
-```python
-import numpy as np
-import pytest
-
-
-@pytest.fixture(autouse=True)
-def set_seed() -> None:
-    """Set random seed at the beginning of all tests."""
-    np.random.seed(42)
-
-
-@pytest.fixture()
-def sample_array() -> np.ndarray:
-    """Return a standard test array."""
-    return np.array([0.1, 0.3, 0.5, 0.7, 0.9])
-```
-
-### Test methods
-
-```python
-class TestFunctionName:
-    """Tests for function_name."""
-
-    def test_basic_case(self) -> None:
-        """Test with standard inputs."""
-        result = function_name(valid_input)
-        assert result == expected_value
-
-    def test_edge_case_empty(self) -> None:
-        """Test with empty input."""
-        result = function_name(np.array([]))
-        assert len(result) == 0
-
-    def test_invalid_input_raises(self) -> None:
-        """Test that invalid input raises ValueError."""
-        with pytest.raises(ValueError, match="must be positive"):
-            function_name(-1)
-```
-
-### Naming
-
-- `test_<what>_when_<condition>` — describe the scenario, not
-  the expectation.
-- Examples:
-  - `test_returns_correct_number_of_bins`
-  - `test_raises_error_for_empty_forecasts`
-  - `test_consistency_bars_within_bounds`
-
-### Parametrized tests
-
-```python
-@pytest.mark.parametrize(
-    "n_bins,expected",
-    [
-        (5, 5),
-        (10, 10),
-        (20, 20),
-    ],
-)
-def test_n_bins_parameter(n_bins: int, expected: int) -> None:
-    """Test that n_bins is respected."""
-    ...
-```
-
-### Assertions
-
-- `assert` (not `self.assert*`).
-- `pytest.raises(SomeException, match="...")` for expected errors.
-- `pd.testing.assert_frame_equal(a, b)` for DataFrame equality.
-- `np.testing.assert_array_equal(a, b)` or
-  `np.testing.assert_allclose(a, b)` for array equality.
-
----
+### Pre-commit
+
+The hooks are ruff (`--fix`) and ruff-format, the standard
+`pre-commit-hooks` checks, the pretty-format hooks for YAML, TOML
+and INI, and commitizen on `commit-msg` and `pre-push`.  Exclude
+`uv.lock` from `pretty-format-toml`, because uv owns that file.  The
+full file is in [reference.md](reference.md).
+
+## uv and the environment
+
+The environment and the lock file belong to the user.  Do not run
+`uv sync`, `uv run`, `uv add`, `uv remove` or `uv lock` unless the
+user asks.  `uv run` and `uv sync` re-sync `.venv` and can replace
+the interpreter under a running kernel.
+
+- Use the existing `.venv/bin/python` read-only.  For a quick check,
+  use the system `python3`.
+- Report a missing package.  Do not install it.
+- `uv.lock` is committed.  `.envrc` holds `layout python` for direnv.
+- When in doubt, ask.
+
+## Docstrings
+
+Every public module, class, function and method gets a NumPy
+docstring.  Ruff `D` checks presence and form.
+
+- The summary line is one sentence that ends with a period.
+- Sections, in this order when needed: `Parameters`, `Returns`,
+  `Raises`, `Attributes`, `References`, `Notes`.
+- An underline of dashes has the same length as its header.
+- A parameter entry is `name : type`.  For an optional parameter,
+  write `type, optional` and end with ``by default ``value``.``.
+- Write mathematics in LaTeX: `:math:` inline, `.. math::` for a
+  block.
+- Docstrings are API reference only.  Do not put examples, tutorials
+  or background in a docstring or on an API page.
+- Usage examples live only in notebooks.
 
 ## Notebooks
 
-Never commit `.ipynb` as the source.  Embedded base64 outputs
-destroy diffs and merge conflicts become unresolvable.
+Notebooks are jupytext `py:percent` files.  The `.py` file is the
+source.  Ignore `notebooks/*.ipynb` in git.  Regenerate a notebook
+with `uvx jupytext --to ipynb <name>.py`.  A notebook with a Colab
+badge is the one exception: track that single `.ipynb` without
+output and regenerate it in the same commit as its `.py`.
 
-- Notebooks are **jupytext `py:percent` files**: plain `.py` with
-  `# %%` cell markers and prose in `# %% [markdown]` cells.  The
-  `.py` file is always the source of truth.
-- Add the generated notebooks to `.gitignore`:
-  ```
-  notebooks/*.ipynb
-  ```
-- Add a `notebooks` dependency group:
-  ```toml
-  notebooks = [
-    "jupytext",
-    "ipykernel",  # so JupyterLab / VS Code can run the generated .ipynb
-  ]
-  ```
-- Regenerate on demand: `uvx jupytext --to ipynb <name>.py`.
-- VS Code and Emacs run the `.py` cells directly, so most work
-  needs no conversion at all.
-- **One exception**: a notebook that needs a public "Open in
-  Colab" badge requires a tracked `.ipynb`.  Track that single
-  file output-stripped, un-ignore it explicitly, and regenerate it
-  in the same commit as its `.py`:
-  ```
-  !notebooks/demo_colab.ipynb
-  ```
-- Give `notebooks/` a `README.md` with a one-line-per-notebook
-  table and the "edit the `.py`, never the `.ipynb`" rule, so a
-  new reader cannot get it wrong.
+## Tests
 
----
+- Tests live in `test/`, one `test_<module>.py` for each module, one
+  `class Test<Unit>` for each function or logical unit.
+- pytest-xdist runs the suite in parallel (`-n auto`).  Tests must
+  not depend on order or shared state.
+- Use `pytest.raises(..., match=...)`, `np.testing.assert_allclose`
+  and `pd.testing.assert_frame_equal`.
+- Prove each new test red.  Break the code under test, see the test
+  fail, then restore the code.  A test that never failed proves
+  nothing.
+- Mark each test that trains or fits a model `@pytest.mark.slow`.
 
-## CI / GitHub workflows
+## CI
 
-### `.github/workflows/` files
+| Workflow | Trigger | Job |
+|---|---|---|
+| `test.yaml` | push, PR | ubuntu, windows, macos, each with the oldest and newest supported Python; `-m "not slow"` |
+| `test.yaml` | nightly cron, `workflow_dispatch` | full suite, `timeout-minutes` set |
+| `pre-commit.yaml` | push | `pre-commit/action` |
+| `docs.yaml` | push to `main`, `dev`, `dev-*` | MkDocs with mike to `gh-pages` |
+| `release.yaml` | `main`, `v*` tags | TestPyPI from `main`; PyPI and GitHub Release from tags |
 
-| Workflow | Event | Purpose |
-|----------|-------|---------|
-| `test.yaml` | push | matrix (ubuntu + windows) × Python 3.11–3.13 |
-| `pre-commit.yaml` | push | `pre-commit/action@v3.0.1` |
-| `docs.yaml` | push to `main`, `dev`, `dev-*` | MkDocs site, one version per branch with mike on `gh-pages` |
-| `release.yaml` | push to `main`, `v*` tags | build; TestPyPI from `main` and tags; PyPI + GitHub Release from `v*` tags |
-| `example.yaml` | push | run `examples/minimal.py` across Python versions |
+Pin actions to SHAs with `pinact` (see `git-conventions`).
 
-### test.yaml
+## Documentation
 
-```yaml
-name: Run tests
-on: [push]
-jobs:
-  build:
-    strategy:
-      matrix:
-        platform: [ubuntu-latest, windows-latest]
-        python-version: ['3.11', '3.12', '3.13']
-    runs-on: ${{ matrix.platform }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - run: pip install .[test]
-      - run: pytest -n auto
-```
+The docs are a MkDocs Material site.  mkdocstrings renders the API
+from the NumPy docstrings.  mike publishes one version for each
+branch to `gh-pages`.
 
-### Slow suites: split fast PR runs from a nightly full run
+- `main` deploys as `latest`, the default version.  Each dev branch
+  deploys under its own name.
+- `mkdocs.yml` sets `strict: true`.
+- `docs/index.md` holds only `--8<-- "README.md"`.
+- Write README links to repository files as full GitHub URLs.
+  Relative links break the strict build and PyPI.
+- Each module gets one page `docs/api/<module>.md` with
+  `::: <package>.<module>`.
+- Set GitHub Pages to branch `gh-pages`, path `/ (root)`.  A `/docs`
+  path fails the build.
 
-When the suite trains models or fits anything, a full matrix on
-every push wastes minutes per commit and people start skipping CI.
-Mark the expensive tests and give CI two jobs:
+## Changelog and releases
 
-```toml
-[tool.pytest.ini_options]
-markers = [
-  "slow: long fit/training tests — excluded from PR CI, run nightly",
-]
-```
-
-```yaml
-on:
-  push:
-  pull_request:
-  workflow_dispatch:      # manual full run from the Actions tab
-  schedule:
-    - cron: "17 3 * * *"  # off-peak minute, not :00
-
-jobs:
-  fast:
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
-    steps:
-      - run: pytest -q -m "not slow"
-  full:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    timeout-minutes: 120
-    steps:
-      - run: pytest -q
-```
-
-Rules: mark **anything that trains** `@pytest.mark.slow`; always
-set `timeout-minutes` on the full job; keep `workflow_dispatch` so
-the full suite can be demanded before a release.
-
-### pre-commit.yaml
-
-```yaml
-name: run pre-commit hooks
-on: [push]
-jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-      - uses: pre-commit/action@v3.0.1
-```
-
-### docs.yaml
-
-The docs are a MkDocs site (Material theme, API pages from the numpy
-docstrings through mkdocstrings) published with `mike` to a
-`gh-pages` branch.  `main` is the default version `latest`; every dev
-branch gets its own version beside it, so no push overwrites another.
-Set Settings -> Pages -> Source to *Deploy from a branch*:
-`gh-pages`, `/ (root)`, not `/docs`: mike writes to the branch root,
-and a `/docs` source fails the Pages build with "No such file or
-directory".  Check and fix it with `gh api`:
-
-```bash
-gh api repos/<owner>/<repo>/pages -q .source
-gh api -X PUT repos/<owner>/<repo>/pages \
-  -f 'source[branch]=gh-pages' -f 'source[path]=/'
-```
-
-The site root answers 404 until the first deploy from `main` sets the
-default version; the dev versions live under `/<branch>/`.
-
-```yaml
-name: docs
-on:
-  push:
-    branches: [main, dev, 'dev-*']
-  workflow_dispatch:
-permissions:
-  contents: write               # mike pushes gh-pages
-concurrency:
-  group: gh-pages               # every run pushes the same branch
-  cancel-in-progress: false
-jobs:
-  docs:
-    runs-on: ubuntu-latest
-    env:
-      REF: ${{ github.ref_name }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0        # mike reads and writes gh-pages
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: pip install -e .[docs]
-      - run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ "$REF" = main ]; then
-            mike deploy --push --update-aliases main latest
-            mike set-default --push latest
-          else
-            mike deploy --push "$REF"
-          fi
-```
-
-`mkdocs.yml`, the minimum:
-
-```yaml
-site_name: <package_name>
-repo_url: https://github.com/<owner>/<project>
-strict: true                    # a broken link or a stale docstring fails the build
-theme:
-  name: material
-plugins:
-  - search
-  - mkdocstrings:
-      handlers:
-        python:
-          paths: [src]
-          options:
-            docstring_style: numpy
-markdown_extensions:
-  - pymdownx.snippets
-extra:
-  version:
-    provider: mike
-```
-
-- `docs/index.md` holds only `--8<-- "README.md"`, so the README is
-  the landing page without a copy.  Links in the README to repository files (`CONTRIBUTING.md`,
-  `LICENSE`) are then broken on the site, and `strict` fails the
-  build.  Write them as full GitHub URLs; that also fixes them on PyPI,
-  which renders the same README.
-- One page per module, `docs/api/<module>.md`, holding
-  `::: <package_name>.<module>`.
-- Pin the actions to SHAs with `pinact` in the real workflow (see
-  `git-conventions`).
-
-### dependabot.yml
-
-```yaml
-version: 2
-updates:
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    target-branch: "dev"
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    target-branch: "dev"
-```
-
----
+Commitizen writes `CHANGELOG.md` during `cz bump`.  Never edit the
+changelog by hand.  The release flow is in `git-conventions`.
 
 ## README.org
 
-### Format
+- `README.org` is the source.  Export `README.md` with Emacs and
+  commit both in the same commit.  `pyproject.toml` reads
+  `README.md`.
+- Structure, after the Best-README-Template: badges, title, local
+  TOC, About The Project, Getting Started (Installation, Usage),
+  Contributing, License, Contact.
+- Install instructions use `uv add <package>`.
+- Code blocks use `:session`, a `#+NAME:` and an `:exports` value.
+  Use `code` for imports and plots, `both` when the output helps,
+  `nil` for install blocks.
+- Blocks with the same `:tangle` target become one runnable script.
 
-```org
-# Inspired by: https://github.com/othneildrew/Best-README-Template
-#+OPTIONS: toc:nil
+## Figures
 
-[[badge-urls...]]
-
-* Project Title
-
-#+TOC: headlines 2 local
-
-** About The Project
-...
-** Getting Started
-*** Installation
-#+begin_src bash
-  uv add <package>
-#+end_src
-*** Running the example
-#+begin_src bash
-  uv run python examples/minimal.py
-#+end_src
-** Contributing
-See [[file:CONTRIBUTING.md][contributing guidelines]].
-** License
-Distributed under the license in [[file:LICENSE][LICENSE]].
-** Contact
-...
-```
-
-### Tangled examples
-
-Use org babel to tangle a runnable Python file:
-
-```org
-#+begin_src python :tangle examples/minimal.py :results output
-import numpy as np
-...
-
-if __name__ == "__main__":
-    print("Example ran successfully")
-#+end_src
-```
-
-The tangled file is committed and can be run directly.
-
----
-
-## Source module structure
-
-Use Spyder/Jupyter cell markers to organise files:
-
-```python
-# %% Description ###############################################################
-"""Functions for reliability diagrams.
-
-Provides ...
-"""
-
-# %% imports ###################################################################
-import logging
-from collections.abc import Callable
-
-import matplotlib.pyplot as plt
-import numpy as np
-
-# %% globals / module-level constants #########################################
-__LOGGER__ = logging.getLogger(__name__)
-DEFAULT_N_BINS = 10
-
-# %% private helper functions #################################################
-def _consistency_resample(...) -> ...:
-    ...
-
-# %% public functions ##########################################################
-def plot_reliability_diagram(...) -> plt.Figure:
-    ...
-```
----
-
-## Emacs & org-babel conventions
-
-### README.org as primary source
-
-- `README.org` is the single source of truth for project documentation.
-- `README.md` is generated from `.org` via Emacs org-export (pandoc /
-  ox-md) and **is committed**, with `readme = "README.md"` in
-  `pyproject.toml`.  Regenerate it in the same commit as the `.org`.
-- Committing it costs one export step; leaving it out costs a blank
-  GitHub landing page and a build with no long description, on every
-  project made from the skeleton.
-
-### Code block conventions
-
-Blocks use `:session` to share Python state when stepping through
-in Emacs.  Each logical code unit gets its own block with a
-`#+NAME:` for cross-referencing.
-
-```org
-#+NAME: block-name
-#+begin_src python :session :tangle <path> :exports <mode>
-  ... code ...
-#+end_src
-```
-
-| `:exports` value | Behaviour                        |
-|------------------+----------------------------------|
-| `code`           | show code only (suppress results)|
-| `results`        | show results only                |
-| `both`           | show code and results            |
-| `nil`            | show nothing (hidden blocks)     |
-
-- Use `:exports code` when results are uninteresting
-  (e.g. import blocks, plot creation).
-- Use `:exports both` when results add value (e.g. a `print()`,
-  a DataFrame head, a notebook-style output).
-- Use `:exports nil` for bash install blocks and other
-  non-essential snippets.
-- Use `:tangle <file>` on blocks that contribute to a runnable
-  script.  Multiple blocks with the same `:tangle` target are
-  concatenated in order.
-- Blocks without `:tangle` are for interactive inspection only
-  and do not end up in the tangled file.
-
-### Example structure
-
-```
-*** Quick start
-
-**** Imports
-#+NAME: imports
-#+begin_src python :session :tangle examples/minimal.py :exports code
-  ...
-#+end_src
-
-**** Reliability diagram
-#+NAME: reliability
-#+begin_src python :session :tangle examples/minimal.py :exports code
-  ...
-#+end_src
-```
-
-Tangled output concatenates all `:tangle` blocks into a single
-runnable script preserving order.
-
-### `.dir-locals.el`
-
-Projects may include a `.dir-locals.el` for Emacs directory-local
-variables:
-
-```elisp
-((nil . ((conda-project-env-path . "<env-name>"))))
-```
-
-### `#+RESULTS:` blocks
-
-Every named code block can have a matching `#+RESULTS:` block
-that caches the output for export.  Use these sparingly — only
-when the output is illustrative (DataFrame head, plot SVG link,
-terminal output).
-
-## Key references
-
-- Skeleton template:
-  https://github.com/MArpogaus/minimal_python_project_skeleton
-- Conventional commits:
-  https://www.conventionalcommits.org/
-- Ruff rules:
-  https://docs.astral.sh/ruff/rules/
-- NumPy docstring guide:
-  https://numpydoc.readthedocs.io/en/latest/format.html
-- mkdocstrings (Python handler):
-  https://mkdocstrings.github.io/python/
-- mike:
-  https://github.com/jimporter/mike
-
----
+- A plot function accepts an optional `ax`, creates a figure only when
+  `ax` is `None`, and returns the `plt.Figure`.
+- The caller saves PDF and PNG and then calls `plt.close(fig)`.
+- Write labels with mathematics in LaTeX, for example
+  `r"$\sigma^2$"`.
+- Colours follow the target medium.  For a slide deck, use the theme
+  foreground and accent colours.
+- Across one project, use one colour for each meaning.  Define the
+  colours once and import them.
 
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
 Use the `skill` tool to load them before using this one:
 
-- **git-conventions** — two-branch flow, conventional commits,
+- **dev-conventions**: design principles, verification, review
+  loop, code and documentation style.
+- **git-conventions**: two-branch flow, conventional commits,
   pre-commit hooks, tagging/releases.
