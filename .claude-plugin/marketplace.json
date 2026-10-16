@@ -11,7 +11,7 @@
       "name": "marpogaus-skills",
       "source": "./",
       "version": "0.3.0",
-      "description": "Marcel's recurring project conventions as skills: the way of working (dev conventions, review loop, session finish), git, GTD agenda, Python, Rust, Emacs, self-hosting, ML research projects, paper writing, Beamer presentations, and meta skills (create-skill, repo-tour).",
+      "description": "Marcel's recurring project conventions as skills: the way of working (dev conventions, review loop, session finish, sandbox tools), git, GTD agenda, Python, Rust, Emacs, self-hosting, ML research projects, paper writing, Beamer presentations, and meta skills (create-skill, repo-tour).",
       "license": "MIT",
       "category": "productivity"
     }

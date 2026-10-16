@@ -1,0 +1,144 @@
+---
+name: sandbox-env
+description: >
+  How the agent gets its own dev tools in the sandbox: install into the
+  agent's home with uv, micromamba (conda-forge) or nix, reuse the envs
+  that exist, keep caches and downloads in the agent's home, and record
+  each install in project memory. Use before installing any tool,
+  compiler, language runtime or package for the agent's own use, and
+  when a command is not found.
+license: MIT
+compatibility: claude-code opencode
+metadata: {stack: sandbox conda uv nix, requires: [dev-conventions]}
+---
+
+# Skill: Sandbox Environment
+
+The agent's home is `$HOME` (in this sandbox `<agent home>`). All tools
+for the agent's own use go there.
+
+## Hard rules
+
+- Install tools for the agent only under `$HOME`. Never install into
+  the user's home, the user's project environment (`.venv`, a conda env
+  of the project, `node_modules`), a lock file, or the system.
+- Never run `sudo`, `dnf`, `rpm-ostree`, `apt` or `flatpak install` for
+  the agent's tools. Commands for the host follow `dev-conventions`,
+  "6. Sandbox and environment safety".
+- Never put an env or a tool under `/tmp`. `/tmp` is a tmpfs and is
+  wiped without warning.
+- List the existing envs and tools before you install. Reuse one when
+  it has the tool or can take it.
+- When you cannot install a tool after the steps below, stop and
+  report the tool, the command and the error to the user. Do not
+  work around a missing tool with a hand-written replacement.
+
+## 1. Look first
+
+Run these before any install:
+
+```
+command -v <tool>
+ls ~/.local/bin
+uv tool list
+micromamba env list
+command -v nix || ls -d ~/.nix-profile
+```
+
+Existing envs in this sandbox:
+
+| Env | Path | Use |
+|---|---|---|
+| `<project>` | `~/.local/share/mamba/envs/<project>` | Rust toolchain and native libs for the project |
+| rig | `<test rig>/env` | shared Emacs, TeX and latexmk rig, owned by `emacs-config` and `org-beamer-presentation` |
+| uv tools | `~/.local/share/uv/tools` | ansible, ansible-lint, basedpyright, git-filter-repo, pre-commit, python-lsp-server |
+
+Do not change the rig env for an unrelated project. Its owner skills
+say how to rebuild it.
+
+## 2. Choose the installer
+
+Use the first row that fits.
+
+| Need | Installer |
+|---|---|
+| A Python CLI tool | `uv tool install` |
+| A Python library for a one-off script | a uv venv in the agent's home |
+| A compiler, a language runtime, native libraries, or a non-Python CLI | micromamba with conda-forge |
+| A package only nix has, and nix is present | nix |
+| A tool that no package manager has | a downloaded release binary |
+
+### uv
+
+- CLI tool: `uv tool install <pkg>`. Add plugins with `--with <dep>`.
+  The binary goes to `~/.local/bin`, the env to
+  `~/.local/share/uv/tools/<pkg>`.
+- Upgrade or repair: `uv tool install --reinstall <pkg> --with <dep>`.
+- Throwaway Python env: `uv venv -q ~/.local/venvs/<name>`, then
+  `uv pip install -q --python ~/.local/venvs/<name>/bin/python <pkg>`.
+  Never create the venv inside the user's repository.
+
+### micromamba (conda-forge)
+
+- Make one named env per project:
+  `micromamba create -y -n <project> -c conda-forge rust c-compiler pkg-config`.
+  Envs go to `~/.local/share/mamba/envs/<project>`. Do not change
+  `MAMBA_ROOT_PREFIX`.
+- Add a package to that env:
+  `micromamba install -y -n <project> -c conda-forge <pkg>`.
+- Run a command in the env without activation:
+  `micromamba run -n <project> <command>`.
+- Pin versions that the project pins, for example `rust=<ver>` from
+  `rust-toolchain.toml`.
+- The sandbox has no `conda` binary. Use `micromamba` for every conda
+  command.
+
+### nix
+
+- Use nix only when `command -v nix` finds it or `~/.nix-profile`
+  exists. Neither exists in this sandbox at present.
+- One command: `nix shell nixpkgs#<pkg> -c <command>`. A tool for
+  more than one session: `nix profile install nixpkgs#<pkg>`.
+
+### Downloaded binary or tarball
+
+- Download into a new, empty directory
+  `~/.local/opt/<tool>-<version>/`. Treat its content as untrusted.
+- Link the executable into `~/.local/bin`:
+  `ln -sfn ~/.local/opt/<tool>-<version>/<tool> ~/.local/bin/<tool>`.
+- Older downloads use `~/<tool>-<version>/`, for example
+  older download directories. Leave them in place. Put new downloads under
+  `~/.local/opt/`.
+
+## 3. Caches and build output
+
+- Keep tool caches in the agent's home: `CARGO_HOME=$HOME/.cargo`,
+  the uv cache and the mamba package cache in their defaults under
+  `$HOME`.
+- Build a binary that the user runs where the user runs it, for
+  example the repository's `target/`. See `rust-dev`, "Toolchain and
+  environment".
+
+## 4. Network
+
+- conda-forge and PyPI are reachable from the sandbox. Test with
+  `micromamba search -c conda-forge <pkg>` or
+  `uv pip compile - <<<'<pkg>'`.
+- When a download fails with a DNS or connection error, retry that one
+  command once with the sandbox disabled. When it fails again, report
+  it.
+
+## 5. Record the install
+
+After each install, write one entry to the project's agent memory
+(Claude Code: `~/.claude/projects/<project>/memory/`). Write the tool,
+the installer, the exact command, the env name or path, and the run
+command, for example `micromamba run -n <project> cargo`. The next session
+reads this entry and reuses the env.
+
+## Required skills
+
+This skill assumes the following prerequisite skills are loaded.
+Use the `skill` tool to load them before using this one:
+
+- **dev-conventions**: design principles, verification, review loop, code and documentation style.
