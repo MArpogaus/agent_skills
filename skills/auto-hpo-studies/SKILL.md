@@ -29,7 +29,8 @@ commit, as `git-conventions` says.
   background job). Do not sleep in the foreground.
 - Keep the state files in `~/.cache/hpo/<target-id>/`, never in
   `/tmp`.
-- Stop only on a criterion of step 10.
+- Stop only on a criterion of step 10 or on an invalid baseline
+  run (step 8).
 
 ## State
 
@@ -39,7 +40,7 @@ commit, as `git-conventions` says.
 |---|---|
 | `status` | `running`, `completed` or `failed` |
 | `iter` | iteration number |
-| `change` | `<param>:<old>-><new>` |
+| `change` | `<param>:<old>-><new>`, or `baseline` in iteration 0 |
 | `pid` | process group of the run |
 | `exit` | exit code of the run |
 
@@ -85,7 +86,15 @@ min_loss = row["metrics.min_loss"]
 best_epoch = row["metrics.best_epoch"]
 ```
 
-If no run exists, this is iteration 0: run the baseline config.
+The training script of `ml-project` ("Logging from a training
+script") sets `tags.target`.
+
+If no run exists, this is iteration 0. Iteration 0: skip steps 3 to
+5. Launch the unchanged config with `change` = `baseline` and row
+`0`. When step 8 finds the run valid, tag it `kept`, set the row to
+`committed` and commit `dvc.lock`, the metrics file and
+`hpo_study.md` as `feat(hpo): <target-id> iter 0: baseline`. When it
+is not valid, set the row to `failed`, stop and report.
 
 ### 3. Diagnose the training state
 
@@ -93,7 +102,6 @@ If no run exists, this is iteration 0: run the baseline config.
 
 | Pattern | Conclusion | Action |
 |---|---|---|
-| `min_val_loss` is NaN or inf | unstable | reduce the learning rate, change the schedule, add gradient clipping |
 | `gap > overfit_gap` | overfitting | add regularisation, reduce capacity, increase patience |
 | `min_val_loss > healthy_loss` | underfitting | change the learning rate or schedule, then increase capacity |
 | `min_val_loss <= healthy_loss` | healthy | increase capacity by one step |
@@ -103,7 +111,8 @@ If no run exists, this is iteration 0: run the baseline config.
 Step 3 picks the row. Inside that row's action, change the first
 parameter that is not settled, in this order: learning rate and
 schedule, capacity, regularisation, training budget. A parameter is
-settled when its last 2 changes were reverted.
+settled when its last 2 changes were reverted. Never repeat a change
+that the log shows as `reverted`.
 
 ### 5. Apply the change
 
@@ -111,13 +120,13 @@ Edit the config file. `ml-project` defines its fields.
 
 ### 6. Launch the run
 
-Take `<N>` as the number of the last log row plus 1. The new row has
-status `launched`. Then run:
+Take `<N>` as the number of the last log row plus 1 (0 in iteration
+0). The new row has status `launched`. Then run:
 
 ```bash
 STATE=~/.cache/hpo/<target-id>; mkdir -p "$STATE" logs
 echo running > "$STATE/status"; echo <N> > "$STATE/iter"
-echo "<param>:<old>-><new>" > "$STATE/change"
+echo "<change>" > "$STATE/change"
 nohup setsid sh -c '<run-command> > logs/iter<N>_<target-id>.log 2>&1
                     echo $? > '"$STATE"'/exit' > /dev/null 2>&1 &
 echo $! > "$STATE/pid"
@@ -147,7 +156,8 @@ done
 
 The watcher polls every 30 seconds. A stall is no new output for 10
 polls (5 minutes). On a stall, read the log tail and the GPU use
-(`nvidia-smi`). If the run hangs, abort the process group. This also ends the watcher:
+(`nvidia-smi`). If the run hangs, abort the process group. This also
+ends the watcher:
 
 ```bash
 kill -- -"$(cat "$STATE/pid")"; echo 143 > "$STATE/exit"
@@ -159,10 +169,11 @@ Read the new run with the step 2 query without the `kept` filter.
 The run is valid when all are true:
 
 - `min_val_loss` is not NaN.
-- `best_epoch` is more than 5 and less than `max_epochs - 1`.
-- The run has the tag `target`.
+- `best_epoch` is more than 5 and less than `max_epochs - 1`, with
+  `max_epochs` = `train.max_epochs` in `params.yaml`.
 
-Else write `failed` to `$STATE/status`.
+Else write `failed` to `$STATE/status`. In iteration 0, do what
+step 2 says for iteration 0 instead of step 9.
 
 ### 9. Compare
 
@@ -170,15 +181,18 @@ Else write `failed` to `$STATE/status`.
 better).
 
 - `improvement > 0`: keep the config and fill in the row with status
-  `committed`. Commit `params/<target>.yaml`, `dvc.lock` and
-  `hpo_study.md` as
+  `committed`. Commit `params/<target>.yaml`, `dvc.lock`,
+  `results/<target>/metrics.json` and `hpo_study.md` as
   `feat(hpo): <target-id> iter <N>: <param> <old>→<new>`. The body
   gives `min_val_loss <old>→<new>` and the diagnosis. Tag the run as
-  kept: `mlflow.MlflowClient().set_tag(run_id, "kept", "1")`. Tag the
-  baseline run of iteration 0 the same way.
-- `improvement <= 0` or failed run: restore the config
-  (`git checkout -- params/<target>.yaml dvc.lock`). Set the row
-  status to `reverted` or `failed`.
+  kept: `mlflow.MlflowClient().set_tag(run_id, "kept", "1")`.
+- `improvement <= 0` or failed run: restore the config and the
+  outputs. Set the row status to `reverted` or `failed`:
+
+  ```bash
+  git checkout -- params/<target>.yaml dvc.lock \
+      results/<target>/metrics.json && dvc checkout train@<target>
+  ```
 
 ### 10. Check the stopping criteria
 
@@ -187,10 +201,12 @@ Stop when one of these is true:
 1. **Target reached**: `min_val_loss <= target_loss`.
 2. **Plateau**: the last `patience` iterations each gave
    `improvement < min_delta`.
-3. **Max iterations**: the iteration count reaches `max_iter`.
-4. **Search space exhausted**: all parameters are at their bounds.
-5. **Unstable**: `min_val_loss` is NaN after 3 different changes in a row. Mark
-   this model unstable for this target in the study log.
+3. **Max iterations**: the number of the last log row reaches
+   `max_iter`.
+4. **Search space exhausted**: all search-space parameters are
+   settled or at their bounds.
+5. **Unstable**: `min_val_loss` is NaN after 3 different changes in a
+   row. Mark this model unstable for this target in the study log.
 
 When a criterion is true, write the best config, the best metric and
 the history to the study log. Run `rm -rf "$STATE"`. Commit
@@ -200,43 +216,36 @@ the user. Else remove the state files and go to step 2.
 ## Study log rows
 
 ```markdown
-| # | Date | Param change | Old min_val_loss | New min_val_loss | Δ min_val_loss | Commit | Status |
-|---|------|--------------|------------------|------------------|----------------|--------|--------|
-| 1 | 2026-05-22 | lr: 0.001→0.0005 | -98.16 | -130.84 | 32.68 | abc1234 | committed |
+| # | Date | Param change | Old min_val_loss | New min_val_loss | Δ min_val_loss | Status |
+|---|------|--------------|------------------|------------------|----------------|--------|
+| 1 | 2026-05-22 | lr: 0.001→0.0005 | -98.16 | -130.84 | 32.68 | committed |
 ```
 
 `Δ min_val_loss` is the `improvement` of step 9. Status is
-`launched`, `committed`, `reverted` or `failed`.
-
-## MLflow tags
-
-Tag each run so that step 2 finds it. The iteration number `N` is in
-`$STATE/iter` and in the log row, not in MLflow.
-
-```python
-mlflow.set_tag("target", "<target-id>")
-```
+`launched`, `committed`, `reverted` or `failed`. Find the commit of
+row `<N>` with `git log --grep "iter <N>:"`.
 
 ## Resume after interruption
 
 When the skill loads, check in this order:
 
 1. No `hpo_study.md`: ask the user for the definition (step 1).
-2. `status` is `running` and the process in `pid` is alive: start
+2. The log row of `iter` is not `launched`: go to step 10.
+3. `status` is `running` and the process in `pid` is alive: start
    the watcher again (step 7).
-3. `status` is `running`, the process is gone: read `exit`. `0`: go to
-   step 8. Non-zero or missing: treat the run as failed (step 9).
-4. `status` is `completed`: go to step 8.
-5. `status` is `failed`: go to step 9 (failed run).
-6. No state files and `git diff params/` shows a change: the config
+4. `status` is `running`, the process is gone: read `exit`. `0`: go
+   to step 8. Non-zero or missing: treat the run as failed (step 9).
+5. `status` is `completed`: go to step 8.
+6. `status` is `failed`: go to step 9 (failed run).
+7. No state files and `git diff params/` shows a change: the config
    was edited but not launched. Restore it and go to step 2.
-7. No state files and no diff: go to step 10, then step 2.
+8. No state files and no diff: go to step 10, then step 2.
 
 ## Common patterns
 
 | Situation | Response |
 |---|---|
-| The run crashes at launch | Check the config format, the dependencies and the GPU memory. Fix and run the same iteration again. |
+| The run crashes at launch | Check the config format, the dependencies and the GPU memory. Fix the cause and launch the same change in a new row. |
 | `min_val_loss` improves, `min_loss` stays flat | Continue. `min_val_loss` is the primary metric. |
 
 ---
@@ -244,7 +253,7 @@ When the skill loads, check in this order:
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: design principles, verification, review
   loop, code and documentation style.
