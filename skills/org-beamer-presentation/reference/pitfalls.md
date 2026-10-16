@@ -46,7 +46,7 @@ pages too.
 ## Code frames
 
 - Pin the backend at the end of the file with a local-variables block:
-  `# org-latex-listings: listings`.
+  `# org-latex-src-block-backend: listings`.
 - A headless export needs `#+LATEX_HEADER: \usepackage{listings}`.
   Without it every code frame fails with `Environment lstlisting
   undefined`.
@@ -88,6 +88,8 @@ pages too.
 
 A deck can compute its figures and tables in Python `src` blocks.
 
+- Run example code with org-babel and export `#+RESULTS:`. Never paste
+  output by hand.
 - Header: `#+PROPERTY: header-args:python :python <venv>/bin/python
   :eval never-export :exports results :results output drawer :noweb yes`.
   Shared imports go in a `#+name: setup` block with `:eval no`, pulled
@@ -126,8 +128,8 @@ A deck can compute its figures and tables in Python `src` blocks.
 - **Scaling shrinks text.** A 1200pt-wide graphviz graph at `\linewidth`
   scales to 0.33, so 11pt labels become 4pt. Shorten the labels or raise
   the font size.
-- **Legends.** Put a shared legend in figure coordinates with
-  `bbox_transform=fig.transFigure`. In a per-axis loop, add the label on
+- **Legends.** Put a shared legend at the top of the figure
+  (`fig.legend`), never inside an axes. In a per-axis loop, add the label on
   the first axis only. An empty artist such as `ax.bar([], [])` draws no
   key colour, so use `matplotlib.patches.Patch` proxies.
 - **Overlap.** Never overlay two translucent histograms. Draw them side

@@ -5,7 +5,7 @@
 
 LaTeX reports a box as "at line N", which is the line of that frame's
 .vrb file, not of the .org, so it does not find the slide. This walks
-the log and attributes each warning to the last page shipped out before
+the log and attributes each warning to the next page shipped out after
 it. Boxes under the threshold (default 5pt) are dropped as noise.
 """
 

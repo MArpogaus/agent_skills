@@ -78,7 +78,7 @@ of the file:
 
 #+begin_src org
 ,# Local Variables:
-,# org-latex-listings: listings
+,# org-latex-src-block-backend: listings
 ,# End:
 #+end_src
 

@@ -3,18 +3,16 @@ name: org-beamer-presentation
 description: >
   Author Beamer talks as Org mode files exported to LaTeX and PDF, in the
   user's sparse, figure-first style. Hard rules: at most one frame per
-  minute, figure frames with at most two short lines, at most three
-  bullets on a text frame, theme colours only, no marketing, cut or split
-  instead of shrinking. Covers the default metropolis-dark design, denote
-  file naming with a sidecar figure folder, global biblatex citations,
-  headless export and page-by-page verification. Use for slides, Folien,
-  Vortrag, talk, Beamer, or an `.org` file under a `presentations/`
-  folder.
+  minute, figure frames with at most two lines, at most three bullets on
+  a text frame, theme colours only, no marketing, cut or split instead of
+  shrinking. Covers the default metropolis-dark design, denote file
+  naming with a sidecar figure folder, global biblatex citations,
+  headless export and page-by-page verification. Use when the user says
+  slides, Folien, Vortrag, talk or Beamer, or when an `.org` file under a
+  `presentations/` folder changes.
 license: MIT
 compatibility: claude-code opencode
-metadata:
-  stack: org-mode latex beamer
-  requires: [git-conventions]
+metadata: {stack: org-mode latex beamer, requires: [git-conventions]}
 ---
 
 # Skill: Org mode Beamer presentations
@@ -24,14 +22,14 @@ A presentation is one Org file plus a sidecar folder of figures.
 `.pdf` next to it. Fewer words make a better deck. The figures carry the
 message.
 
-## 1. Hard rules
+## Hard rules
 
-- Budget: at most one frame per minute of talk.
-- A talk of 15 minutes or less has no section, TOC or agenda frames.
-  A longer talk may use the section TOC stanza from
-  `templates/header-extras.org`. One closing frame is allowed. No
-  appendix unless the user asks for one.
-- Figure first. A figure frame has at most 2 lines of at most 12 words.
+- Budget: at most one frame per minute of talk. A talk of 15 minutes or
+  less has no section, TOC or agenda frames. A longer talk may use the
+  section TOC stanza from `templates/header-extras.org`. One closing
+  frame is allowed. No appendix unless the user asks for one.
+- Figure first. A figure frame has at most 2 lines, each at most 12
+  words.
 - A text frame has at most 3 bullets. A bullet has at most 2 lines at
   full width. Never put more than 2 text-only frames in a row.
 - A title has at most 8 words, a plain statement. No marketing, no
@@ -39,21 +37,22 @@ message.
 - Colours: theme foreground plus one accent. One colour per meaning:
   the same dataset has the same colour on every frame.
 - Show at most 2 examples, the two with the largest contrast.
-- No overlays, semicolons, arrows, one-item lists or version history.
-  Show the current state only.
+- No overlays, semicolons, arrow characters in text, one-item lists or
+  version history. Show the current state only. No bold lead-ins and no
+  bold on conclusions.
 - Never invent content. Mark schematic numbers as schematic on the
-  slide.
-- No code or math for a non-specialist audience. Spell out jargon.
+  slide. No code or math for a non-specialist audience. Spell out
+  jargon.
 - When content does not fit, cut it or split the frame. Never shrink
   fonts, spacing or figures to make it fit.
-- A collection of facts goes into a Denote note, not into a deck.
-- Every deck is self-contained with its own sidecar folder. Copy a
-  figure from another deck when necessary.
+- A collection of facts goes into a Denote note, not into a deck. Every
+  deck is self-contained with its own sidecar folder. Copy a figure
+  from another deck when necessary.
 
-## 2. Before writing
+## 1. Before writing
 
-Read 1 or 2 of the user's own decks in
-`<presentations dir>/` and follow their tone:
+Read the first deck of this list, plus one of the same talk type, in
+`<presentations dir>/`. Follow their tone:
 
 - `<recent deck>.org`:
   the accepted model, about 20 words per frame, one figure and two short
@@ -65,11 +64,11 @@ Read 1 or 2 of the user's own decks in
 - `<workshop deck>.org`: a project workshop.
 
 Ask for the talk length and the audience when the request does not
-state them. Autonomous default (see `dev-conventions`, "Autonomous
-sessions"): 15 minutes, specialist audience, slug from `#+title:`, tag
-`presentation`. Calculate the frame budget from the length.
+state them. Autonomous default (see `dev-conventions`, "5. Interactive
+and autonomous sessions"): 15 minutes, specialist audience, slug from
+`#+title:`, tag `presentation`. Calculate the frame budget from the length.
 
-## 3. Design
+## 2. Design
 
 Use metropolis-dark. `templates/header.org` carries it as the active
 stanza. Use Szeged/dolphin or SimplePlus only when the user asks for
@@ -83,16 +82,16 @@ stanzas, each with its trigger. Add a stanza only when a frame needs it.
 `templates/layouts.org` holds the frame layouts. Read it before you write
 a frame.
 
-## 4. Structure, files, citations, export
+## 3. Structure, files, citations, export
 
 **Structure.** `#+OPTIONS: H:2`: `* Section` groups frames, `** Title` is
 one frame, `***` headings are columns or blocks inside the frame. The
 title frame comes from `#+title:`, `#+subtitle:` and `#+author:`.
 Order the deck for a listener without prior knowledge. Introduce each
 model, data set and setup before its results. Add one step of
-complexity per frame. A frame is mostly figure or mostly text. For a figure beside text, use a
-0.55/0.45 or 0.5/0.5 column split with the figure on the left. Text does
-not repeat numbers that the figure shows. Use `:noexport:` to park a
+complexity per frame. A frame is mostly figure or mostly text. For a
+figure beside text, use a 0.55/0.45 or 0.5/0.5 column split with the
+figure on the left. Text does not repeat numbers that the figure shows. Use `:noexport:` to park a
 frame. Lines that start with `# ` inside a frame are the user's speaker
 prose: do not change them. A German deck writes ß, not ss.
 
@@ -104,9 +103,9 @@ prose: do not change them. A German deck writes ß, not ss.
 ```
 
 The identifier matches `#+identifier:`, the tags match `#+filetags:`.
-Ask the user for slug and tags (autonomous default in §2). Put figures in the sidecar folder as
-vector PDF where possible, and set `\graphicspath` to it. Never edit the
-`.tex`.
+Ask the user for slug and tags (autonomous default in section 1). Put
+figures in the sidecar folder as vector PDF where possible, and set
+`\graphicspath` to it. Never edit the `.tex`.
 
 **Citations.** `#+CITE_EXPORT: biblatex ieee`, cited as `[cite:@Key]`.
 Use the global `org-cite-global-bibliography` only, never a per-talk
@@ -144,10 +143,12 @@ emacs -Q --batch -l org -l ox-beamer \
 When the export fails, or before frames with code, tables, math or
 generated figures, read `reference/pitfalls.md`.
 
-## 5. Verification
+## 4. Verification
 
-A clean log does not prove a correct deck. Do all steps after each
-build:
+Run these with the `PATH` of section 3 (the rig). Tool paths are
+relative to this skill's directory. A clean log does not prove a
+correct deck. Do steps 1 to 4 after each build. Do step 5 once, before
+you report.
 
 1. Build the PDF. `pdftotext <file>.pdf - | grep -c '??'` prints `0`.
 2. Count frames with `pdfinfo` and compare with the budget.
@@ -160,24 +161,26 @@ build:
 5. Report a numbered list of problems, one line each, so the user can
    accept items by number.
 
-For a review with subagents, give each reviewer one view:
+Add these views to `dev-conventions`, "4.3 Reviewers":
 
 - Density and budget: frame count, words per frame, text-only runs.
 - Figure correctness and provenance: data source, axes, colours,
   legends.
 - Consistency with the user's style: tone, titles, colours, the decks
-  in §2.
+  in section 1.
 
-## 6. Checklist
+## 5. Checklist
 
 - [ ] Frame count is within the budget
-- [ ] Every frame obeys the hard rules in §1
-- [ ] Tone matches the user's decks in §2
+- [ ] Every frame obeys the hard rules
+- [ ] Tone matches the user's decks in section 1
 - [ ] Filename, `#+identifier:` and `#+filetags:` agree, sidecar exists
 - [ ] Header carries no package that the frames do not use
 - [ ] Every number comes from a source, schematic numbers are marked
 - [ ] PDF builds, no `??`, every page looked at
 - [ ] Numbered problem list handed over
+
+---
 
 ## Required skills
 

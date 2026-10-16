@@ -2,8 +2,8 @@
 #+startup: show2levels
 
 Copy a layout under a =**= frame heading and fill it. Levels assume
-=H:2=: =*= section, =**= frame, =***= column or block. The limits of
-SKILL.md §1 apply to every layout.
+=H:2=: =*= section, =**= frame, =***= column or block. The hard rules
+of SKILL.md apply to every layout.
 
 * Figure frame (the default)
 One figure and at most two short lines. Plain lines need no bullets
@@ -58,12 +58,11 @@ two.
 #+end_src
 
 * Text frame
-At most three bullets, each at most two lines at full width. A short
-bold label above a list is allowed, as in the user's decks.
+At most three bullets, each at most two lines at full width. A block
+title above a list is allowed, as in the user's decks.
 
 #+begin_src org
-,*<Label>*
-
+,*** <Block title> :B_block:
 - <point>
 - <point>
 - <point>
@@ -75,8 +74,8 @@ every block, lines joined with =\\=.
 
 #+begin_src org
 ,*** [[<url>][<Name>]] (<place>) :B_block:
-,*Idee:* <one line> \\
-,*Status:* <one line>
+Idee: <one line> \\
+Status: <one line>
 #+end_src
 
 * Display math
