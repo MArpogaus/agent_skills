@@ -115,6 +115,7 @@ theme:
   name: material
 plugins:
   - search
+  - bibtex: {bib_file: docs/references.bib}
   - mkdocstrings:
       handlers:
         python:

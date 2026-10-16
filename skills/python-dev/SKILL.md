@@ -62,11 +62,9 @@ When the skeleton and this skill disagree, this skill is correct.
 3. Adapt the metadata, the package directory and the dependencies.
    Commit on `dev`.
 
-Resolve `<skeleton checkout>` as `dev-conventions` says ("6. Sandbox
-and environment safety"). Apply the skeleton change there as a
-separate commit, with a message such as
-`chore: bump pre-commit ruff rev`. When `<skeleton checkout>` does not
-resolve or is not mounted, list the change under "Open".
+When a project change also applies to the skeleton, apply the change in
+`<skeleton checkout>` as a separate commit, with a message such as
+`chore: bump pre-commit ruff rev`.
 
 Layout:
 
@@ -100,7 +98,7 @@ dependencies = []  # keep minimal
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-xdist"]
-docs = ["mkdocs-material", "mkdocstrings[python]", "mike"]
+docs = ["mkdocs-material", "mkdocstrings[python]", "mike", "mkdocs-bibtex"]
 develop = ["<hyphenated-name>[test]", "commitizen", "pre-commit", "ruff"]
 
 [tool.setuptools.packages.find]
@@ -230,7 +228,8 @@ branch to `gh-pages`.
   `::: <package>.<module>`.
 - Set GitHub Pages to branch `gh-pages`, path `/ (root)`. A `/docs`
   path fails the build.
-- Keep one `.bib` file, rendered in the docs in author-year style.
+- Keep one `.bib` file, `docs/references.bib`, rendered by
+  `mkdocs-bibtex`. Its `csl_file` option takes an author-year CSL style.
   Cite in a docstring only when the function implements that
   reference. Put no citations in configs. Background and references
   go to the guide pages in `docs/`.
