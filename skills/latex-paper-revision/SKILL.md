@@ -92,11 +92,12 @@ Use this phase when a revised version goes back to a venue.
 
 Compare the revised version against the submitted version (its git
 tag, for example `submitted-v1`). `--flatten` follows the `\input`
-files of both versions:
+files of both versions. Use the engine of the venue (`-lualatex` or
+`-pdf`):
 
 ```bash
-latexdiff --flatten original.tex revised.tex > diff.tex
-latexmk -lualatex diff.tex  # or -pdf: the engine follows the venue
+latexdiff-vc --git --flatten -r <tag> main.tex   # writes main-diff<tag>.tex
+latexmk -lualatex main-diff<tag>.tex
 ```
 
 The output shows additions in blue underline and deletions in red
