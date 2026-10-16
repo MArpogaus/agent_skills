@@ -4,7 +4,7 @@
     tools/box-pages.py deck.log [threshold-pt]
 
 LaTeX reports a box as "at line N", which is the line of that frame's
-.vrb file, not of the .org — useless for finding the slide. This walks
+.vrb file, not of the .org, so it does not find the slide. This walks
 the log and attributes each warning to the last page shipped out before
 it. Boxes under the threshold (default 5pt) are dropped as noise.
 """

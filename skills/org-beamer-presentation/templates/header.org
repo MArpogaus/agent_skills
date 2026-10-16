@@ -1,7 +1,6 @@
-# Generic presentation skeleton.  Pick ONE theme stanza below, delete
-# the other two, fill the placeholders.  Everything a single talk needs
-# beyond this — TikZ, logos, extra packages — is opt-in, see
-# header-extras.org.
+# Presentation skeleton.  metropolis-dark is the default.  Use one of
+# the commented theme stanzas only when the user asks for it, and
+# delete the others.  Everything else is opt-in, see header-extras.org.
 
 #+title:      <TITLE>
 #+date:       [<YYYY-MM-DD Day HH:MM>]
@@ -28,7 +27,7 @@
 # ---------------------------------------------------------------- theme
 # metropolis-dark
 #+LATEX_CLASS_OPTIONS: [dvipsnames, aspectratio=169, smaller]
-#+BEAMER_THEME: metropolis [background=dark, progressbar=frametitle, block=fill, titleformat frame=allcaps]
+#+BEAMER_THEME: metropolis [background=dark, progressbar=frametitle, block=fill, titleformat frame=allcaps, sectionpage=none]
 
 # Szeged / dolphin
 # #+LATEX_CLASS_OPTIONS: [9pt, dvipsnames, aspectratio=169]
@@ -41,19 +40,14 @@
 # -----------------------------------------------------------------------
 
 #+BEAMER_HEADER: \setbeamertemplate{bibliography item}[text]
-#+BEAMER_HEADER: \AtBeginSection[]
-#+BEAMER_HEADER: {
-#+BEAMER_HEADER:   \begin{frame}<beamer>
-#+BEAMER_HEADER:     \tableofcontents[
-#+BEAMER_HEADER:       currentsection,
-#+BEAMER_HEADER:       subsectionstyle=show/shaded/hide,
-#+BEAMER_HEADER:     ]
-#+BEAMER_HEADER:   \end{frame}
-#+BEAMER_HEADER: }
+#+BEAMER_HEADER: \graphicspath{{<YYYYMMDDTHHMMSS>--<slug>__<tags>}}
 
 * <Section>
 ** <Frame title>
-- <point>
+#+ATTR_LATEX: :width \linewidth
+[[file:<figure>.pdf]]
+
+<one short line, no bullet>
 
 * References :B_ignoreheading:
 :PROPERTIES:
