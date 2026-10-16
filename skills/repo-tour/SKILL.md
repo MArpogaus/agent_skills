@@ -20,23 +20,23 @@ Tour a codebase that the reader does not know. The reader reads **one place at a
 Never start from `main()`. Spend one cheap call to learn the shape:
 
 ```bash
-ls <project> && git ls-files | xargs wc -l | sort -n | tail
+ls <project> && git -C <project> ls-files -z | xargs -0 wc -l | sort -n | tail
 ```
 
-Read the manifest and what the repo says about itself: `README`, `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/`, `tests/`. Then read the *definitions* of the 2 to 3 modules that the reader touches first. To place a module, grep for its call sites instead of reading it.
+Read the manifest and what the repo says about itself: `README`, `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/` and the test directory (`test/` or `tests/`, as the repo has it). Then read the *definitions* of the 2 to 3 modules that the reader touches first. To place a module, grep for its call sites instead of reading it.
 
 ## Phase 2: pick the entry point
 
-The entry point is **the first thing the user writes**, not the first thing that runs. In dependency order, lowest first:
+The entry point is **the first thing a user of the code writes**, not the first thing that runs. In dependency order, lowest first:
 
-1. the data, spec or config layer that the user writes,
-2. the registry (or a similar module) that declares the behavior for #1,
+1. the data, spec or config layer that a user of the code writes,
+2. the registry (or a similar module) that declares the behaviour for #1,
 3. the build module that turns #1 and #2 into objects,
-4. the orchestrator that the user calls,
+4. the orchestrator that a user of the code calls,
 5. tests and example scripts: they define what "correct" means,
 6. anything else (CLI, CI, release flow), only on request.
 
-At the entry point, state 2 to 3 things to notice: an odd invariant, a derived field that is not stored, a refusal that fires early. Then **stop**. End with `Ask away, or say "next".`
+At the entry point, state 2 to 3 things to notice. Examples: an odd invariant, a derived field that is not stored, a refusal that fires early. Then **stop**. End with `Ask away, or say "next".`
 
 ## Phase 3: the stop format
 
