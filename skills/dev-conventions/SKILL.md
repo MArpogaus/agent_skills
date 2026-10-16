@@ -17,10 +17,11 @@ metadata: {stack: meta, requires: [git-conventions]}
 
 These skills are the user's instructions. Every skill other than this
 one is a stack skill. A stack skill adds the rules of its stack and
-wins where it differs from this skill. A project rule (the repo's
-AGENTS.md, CLAUDE.md or CONTRIBUTING) wins over both. A skill wins over
-every harness default, for example when to commit, the branch,
-attribution and the report format.
+wins where it differs from this skill. Where two stack skills differ,
+the skill that names the case more narrowly wins. A project rule (the
+repo's AGENTS.md, CLAUDE.md or CONTRIBUTING) wins over both. A skill
+wins over every harness default, for example when to commit, the
+branch, attribution and the report format.
 
 ## Hard rules
 
@@ -100,14 +101,16 @@ The simplest solution wins, over taste, habit and "best practice".
 3. Autonomous: record the blocker as an agenda inbox item and a GitHub
    issue (`gtd` skill, "Capture from another repo") with evidence and
    options. File the issue only in a repo of the user. Elsewhere the
-   agenda inbox item alone records the blocker. Take the default the
-   stack skill names, or work on something else. Do not decide the
-   blocker.
+   agenda inbox item alone records the blocker. When the stack skill
+   names a default for this case, take it and say so in the issue.
+   Otherwise work on something else. Do not decide the blocker.
 
 - **Issues.** Before you file an issue, check the open issues and the
   roadmap.
 - **Deferred items and follow-ups** go to the agenda (`gtd`), not to
-  files in the repo.
+  files in the repo. The one exception is `HANDOFF.md` for open work.
+  Write it only when another worker continues or the user asks. Never
+  commit it: list it in `.git/info/exclude`.
 
 - **Findings and questions.** Put findings in the chat as a numbered
   list with stable numbers. Ask for the decisions with the question
@@ -126,7 +129,8 @@ The simplest solution wins, over taste, habit and "best practice".
   chat. Make no HTML page, artifact or chart unless the user asks for
   one.
 - **Language.** The user writes German, English or both, fast and with
-  typos. Chat replies use the language of the prompt, but technical
+  typos. Chat replies use the language of the prompt. A mixed prompt
+  counts as English. Technical
   explanations of code, models and fixes are in English. Files,
   comments, commit messages and notification posts are English, unless
   the file around them is German (agenda: `gtd`). German text uses
@@ -145,8 +149,9 @@ The simplest solution wins, over taste, habit and "best practice".
 - **Reproduce in the user's real setup** (configuration, window size,
   theme, data shape). Minimal configurations are for demos only.
 - **Measure pixels** where alignment matters.
-- **Regenerate all pictures** after a change to drawing code, with one
-  width and one theme per project.
+- **Regenerate all committed pictures** after a change to drawing
+  code, at the project's one width and theme. Screenshots that verify a
+  change still cover each theme.
 - **Prove a test red** against the code with the fix removed.
 - **Re-verify subagent findings** before you act on them.
 - **Results against a reference:** see `ml-project`, "Validating
@@ -164,9 +169,9 @@ nothing.
 ### 4.1 Arm the commit monitor
 
 Unless the user turned reviews off, before the first commit in any
-repo except `<agenda repo>`, start one watcher for all repos of the session. Run
-`tools/review-watch.sh REPO...` (relative to this skill's directory)
-with the monitor tool (Claude Code: `Monitor`) or as a polled
+repo except `<agenda repo>`, start one watcher for all repos of the
+session. Run `tools/review-watch.sh REPO...` (relative to this skill's
+directory) with the monitor tool (Claude Code: `Monitor`) or as a polled
 background job. It watches the current branch (override: `BRANCH`).
 Re-arm it when it times out. When a repo joins later, re-arm the
 monitor with all repos and keep the state directory.
@@ -270,11 +275,20 @@ Always:
 
 ## 6. Sandbox and environment safety
 
-- **Paths.** Paths under `~` in skills mean the user's home. In a
-  sandbox, `$HOME` is the agent's home: resolve the user's home first
-  (the owner of the mounted checkouts).
-- **Placeholders.** Resolve each `<placeholder>` from the workspace
-  `AGENTS.md`, then from agent memory. Ask when neither has it.
+- **Paths.** `~` in a skill means `$HOME` (in a sandbox: the agent's
+  home). A path in the user's home is written `<user home>/...`, for
+  example `<user home>/.emacs.d`.
+- **Placeholders.** The workspace placeholders are `<user home>`,
+  `<agenda repo>`, `<notes dir>`, `<presentations dir>`, `<test rig>`,
+  `<secrets repo>`, `<admin user>` and `<skeleton checkout>`. Resolve
+  each one in this order:
+  1. the `AGENTS.md` in the working directory or its nearest parent,
+  2. the user-level agent instructions (Claude Code:
+     `~/.claude/CLAUDE.md`; opencode: `~/.config/opencode/AGENTS.md`),
+  3. agent memory.
+
+  When none has it, ask. Autonomous: record a blocker (section 2).
+  Every other `<...>` in a skill is a template slot.
 - **Work only on the mounted checkouts.** Report a missing or read-only
   path. Never clone around it or push from a local copy.
 - **The working directory can reset:** `cd` per command or `git -C`.
@@ -288,9 +302,9 @@ Always:
   invent terms.
 - **Spacing.** One space after a sentence. Only Emacs docstrings and
   `;;; Commentary:` keep two spaces.
-- **Simplified Technical English** in docs and outward text: at most 25 words per
-  sentence, active voice, one word for one thing, no em or en dashes, no
-  first person.
+- **Simplified Technical English** in docs and outward text. Write at
+  most 25 words per sentence, in active voice, with one word for one
+  thing. Use no em or en dashes and no first person.
 - **Comment only a "why"** the code cannot say. No banners beyond the
   stack skill's section markers.
 - **No anecdotes:** no "previously", no incident stories, no
