@@ -24,10 +24,10 @@ metadata: {stack: meta, requires: [dev-conventions, git-conventions, gtd]}
 - Run the steps in order. Skip a step only when it has nothing to do.
 - If a step finds a blocker, report it as `dev-conventions`, "2. Asking
   and acting", says. Do not work around it.
-- Never delete the user's files. Drop no stash.
-- Push only when the user asked for it.
+- Never delete the user's files. Stashes, pushes and agenda states
+  follow the "Hard rules" of `dev-conventions`, `git-conventions` and
+  `gtd`.
 - Never commit report and plan files (`findings.md`, `HANDOFF.md`).
-- Set a task to `DONE` only when the user confirmed it.
 - Edit a skill only when the user agrees to the change.
 
 ## 1. Background work
@@ -45,14 +45,16 @@ For each repo the session touched:
 1. `git status --short`: untracked files, scratch scripts, debug
    output, temporary configs. Delete what the session made and no
    longer needs.
-2. Read the session's diff (`git diff <start>^..HEAD`). Look for dead
+2. Read the session's diff: use `git diff <start>^..HEAD`, or
+   `git diff $(git hash-object -t tree /dev/null)..HEAD` when `<start>`
+   is the root commit. Look for dead
    code, debug prints, commented-out code, unused options and
    arguments, history in comments, and docs that still describe the
    old state.
 3. Run `git worktree list`, `git stash list` and `git branch`. Remove
    the worktrees and branches that you made and that are merged. List
    your stashes and unmerged branches under "Open".
-4. Scratch files outside the repos stay in the scratchpad.
+4. Scratch files outside the repos: leave them where they are.
 
 ## 3. Review
 
@@ -63,7 +65,7 @@ turned reviews off, read your own diff once with the Simplicity view.
 ## 4. Git state
 
 - Commit everything that belongs in history, as `git-conventions`
-  requires. Report unpushed commits (`git log --oneline @{u}..`).
+  requires. Report unpushed commits (`git log --oneline @{u}.. 2>/dev/null || git log --oneline --branches --not --remotes`).
 - For `findings.md`, see `dev-conventions` reference.md, "findings.md".
   Delete report and plan files when they are done. If work stays open,
   write `HANDOFF.md` in the repo root, listed in `.git/info/exclude`:
@@ -75,13 +77,11 @@ Follow the `gtd` skill, "Hard rules" and "1. Safe edits".
 
 - Find the agenda project of each repo: its name, or the repo link
   under `Information`.
-- Set tasks to `DONE` that the session finished. For a finished task
-  without confirmation, list it in the report as "to close".
+- Set a finished task to `DONE` when the user confirmed it, else list
+  it as "to close".
 - Add follow-ups, filed issues and the open blockers that are not in
   the agenda yet as inbox items, as in `gtd`, "Capture from another
   repo".
-- Before you file an issue, check the open issues and the roadmap, so
-  you do not file what is already planned.
 
 ## 6. Lessons
 
