@@ -21,7 +21,6 @@
 
 #+CITE_EXPORT: biblatex ieee
 
-#+LATEX_HEADER: \usepackage[utf8]{luainputenc}
 #+LATEX_HEADER: \usepackage[mathbf=sym]{unicode-math}
 
 # ---------------------------------------------------------------- theme

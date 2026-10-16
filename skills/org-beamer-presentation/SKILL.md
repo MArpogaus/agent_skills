@@ -5,11 +5,11 @@ description: >
   user's sparse, figure-first style: metropolis-dark design, denote file
   names with a sidecar figure folder, global biblatex citations, headless
   export and page-by-page verification. Use when the user says
-  slides, Folien, Vortrag, talk or Beamer, or when an `.org` file under a
-  `presentations/` folder changes.
+  slides, Folien, Vortrag, talk or Beamer, or when an `.org` file with
+  `#+LATEX_CLASS: beamer` changes.
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: org-mode latex beamer, requires: [git-conventions]}
+metadata: {stack: org-mode latex beamer, requires: [dev-conventions, git-conventions]}
 ---
 
 # Skill: Org mode Beamer presentations
@@ -26,8 +26,7 @@ message.
   section TOC stanza from `templates/header-extras.org`. One closing
   frame is allowed. No appendix unless the user asks for one.
 - Figure first. A figure frame has at most 2 lines, each at most 12
-  words.
-- A text frame has at most 3 bullets. A bullet has at most 2 lines at
+  words. A text frame has at most 3 bullets, each at most 2 lines at
   full width. Never put more than 2 text-only frames in a row.
 - A title has at most 8 words, a plain statement. No marketing, no
   teasers, no punch lines.
@@ -46,17 +45,12 @@ message.
   jargon.
 - When content does not fit, cut it or split the frame. Never shrink
   fonts, spacing or figures to make it fit.
-- The hard rules apply to talks. An internal fact deck that the user
-  asks for is exempt from the time budget and may hold up to 6 bullets
-  per frame.
-- Every deck is self-contained with its own sidecar folder. Copy a
-  figure from another deck when necessary.
 
 ## 1. Before writing
 
 Read two or three of the user's earlier decks in `<presentations dir>`,
-the newest first, plus one of the same talk type. Aim for their density:
-about 20 words per frame, one figure and at most two short bullets.
+the newest first, plus one of the same talk type. Their density is the
+target: about 20 words per frame, one figure and 1 or 2 short bullets.
 
 Ask for the talk length and the audience when the request does not
 state them. Autonomous default (see `dev-conventions`, "5. Interactive
@@ -87,8 +81,14 @@ model, data set and setup before its results. Add one step of
 complexity per frame. A frame is mostly figure or mostly text. For a
 figure beside text, use a 0.55/0.45 or 0.5/0.5 column split with the
 figure on the left. Text does not repeat numbers that the figure
-shows. Use `:noexport:` to park a frame. Lines that start with `# ` inside a frame are the user's speaker
-prose: do not change them. A German deck writes ß, not ss.
+shows. Use `:noexport:` to park a frame. Lines that start with `# `
+inside a frame are the user's speaker prose: do not change them. A
+German deck writes ß, not ss.
+
+**Scope.** The hard rules apply to talks. An internal fact deck that
+the user asks for is exempt from the time budget and may hold up to 6
+bullets per frame. Every deck is self-contained with its own sidecar
+folder. Copy a figure from another deck when necessary.
 
 **File name.** Denote convention, in the presentations directory:
 
@@ -112,7 +112,7 @@ a `#+MACRO` (stanza in `header-extras.org`) and write
 another Org file.
 
 **Export in the agent sandbox.** `emacs` and `lualatex` are not on
-`PATH`. Use `<test rig>` (its README names its location). Put TeX
+`PATH`. Use `<test rig>`. Put TeX
 first, so that its `kpsewhich` wins:
 
 ```bash
@@ -156,8 +156,8 @@ you report.
 5. Report a numbered list of problems, one line each, so the user can
    accept items by number.
 
-When a deck changes, spawn these views in addition to the views in
-`dev-conventions`, "4.3 Reviewers":
+In each review round whose range changes a deck, add these views to
+those in `dev-conventions`, "4.3 Reviewers":
 
 - Density and budget: frame count, words per frame, text-only runs.
 - Consistency with the user's style: tone, titles, colours, the decks
@@ -170,4 +170,5 @@ When a deck changes, spawn these views in addition to the views in
 This skill assumes the following prerequisite skills are loaded.
 Use the `skill` tool to load them before using this one:
 
+- **dev-conventions**: autonomous defaults and the review loop.
 - **git-conventions**: commits when the deck lives in a tracked repo.
