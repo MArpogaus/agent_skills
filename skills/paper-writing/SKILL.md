@@ -3,28 +3,20 @@ name: paper-writing
 description: >
   End-to-end academic paper writing workflow for probabilistic ML research:
   LaTeX project scaffolding, figure generation, writing with
-  IEEE/Elsevier/UAI templates, revision cycles, and venue submission.
-  Use when writing or submitting a paper; the experiment code follows
-  ml-project, and a revision of an existing draft follows
+  IEEE/Elsevier/UAI templates, build, and venue submission. Use when
+  the user asks to start, write, build or submit a paper. The
+  experiment code follows ml-project. A revision of an existing draft follows
   latex-paper-revision.
 license: MIT
 compatibility: claude-code opencode
-metadata:
-  requires:
-    - git-conventions
-    - python-dev
-    - ml-project
-  audience: researchers
-  stack: ml+latex
+metadata: {stack: ml latex, audience: researchers, requires: [git-conventions, python-dev, ml-project]}
 ---
 
-## When to use
+# Skill: Paper Writing
 
-Load when writing or revising an academic paper — from experiment
-completion through figure generation, LaTeX writing, revision cycles,
-and camera-ready submission.
-
----
+Load this skill to write a new academic paper: from the finished
+experiments through figures, LaTeX writing and the camera-ready
+submission. For a revision, use `latex-paper-revision`.
 
 ## Phase 1: LaTeX project scaffolding
 
@@ -136,22 +128,12 @@ Include the preamble as a separate file (`preamble.tex`) and
 \newcommand{\TODO}[1]{\textcolor{red}{\textbf{(TODO: #1)}}}
 ```
 
-### Bibliography management
+### Bibliography
 
-Prefer `biblatex` with `biber` backend:
-
-```latex
-% In preamble
-\usepackage[style=ieee, backend=biber, natbib=true]{biblatex}
-\addbibresource{references.bib}
-
-% Where to print
-\printbibliography
-```
-
-For Elsevier use `bibtex` with the `elsarticle-num` style, and drop
-the `biblatex` block from the preamble; the two cannot be loaded
-together:
+The preamble loads `biblatex` with `biber`. Print with
+`\printbibliography`. For Elsevier, use `bibtex` with the
+`elsarticle-num` style, and remove the `biblatex` block from the
+preamble. The two cannot be loaded together:
 
 ```latex
 \bibliographystyle{elsarticle-num}
@@ -173,16 +155,13 @@ together:
 Use in text: `\gls{BNF}` (first use expands full form), `\glspl{BNF}`
 (plural), `\acrfull{BNF}` (always full form).
 
----
-
 ## Phase 2: Figure generation
 
 ### Python → PDF → LaTeX workflow
 
 Generate publication-quality figures in Python and include the
-resulting PDF in LaTeX.  Figure scripts follow the plotting pattern
-and the colour palette in the `python-dev` skill ("Matplotlib
-plotting"); `ml-project` says where the scripts and figures live.
+resulting PDF in LaTeX. Figure scripts follow `python-dev`
+("Figures"). `ml-project` says where the scripts and figures live.
 
 ### TikZ / PGFPlots for inline figures
 
@@ -225,8 +204,6 @@ For data-driven plots that should match the document font, use
 
 A figure names its own experiment, for example
 `synth_baseline_contour.pdf` or `synth_baseline_calibration.pdf`.
-
----
 
 ## Phase 3: LaTeX writing
 
@@ -282,16 +259,16 @@ All papers follow the same canonical structure:
 
 ### Writing workflow
 
-1. **Draft** — Write each section as a separate file in `tex/` with
+1. **Draft**: write each section as a separate file in `tex/` with
    numbered filenames (`01_introduction.tex`, `02_method.tex`, ...).
-2. **Cross-references** — Use `\label{sec:...}`, `\label{fig:...}`,
+2. **Cross-references**: use `\label{sec:...}`, `\label{fig:...}`,
    `\label{tab:...}` consistently. Reference with `\Cref{...}` or
    `\autoref{...}`.
-3. **Placeholders** — Mark incomplete sections with `\TODO{...}` for
+3. **Placeholders**: mark incomplete sections with `\TODO{...}` for
    easy grep before submission.
-4. **Bibliography** — Keep a single `references.bib`. Add entries
+4. **Bibliography**: keep a single `references.bib`. Add entries
    as you write, using BibTeX keys like `author2023title`.
-5. **Glossaries** — Define acronyms once in `glossaries.tex` and use
+5. **Glossaries**: define acronyms once in `glossaries.tex` and use
    `\gls{}` throughout.
 
 ### Accepted acknowledgments patterns
@@ -303,8 +280,6 @@ All papers follow the same canonical structure:
 During the finalization of this paper, large language models (LLMs)
 were used to optimize language and grammar.
 ```
-
----
 
 ## Phase 4: Build and compilation
 
@@ -318,14 +293,6 @@ For pdflatex-based projects:
 
 ```bash
 latexmk -pdf main.tex
-```
-
-### Clean build for final submission
-
-```bash
-latexmk -C
-latexmk -lualatex -shell-escape main.tex
-latexmk -c
 ```
 
 ### Compile script template
@@ -362,61 +329,7 @@ latexmk -c
 mv final.pdf "FINAL_PAPER.PDF"
 ```
 
----
-
-## Phase 5: Revision cycle
-
-### latexdiff for change tracking
-
-Compare revised version against the original:
-
-```bash
-latexdiff original.tex revised.tex > diff.tex
-latexmk -pdf diff.tex
-```
-
-Output shows additions in blue underlined and deletions in red
-strikethrough.
-
-### Response to reviewers
-
-Structure as a standalone LaTeX document:
-
-```latex
-\documentclass[12pt]{article}
-\usepackage[colorlinks]{hyperref}
-
-\begin{document}
-
-\section*{Response to Reviewers}
-
-\subsection*{Reviewer 1}
-
-\subsubsection*{Comment:}
-...
-\subsubsection*{Response:}
-...
-
-\subsection*{Reviewer 2}
-...
-
-\end{document}
-```
-
-### Changelog
-
-Maintain a `changelog.txt` tracking major changes between
-versions:
-
-```
-v1 — Initial submission
-v2 — Revised: expanded method section, added Experiment 3,
-     updated figures 2–4
-```
-
----
-
-## Phase 6: Venue-specific submission
+## Phase 5: Venue-specific submission
 
 ### IEEE (IEEEtran)
 
@@ -456,8 +369,6 @@ v2 — Revised: expanded method section, added Experiment 3,
 - **Remove:** copyright notice, IEEE DOI, `\markboth` headers
 - **Required:** source files for full compilation
 
----
-
 ## Key references
 
 - IEEEtran documentation: https://www.ieee.org/conferences/publishing/templates.html
@@ -469,16 +380,14 @@ v2 — Revised: expanded method section, added Experiment 3,
 - An earlier paper that used the target class is the best reference
   for a venue: ask the user for one and copy its setup.
 
----
-
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
 Use the `skill` tool to load them before using this one:
 
-- **git-conventions** — two-branch flow, conventional commits,
-  pre-commit hooks, tagging/releases.
-- **python-dev** — Python project structure, pyproject.toml, ruff,
-  NumPy docstrings, pytest, matplotlib patterns.
-- **ml-project** — DVC pipeline orchestration, MLflow experiment
+- **git-conventions**: two-branch flow, conventional commits,
+  pre-commit hooks, tagging and releases.
+- **python-dev**: Python project structure, pyproject.toml, ruff,
+  NumPy docstrings, pytest, figures.
+- **ml-project**: DVC pipeline orchestration, MLflow experiment
   tracking, HPO study logs, per-target configs, figure generation.
