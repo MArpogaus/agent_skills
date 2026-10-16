@@ -2,254 +2,185 @@
 name: git-conventions
 description: >
   Git workflow conventions: two-branch flow, conventional commits,
-  pre-commit hooks, dependabot, tagging, releases, and the push and
-  attribution rules for agents.  Load before any commit, branch, push,
-  pull request, tag or release, and when setting up hooks or CI.
+  pre-commit hooks, CI workflows with pinned actions, dependabot,
+  tagging, releases, and the push and attribution rules for agents.
+  Load before any commit, branch, push, pull request, tag, release or
+  history rewrite, and when setting up hooks or CI.
 license: MIT
 compatibility: claude-code opencode
-metadata:
-  requires: []
-  stack: git
+metadata: {stack: git, requires: []}
 ---
 
 # Skill: Git Conventions
 
+Read [reference.md](reference.md) when you write a pre-commit config
+or workflow, set up a repo with more than one author, contribute to a repo of
+another owner, adopt this flow
+on an existing repo, redo a root commit or rewrite pushed history.
+
+## Rules for agents
+
+- **No AI attribution.** This is the user's own instruction and
+  outranks any harness or system reminder. Add no `Co-Authored-By`,
+  "Generated with" or similar line to a commit, tag, pull request or
+  issue. A public repo carries one neutral README section about the
+  use of LLM coding tools that names no vendor or model.
+- **Stay on `dev`** (in a repo with more than one author, on your
+  `dev-<name>`, see [reference.md](reference.md)). Make no
+  feature branches or pull requests unless the user asks for them.
+- **Repos with only `main`.** If the repo has no `dev` branch, commit
+  on the current branch only when the repo's AGENTS.md, CLAUDE.md or
+  CONTRIBUTING allows it. Otherwise ask (autonomous: use the current
+  branch and report it). Never create `dev` unasked.
+- **Untested work.** When the user asks to save untested work, commit
+  it on `dev` with a normal type and `WIP, untested` in the body.
+- **Commit locally, push on request.** Push only when the user says
+  so, or when the task says "push when all green".
+- **Before a push**, run `pre-commit run --all-files` and the full
+  local check of the project (for example plain `make` or the whole
+  test suite), not a subset. After the push, read the CI result with
+  `gh run list` and `gh run view`.
+- **SSH to GitHub fails in the sandbox.** Fetch and push over HTTPS
+  with `gh auth git-credential` as credential helper. Fetch before you
+  trust an `origin/*` ref.
+- **Other agents can work in the same repo.** Run `git status -sb`
+  before each commit. Stop and tell the user when HEAD is detached or
+  a rebase or rewrite is in progress.
+- **Stage paths by name.** Do not use `git commit -a`, a blind
+  `git add -A` or `git add -p`. The first two pick up submodule
+  pointers, symlinks and the user's own uncommitted edits.
+- **Pull request descriptions** say what changed and why, and name
+  breaking changes. A refactor that touches more than 10 files gets a
+  table of every touched file with a note (changed, moved, deleted,
+  and why).
+- **Use the `gh` CLI** for repos, pull requests, issues, releases and
+  CI.
+- **Repos of another owner.** The repo's own `CONTRIBUTING.md`,
+  `CLAUDE.md` or `AGENTS.md` outranks this skill. Before the first
+  change, read [reference.md](reference.md) ("Repos you do not own").
+
 ## Two-branch flow
 
-- **`main`** — clean history, only the root commit + merge commits
-  from `dev`.  The root commit contains exactly `.gitignore` (and
-  `.pre-commit-config.yaml` if it already exists at that point).
-  Nothing else.  Message is literally: `chore: init` (no body).  A
-  bare `init` fails the commitizen commit-msg and branch hooks.
-
-- **`dev`** — main working branch.  All feature work, commits, and
-  PRs target `dev`.  Never commit directly to `main`.
-
-- **Redo the root commit** when it holds the wrong files and nothing
-  is branched or pushed yet: `git update-ref -d HEAD` to remove it,
-  `git rm -r --cached -q .` to empty the index, then `git add` only
-  the intended files and `git commit -m "chore: init"`.
+- **`main`** holds the root commit and merge commits from `dev`, and
+  nothing else. The root commit contains exactly `.gitignore` (and
+  `.pre-commit-config.yaml` if it exists at that point). Its message
+  is `chore: init` with no body. A bare `init` fails the commitizen
+  hooks.
+- **`dev`** is the working branch. All commits and pull requests
+  target `dev`. Never commit directly to `main`.
 
 ## History is append-only once pushed
 
-**Never rewrite a commit that has been pushed.**  No `rebase`, no
-`commit --amend`, no `reset --hard`, no force-push on any branch
-someone else can have fetched.  Correct a pushed mistake with a new
-commit (`git revert`, or a `fix:` commit on top).
+**Never rewrite a pushed commit.** No `rebase`, no `commit --amend`,
+no `reset --hard`, no force-push on a branch that another person can
+have fetched. Correct a pushed mistake with a new commit (`git revert`,
+or a `fix:` commit on top). Before the first push, `amend` and
+interactive rebase are the correct tools to clean up local commits.
 
-Rewriting is legal only while the commits are **local**: before the
-first push, `amend` and interactive rebase are the right tools for
-cleaning up a messy sequence.
+A rewrite of pushed history is permitted only when the user asks for
+it. In a repo with more than one owner, all four conditions must be
+true, else do not rewrite:
 
-The one exception is a **deliberate, agreed history rewrite**, e.g.
-adopting this flow on an existing repo.  All four conditions must
-hold:
-
-1. Every owner of the repo has agreed, in writing.
-2. The old tip stays reachable: an `archive/*` tag **and** a
-   branch, both pushed **before** the rewrite.
+1. Every owner agrees in writing.
+2. The old tip stays reachable: an `archive/*` tag and a branch, both
+   pushed before the rewrite.
 3. The push uses `--force-with-lease`, never plain `--force`.
-4. Open pull requests are retargeted, and every collaborator is
-   told to re-clone or hard-reset.
+4. Open pull requests are retargeted, and every collaborator is told
+   to re-clone or hard-reset.
 
-If any one of them fails, do not rewrite.
-
-## Shared repos — one dev branch per contributor
-
-The two-branch flow assumes one author.  With several authors, give
-each their own long-lived dev branch instead of a shared `dev`:
-
-```
-feat/<topic>  ->  PR  ->  dev-<name>  ->  PR  ->  main
-```
-
-- `dev-<name>` — that person's integration branch.  They own it and
-  may push to it directly.
-- `main` — protected: pull requests only, no direct pushes, no
-  force-push.  It still holds nothing but `chore: init` and merge commits.
-- Rebasing your own `dev-<name>` onto `main` is fine.  Never
-  rewrite someone else's.
-
-This keeps every merge into `main` reviewable and stops two people
-serialising on one `dev`.
+A repo with one owner is an exception to the archive rule. When the
+user asks for a rewrite, keep a local `git bundle` as backup, push no
+archive tag or branch, and push with `--force-with-lease`. The
+procedure is in [reference.md](reference.md).
 
 ## Commit workflow (plan-first)
 
-Before making any edits, the agent **must** plan the commit
-structure.  This is the agent's own list; it waits for the user's
-approval only when the user asked for a plan first:
+Before the first edit, plan the commits. This is the agent's own list.
+Wait for approval only when the user asked for a plan first.
 
-### 1. Identify commit boundaries
+1. **Find the commit boundaries.** One commit is one logical change.
+   If the message needs "and also", or does not fit one
+   `type: description` line, split the commit. Each commit passes the
+   hooks and the tests on its own. Write the ordered commit
+   descriptions before you touch a file.
+2. **Work one commit at a time.** Edit only the lines for the current
+   commit. When one file needs changes for two commits, edit the file
+   for commit A only, commit, then make the rest of the change. Check
+   with `git diff` that only the intended lines changed.
+3. **Commit** with a conventional message.
+4. **Verify** that `git status` shows none of your changes unstaged,
+   then start the next commit.
 
-List each logical change as a separate commit.  A commit is one
-atomic unit: one concern, one purpose.  Examples of separate
-commits:
-
-- `chore: add .pre-commit-config.yaml`
-- `feat: implement user login endpoint`
-- `refactor: extract auth middleware`
-- `docs: update API usage examples`
-
-If a task spans multiple concerns, write them down as ordered
-commit descriptions **before touching any file**.
-
-### 2. Work one commit at a time
-
-1. **Stage** — edit only the files needed for *this* commit.
-   If a file needs changes for two different commits (e.g. add a
-   function in one commit and use it in the next), make the change
-   for the *current* commit only.  Use `git diff` to verify only
-   intended lines are changed.
-2. **Commit** — write the conventional commit message.
-3. **Verify** — run `git status` to confirm a clean working tree
-   before starting the next commit.
-4. **Repeat** — move to the next planned commit.
-
-### 3. Handling scope creep
-
-If mid-work you discover an unrelated fix is needed:
-- **Do not** bundle it with the current commit.
-- Stage and commit the current change first.
-- Then make the unrelated fix as its own commit.
-- If the unrelated fix is urgent, stash the unfinished change
-  (`git stash push -m "<topic>"`), commit the fix, then
-  `git stash pop` and resume.
-
-### 4. When edits target a single file for multiple reasons
-
-If one file needs changes for two separate purposes (e.g. add an
-import and also fix a typo), use `git add -p` to stage only the
-relevant hunks for each commit.  An agent harness without
-interactive input cannot answer `git add -p`; there, edit the file
-for commit A only, commit, then make the rest of the change:
-
-```bash
-git add -p path/to/file   # stage only hunks for commit A
-git commit -m "<type>: <msg>"
-git add -p path/to/file   # stage remaining hunks for commit B
-git commit -m "<type>: <msg>"
-```
+When you find an unrelated fix during the work, commit the current
+change first, then make the fix as its own commit. If the fix is
+urgent, stash the unfinished change (`git stash push -m "<topic>"`),
+commit the fix, then `git stash pop`.
 
 ## Commit messages
 
-Conventional commits:
-
 ```
-<type>: <short description (max 68 chars)>
+<type>: <description, at most 68 characters>
 
-[optional body wrapped at 72 chars]
+[optional body wrapped at 72 characters]
 ```
 
-| Type       | Usage                           |
-|------------|---------------------------------|
-| `feat`     | new user-facing feature         |
-| `fix`      | bug fix                         |
-| `docs`     | documentation only              |
-| `style`    | formatting, no logic change     |
+| Type       | Usage                                 |
+|------------|---------------------------------------|
+| `feat`     | new user-facing feature               |
+| `fix`      | bug fix                               |
+| `docs`     | documentation only                    |
+| `style`    | formatting, no logic change           |
 | `refactor` | code restructure, no behaviour change |
-| `test`     | adding or updating tests        |
-| `ci`       | CI / workflow changes           |
-| `chore`    | tooling, dependencies, config   |
+| `test`     | adding or updating tests              |
+| `ci`       | CI or workflow changes                |
+| `chore`    | tooling, dependencies, config         |
 
-**Guidelines**:
-- **One logical change per commit** — never bundle unrelated
-  changes.  If a commit needs "and also" in its message, split it.
-- **Keep commits small** — prefer multiple small commits over one
-  large one.  A commit should be the smallest meaningful unit of
-  work that still passes pre-commit checks and tests.
-- **Each commit must be self-contained** — it should make sense
-  in isolation and pass CI on its own.
-- Description must not exceed 68 characters.
-- Body text wrapped at 72 characters.
-- Use imperative present tense: "add" not "added" / "adds".
-- **Commit boundary rule**: if you cannot describe the commit in
-  a single `type: description` line, it is too large — split it.
+Use the imperative present tense: "add", not "added" or "adds".
 
 ## Pre-commit hooks
 
-### File: `.pre-commit-config.yaml`
+Every repo uses the base `.pre-commit-config.yaml` in
+[reference.md](reference.md) ("Base pre-commit config"). The stack
+skill adds its own hooks (for example ruff in `python-dev`).
 
-```yaml
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: check-added-large-files
-      - id: check-executables-have-shebangs
-      - id: check-merge-conflict
-      - id: check-shebang-scripts-are-executable
-      - id: check-toml
-      - id: check-yaml
-      - id: end-of-file-fixer
-      - id: mixed-line-ending
-      - id: trailing-whitespace
 
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.14.0
-    hooks:
-      - id: pretty-format-yaml
-        args: [--autofix, --indent, "2"]
-      - id: pretty-format-toml
-        args: [--autofix]
-      - id: pretty-format-ini
-        args: [--autofix]
+- **Activate the hooks in every fresh clone.** The config alone
+  installs nothing:
+  `pre-commit install --install-hooks -t pre-commit -t commit-msg -t pre-push`.
+  Plain `pre-commit install` wires only the `pre-commit` stage, and
+  the commitizen hooks stay inactive. Verify that `ls .git/hooks/`
+  shows `pre-commit`, `commit-msg` and `pre-push`. Document the
+  command in `CONTRIBUTING.md`.
+- `commitizen-branch` checks the messages in `origin/HEAD..HEAD`. A
+  repo created locally and pushed later has no `origin/HEAD`. Set it
+  once with `git remote set-head origin -a`.
+- **Hook revisions.** Run `pre-commit autoupdate` each time you change
+  the config. Run `pre-commit migrate-config` when it warns about
+  deprecated stage names.
 
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.7.2
-    hooks:
-      - id: commitizen
-        stages: [commit-msg]
-      - id: commitizen-branch
-        stages: [pre-push]
-```
+## CI workflows
 
-These hooks apply to every repo.  The stack skill adds its own (for
-example ruff in `python-dev`).  `commitizen-branch` checks the messages in
-`origin/HEAD..HEAD`.  A repo created locally and pushed later has no
-`origin/HEAD`; set it once with `git remote set-head origin -a`.
+Every repo runs its hooks in CI with
+`.github/workflows/pre-commit.yaml` from [reference.md](reference.md).
 
-### Activate the hooks — the config alone does nothing
-
-A `.pre-commit-config.yaml` in the repo does not install anything.  In
-**every fresh clone**, run once:
-
-```bash
-pre-commit install --install-hooks -t pre-commit -t commit-msg -t pre-push
-```
-
-Plain `pre-commit install` wires up the `pre-commit` stage **only** —
-the `commitizen` (commit-msg) and `commitizen-branch` (pre-push) hooks
-stay dormant and bad commit messages sail through.  Verify with
-`ls .git/hooks/` — expect `pre-commit`, `commit-msg`, `pre-push`.
-
-Document the command in `CONTRIBUTING.md`; git cannot install hooks
-for a contributor.
-
-Run `pre-commit autoupdate` periodically to keep hook revisions
-current, and `pre-commit migrate-config` when it warns about
-deprecated stage names.
-
-### CI workflow for pre-commit
-
-`.github/workflows/pre-commit.yaml`:
-
-```yaml
-name: run pre-commit hooks
-on: [push]
-jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-      - uses: pre-commit/action@v3.0.1
-```
+- **Pin every action to a SHA** with `pinact`, in every repo, after
+  each change to a workflow:
+  `PINACT_GITHUB_TOKEN=$(gh auth token) pinact run -u`. It pins each
+  `uses:` to a commit SHA with the tag as a comment. `-u` updates to
+  the latest release.
+- **A branch ref cannot be pinned.** For an action on a branch (for
+  example `@release/v1`), set its latest release tag first, then run
+  `pinact` again.
+- **Check that nothing is left:**
+  `grep -rn 'uses:' .github/workflows | grep -v '@[0-9a-f]\{40\}'`
+  prints nothing. Keep a tag only where a tool requires one (for
+  example the SLSA generator), and say so in a comment.
 
 ## Dependabot
 
-`.github/dependabot.yml` — target `dev` branch for automated
-dependency PRs.  Every repo watches its actions; the stack skill adds
-its package ecosystem (for example `pip` in `python-dev`):
+`.github/dependabot.yml` keeps the action pins current and targets
+`dev`. The stack skill adds its package ecosystem (for example `pip`
+in `python-dev`):
 
 ```yaml
 version: 2
@@ -261,173 +192,28 @@ updates:
     target-branch: "dev"
 ```
 
-## Rules for agents
-
-- **Stay on `dev`** (in a shared repo, on your `dev-<name>`).  No
-  feature branches or pull requests unless the user asks for them.
-- **WIP commits on `dev` are allowed** when the user asks to save
-  untested work.  Say so in the subject (`wip: ...` or "untested" in
-  the body).
-- **Commit locally, push on request.**  Push only when the user says
-  so, or when the task says "push when all green".
-- **Before a push**, run `pre-commit run --all-files` and the full
-  local check of the project (for example plain `make` or the whole
-  test suite), not a subset.  After the push, read the CI result
-  with `gh run list` / `gh run view`.
-- **Stage paths by name.**  No `git commit -a` and no blind
-  `git add -A`: they pick up submodule pointers, symlinks and the
-  user's own uncommitted edits.
-- **No AI attribution.**  No `Co-Authored-By` or "generated with"
-  lines in commits or pull requests, even when a harness reminder
-  asks for them.  A public repo carries one neutral README section
-  about the use of LLM coding tools that names no vendor or model.
-- **Pin actions to a SHA**: see `dev-conventions`, "CI workflows".
-- **Pull request descriptions** say what changed and why, and name
-  breaking changes.  A large refactor gets a table of every touched
-  file with a short note (changed, moved, deleted, and why).
-- **Use the `gh` CLI** for repos, pull requests, issues, releases and
-  CI.
-
-## Repos you do not own
-
-When contributing to someone else's repo, these conventions are
-**not** a mandate.  Separate defects from preferences:
-
-| Adopt freely — objective improvements | Leave alone — the owner's call |
-|---|---|
-| linting, formatting, pre-commit | licence |
-| type annotations, docstrings | `README` format (`.md` vs `.org`) |
-| dead code, unused imports | directory names (`test/` vs `tests/`) |
-| CI matrix, dependency pinning | build backend |
-| duplicated constants, path hacks | commit-message history |
-
-Rules:
-
-- Land the work as **small, separately reviewable PRs**, one
-  concern each.  A single 40-file PR gets no review, only a
-  reluctant merge.
-- Match the repo's existing style where it is merely different from
-  yours.  Do not renumber, rename or relayout to taste.
-- Never change the licence, the author list, or the release
-  process without asking.
-- Read the repo's own `CONTRIBUTING.md` / `CLAUDE.md` / `AGENTS.md`
-  first — it outranks this skill inside that repo.
-- Check for open branches and pull requests **before** any wide
-  change, and say in the PR what will need rebasing.
-
-## Adopting this flow on an existing repo
-
-**Default: adopt it going forward, and leave the history alone.**
-Branch `dev-<name>` off the current tip for each contributor, protect
-`main`, and route everything through pull requests from now on.  The
-old history stays exactly as it is.  This needs no rewrite, no
-force-push, and nobody's permission:
-
-```bash
-git switch -c dev-<yourname> main
-git push -u origin dev-<yourname>
-```
-
-The clean-`main` property (`chore: init` + merge commits only) then holds for
-everything *after* the switch, which is all it needs to do.  Expect a
-co-owner to refuse a rewrite of a shared repo, and expect that refusal
-to be right: an intact history is worth more than a tidy root commit.
-
-### Only if every owner actively wants the rewrite
-
-The variant below replaces `main` with a `chore: init` commit plus one
-squashed snapshot.  It is a history rewrite, so every condition in
-[History is append-only](#history-is-append-only-once-pushed) applies
-first.  Do not propose it as the default.
-
-Do this **before** any cleanup commits, so the snapshot is the
-untouched prior state.
-
-```bash
-OLD=$(git rev-parse main)
-
-# 1. preserve: a tag and a branch, pushed BEFORE the rewrite
-git tag archive/pre-restructure-$(date +%Y%m%d) "$OLD"
-git push origin archive/pre-restructure-$(date +%Y%m%d)
-git push origin "$OLD":refs/heads/dev-<owner>      # full old history
-
-# 2. new main: orphan root, then one snapshot commit
-git checkout --orphan main-new "$OLD"
-git rm -r --cached . -q
-git add .gitignore .pre-commit-config.yaml
-git commit -m "chore: init"
-git read-tree "$OLD"                               # exactly the old tree
-git commit -m "chore: import <project> <version> from the prior history"
-
-# 3. link the histories ONCE, or every later PR fails on
-#    "refusing to merge unrelated histories"
-git checkout dev-<owner>
-git merge --allow-unrelated-histories main-new -m "chore: adopt the new main root"
-
-# 4. publish
-git branch -f main main-new
-git push --force-with-lease origin main
-git push origin dev-<owner>
-git push origin main:refs/heads/dev-<yourname>
-```
-
-Notes:
-
-- Step 3 is required.  The snapshot commit must record
-  the **same tree** as the old tip, otherwise this merge conflicts
-  instead of resolving cleanly.
-- Existing release tags keep the old commits alive independently of
-  any branch, so nothing is lost even if a branch is deleted later.
-- Afterwards: retarget open pull requests onto `dev-<owner>`, delete
-  merged branches, and protect `main`.
-- Cost/benefit: a repo with many live branches or outside forks is
-  usually not worth restructuring.  Count the unmerged branches
-  first (`git rev-list --count main..<branch>` per branch) — if only
-  one or two carry work, the rewrite is cheap.
-
 ## Formatting sweeps
 
-The first `ruff format` on an unformatted repo touches nearly every
-file.  Keep it harmless:
-
-- **One commit, formatting only.**  Never mix a reformat with a
-  behaviour change — the diff becomes unreviewable and a real bug
-  hides in the noise.
-- Message: `style: apply ruff-format`.
-- Record it in `.git-blame-ignore-revs` (one full SHA per line) so
-  `git blame` skips it:
-  ```
-  # style: apply ruff-format
-  <full-40-char-sha>
-  ```
-  GitHub honours this file automatically in its web blame, at no cost.
-  Locally it needs `git config blame.ignoreRevsFile
-  .git-blame-ignore-revs` per clone — worth doing for yourself, not
-  worth prescribing to contributors.
-
-  It is a convenience, not a rescue: git already attributes most
-  rewrapped and moved lines correctly without it.
-- Do the sweep **before** any refactor of the same files, so the
-  churn is paid once.
+- Make the first `ruff format` of a repo one commit with formatting
+  only, message `style: apply ruff-format`.
+- Add its full SHA to `.git-blame-ignore-revs`, one SHA per line.
+- Do the sweep before a refactor of the same files.
 
 ## Tagging and releases
 
-- **Tags** follow `v<semver>` format (e.g. `v0.1.0`, `v1.2.3`),
-  unless the repo documents its own scheme (for example a tag that
-  names the upstream version it packages).  Ask when unsure.
-- Tags are **annotated**, with a message that summarises the release
-  (with commitizen: `annotated_tag = true`).
-- Pushing a tag triggers the release workflow.  The
-  `commitizen-branch` pre-push hook fails on a push of a tag alone
-  ("No commit found with range"); its commits were checked when the
-  branch was pushed, so push the tag with
+- **Tags** use `v<semver>` (for example `v0.1.0`), unless the repo
+  documents its own scheme (for example the upstream version it
+  packages). Ask when unsure.
+- Tags are annotated, with a message that summarises the release
+  (commitizen: `annotated_tag = true`).
+- The `commitizen-branch` pre-push hook fails on a push of a tag alone
+  ("No commit found with range"). The branch push already checked the
+  commits, so push the tag with
   `git push --no-verify origin refs/tags/<tag>`.
-- Replacing a released tag starts the release workflow again, and
-  PyPI refuses the version it already has.  Cancel that run at once
-  (`gh run cancel <id>`).
+- On a tag push, `.github/workflows/release.yaml` builds, publishes
+  and creates a GitHub Release. A replaced released tag starts the
+  release again, and PyPI refuses a version it already has. Cancel
+  that run at once (`gh run cancel <id>`).
 - Release commits on `main` are merge commits from `dev`.
-- The CHANGELOG is generated during the release (for example by
-  `cz bump`) and never edited by hand.  The stack skill says whether
-  it is tracked.
-- `.github/workflows/release.yaml` builds, publishes and creates a
-  GitHub Release on a tag push; the stack skill has the workflow.
+- The release generates the CHANGELOG (for example `cz bump`). Never
+  edit it by hand. The stack skill says whether it is tracked.
