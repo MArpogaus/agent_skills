@@ -22,15 +22,15 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 - On the test VM, run commands yourself. On the production host, run
   only read-only commands, except a deploy the user asked for in this
   session. Say before each command that needs the user's hardware key.
-- If the logind session count rises by more than 50 during a deploy,
-  stop and tell the user.
+- If the logind session count rises by more than 50 above the count
+  before the deploy, stop and tell the user.
 - Roles assume a clean install (dev-conventions, "1. Design
   principles"). Give one-off steps for the existing production host to
   the user as manual steps.
 
 ## Platform
 
-- The host runs Fedora CoreOS and rebases to SecureBlue on first boot.
+- A host that runs Fedora CoreOS rebases to SecureBlue on first boot.
   Butane files produce the Ignition config.
 - Each service runs as rootless Podman Quadlets under its own user, on
   its own Btrfs subvolume.
