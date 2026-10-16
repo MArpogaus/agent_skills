@@ -74,8 +74,8 @@ every block, lines joined with =\\=.
 
 #+begin_src org
 ,*** [[<url>][<Name>]] (<place>) :B_block:
-Idee: <one line> \\
-Status: <one line>
+,*Idee:* <one line> \\
+,*Status:* <one line>
 #+end_src
 
 * Display math

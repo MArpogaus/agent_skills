@@ -73,8 +73,9 @@ pages too.
 
 ## Log and boxes
 
-- The log's `at line N` refers to the frame's `.vrb` file, not to the
-  `.org`. `tools/box-pages.py` maps each warning to its page.
+- For a fragile frame, the log's `at line N` refers to the frame's
+  `.vrb` file, not to the `.org`. `tools/box-pages.py` maps each
+  warning to its page.
 - `Overfull \vbox` means content runs past the bottom of the slide. Cut
   a line or split the frame.
 - The metropolis title page always reports about 13.8pt of `\vbox`.

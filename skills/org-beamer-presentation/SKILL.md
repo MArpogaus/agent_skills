@@ -2,12 +2,9 @@
 name: org-beamer-presentation
 description: >
   Author Beamer talks as Org mode files exported to LaTeX and PDF, in the
-  user's sparse, figure-first style. Hard rules: at most one frame per
-  minute, figure frames with at most two lines, at most three bullets on
-  a text frame, theme colours only, no marketing, cut or split instead of
-  shrinking. Covers the default metropolis-dark design, denote file
-  naming with a sidecar figure folder, global biblatex citations,
-  headless export and page-by-page verification. Use when the user says
+  user's sparse, figure-first style: metropolis-dark design, denote file
+  names with a sidecar figure folder, global biblatex citations, headless
+  export and page-by-page verification. Use when the user says
   slides, Folien, Vortrag, talk or Beamer, or when an `.org` file under a
   `presentations/` folder changes.
 license: MIT
@@ -37,31 +34,29 @@ message.
 - Colours: theme foreground plus one accent. One colour per meaning:
   the same dataset has the same colour on every frame.
 - Show at most 2 examples, the two with the largest contrast.
-- No overlays, semicolons, arrow characters in text, one-item lists or
-  version history. Show the current state only. No bold lead-ins and no
-  bold on conclusions.
+- No semicolons, arrow characters in text, one-item lists or version
+  history. Show the current state only.
+- No overlay reveals of text or punch lines. A step-by-step build of one
+  figure with its math (`\multiinclude`, `<2->`) is allowed when the user
+  asks for an animation.
+- No rhetorical bold lead-ins and no bold on conclusions. Field labels in
+  an entity grid (for example `*Idea:*`, `*Status:*`) stay bold.
 - Never invent content. Mark schematic numbers as schematic on the
   slide. No code or math for a non-specialist audience. Spell out
   jargon.
 - When content does not fit, cut it or split the frame. Never shrink
   fonts, spacing or figures to make it fit.
-- A collection of facts goes into a Denote note, not into a deck. Every
-  deck is self-contained with its own sidecar folder. Copy a figure
-  from another deck when necessary.
+- The hard rules apply to talks. An internal fact deck that the user
+  asks for is exempt from the time budget and may hold up to 6 bullets
+  per frame.
+- Every deck is self-contained with its own sidecar folder. Copy a
+  figure from another deck when necessary.
 
 ## 1. Before writing
 
-Read the first deck of this list, plus one of the same talk type, in
-`<presentations dir>/`. Follow their tone:
-
-- `<recent deck>.org`:
-  the accepted model, about 20 words per frame, one figure and two short
-  bullets.
-- `<conference deck>.org`:
-  a conference talk.
-- `<older conference deck>.org`:
-  a conference talk.
-- `<workshop deck>.org`: a project workshop.
+Read two or three of the user's earlier decks in `<presentations dir>`,
+the newest first, plus one of the same talk type. Aim for their density:
+about 20 words per frame, one figure and at most two short bullets.
 
 Ask for the talk length and the audience when the request does not
 state them. Autonomous default (see `dev-conventions`, "5. Interactive
@@ -91,8 +86,8 @@ Order the deck for a listener without prior knowledge. Introduce each
 model, data set and setup before its results. Add one step of
 complexity per frame. A frame is mostly figure or mostly text. For a
 figure beside text, use a 0.55/0.45 or 0.5/0.5 column split with the
-figure on the left. Text does not repeat numbers that the figure shows. Use `:noexport:` to park a
-frame. Lines that start with `# ` inside a frame are the user's speaker
+figure on the left. Text does not repeat numbers that the figure
+shows. Use `:noexport:` to park a frame. Lines that start with `# ` inside a frame are the user's speaker
 prose: do not change them. A German deck writes ß, not ss.
 
 **File name.** Denote convention, in the presentations directory:
@@ -117,11 +112,11 @@ a `#+MACRO` (stanza in `header-extras.org`) and write
 another Org file.
 
 **Export in the agent sandbox.** `emacs` and `lualatex` are not on
-`PATH`. Use the test rig in `<test rig>`. Put TeX first, so that its
-`kpsewhich` wins:
+`PATH`. Use `<test rig>` (its README names its location). Put TeX
+first, so that its `kpsewhich` wins:
 
 ```bash
-export PATH=<test rig>/tex/bin:<test rig>/env/bin:$PATH
+export PATH=<test rig>/tex/bin/x86_64-linux:<test rig>/env/bin:$PATH
 ```
 
 If `<test rig>/env/bin/emacs` does not start, run `<test rig>/rig setup`.
@@ -132,7 +127,7 @@ emacs -Q --batch -l org -l ox-beamer \
   --eval '(setq enable-local-variables :all
                 org-latex-remove-logfiles nil
                 org-latex-packages-alist
-                (quote (("" "xcolor" t) ("" "listings" t)
+                (quote (("" "xcolor" t)
                         ("AUTO" "polyglossia" t ("xelatex" "lualatex"))))
                 org-latex-pdf-process
                 (list "latexmk -f -pdf -%latex -interaction=nonstopmode \
@@ -145,7 +140,7 @@ generated figures, read `reference/pitfalls.md`.
 
 ## 4. Verification
 
-Run these with the `PATH` of section 3 (the rig). Tool paths are
+Run these with the `PATH` of section 3 (`<test rig>`). Tool paths are
 relative to this skill's directory. A clean log does not prove a
 correct deck. Do steps 1 to 4 after each build. Do step 5 once, before
 you report.
@@ -161,24 +156,12 @@ you report.
 5. Report a numbered list of problems, one line each, so the user can
    accept items by number.
 
-Add these views to `dev-conventions`, "4.3 Reviewers":
+When a deck changes, spawn these views in addition to the views in
+`dev-conventions`, "4.3 Reviewers":
 
 - Density and budget: frame count, words per frame, text-only runs.
-- Figure correctness and provenance: data source, axes, colours,
-  legends.
 - Consistency with the user's style: tone, titles, colours, the decks
   in section 1.
-
-## 5. Checklist
-
-- [ ] Frame count is within the budget
-- [ ] Every frame obeys the hard rules
-- [ ] Tone matches the user's decks in section 1
-- [ ] Filename, `#+identifier:` and `#+filetags:` agree, sidecar exists
-- [ ] Header carries no package that the frames do not use
-- [ ] Every number comes from a source, schematic numbers are marked
-- [ ] PDF builds, no `??`, every page looked at
-- [ ] Numbered problem list handed over
 
 ---
 
