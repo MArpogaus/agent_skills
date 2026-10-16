@@ -26,8 +26,8 @@ submission. For a revision, use `latex-paper-revision`.
   `\TODO{...}`.
 - A new paper puts sections in `tex/` and figures in `gfx/`. An
   existing draft keeps its directory names.
-- Before a submission, `grep -rn '\\TODO' main.tex tex/` prints
-  nothing.
+- Before a submission, `pdftotext main.pdf - | grep -c 'TODO:'`
+  prints `0`.
 - Load `biblatex` or `\bibliography`, never both.
 - Take the class options from the venue template. Never guess them.
 - Compile before each commit and check that the log has no undefined
@@ -322,8 +322,8 @@ mv final.pdf "FINAL_PAPER.PDF"
 - **Packages:** do not load `caption`: it conflicts with IEEEtran.
   Remove the `caption` and `subcaption` lines from the preamble
   (`subcaption` loads `caption`).
-- **Keywords:** `\IEEEkeywords{...}`
-- **Author bios:** `\IEEEbiography{...}` (camera-ready only)
+- **Keywords:** `\begin{IEEEkeywords}...\end{IEEEkeywords}`
+- **Author bios:** `\begin{IEEEbiography}[<photo>]{<name>}...\end{IEEEbiography}` (camera-ready only)
 - **Review:** `\IEEEpeerreviewmaketitle` for the anonymised review
   version. It needs the `peerreview` class option:
   `\documentclass[peerreview]{IEEEtran}`.
@@ -367,7 +367,7 @@ mv final.pdf "FINAL_PAPER.PDF"
 - PGFPlots: https://pgfplots.sourceforge.net/
 - An earlier paper that used the target class is the best reference
   for a venue: ask the user for one and copy its setup. Autonomous:
-  take the class defaults and record the question
+  use the class defaults without options and record the question
   (`dev-conventions`, "2. Asking and acting").
 
 ---
