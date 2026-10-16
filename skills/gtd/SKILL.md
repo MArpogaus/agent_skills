@@ -30,8 +30,6 @@ repo's `main`.
 - Run `git -C <agenda repo> status --short` before each edit. Never
   revert or overwrite changes that you did not make. When a file you
   want to change has such changes, stop and tell the user.
-- Stage only the files you changed (`git add FILE`). Commit each change
-  at once.
 - Ask before you set `DONE` or `KILL` and before you delete text. "X is
   done" from the user is the consent. Do not ask again. Autonomous:
   skip the edit and list the item under "Open" in the final report.
@@ -47,7 +45,7 @@ Other writers change the same files: a sync client and open Emacs
 buffers. Uncommitted changes that you did not make can be a stale sync
 or an unsaved buffer.
 
-Commit on `main` with a short conventional message in English.
+Commit on `main` as `git-conventions`, "Hard rules", says.
 
 ## 2. Capture
 
@@ -103,12 +101,12 @@ apply it, commit, then go to the next project.
 2. Carry meeting notes into their Denote notes and new tasks into the
    projects. Triage what is left in the inbox (section 4).
 3. Read today's agent sessions: the transcripts that changed today in
-   the harness's transcript location (Claude Code: `~/.claude/projects/`). Extract the user's messages
-   and look for what went well, what went badly, and decisions.
+   the harness's transcript location (Claude Code:
+   `~/.claude/projects/`). Extract the user's messages and look for
+   what went well, what went badly, and decisions.
 4. Write the journal entry in the date tree of `journal.org` with the
    fields `AGENTS.md` names, one line each. They cover what is done,
    what went well, what went badly, decisions and tomorrow.
-
 5. Commit.
 
 ## 6. Weekly review ("Wochenreview")
