@@ -1,85 +1,42 @@
 ---
 name: emacs-config
 description: >
-  Conventions and architecture knowledge for the user's literate Emacs
-  configuration (MArpogaus/emacs.d): org-only editing workflow, naming
-  schemes, package idioms, the my/pycell notebook layer, header-line
-  buttons, display-property rendering lore, and the repo's git flow.
-  Use when working in that configuration repository.
+  Conventions and architecture of the user's literate Emacs
+  configuration (MArpogaus/emacs.d): the org-only editing workflow,
+  naming schemes, package idioms, header-line buttons, the features
+  that became packages, the hand-off of a fix through elpaca, and the
+  repo's git flow. Use in the ~/.emacs.d repository or when editing
+  emacs.org.
 license: MIT
 compatibility: claude-code opencode
-metadata:
-  requires: [git-conventions]
-  stack: emacs
+metadata: {stack: emacs, requires: [git-conventions]}
 ---
 
 # Skill: Emacs Config (MArpogaus/emacs.d)
 
 ## Cardinal rules
 
-- **`emacs.org` is the single source of truth.**  `lisp/*.el`,
-  `init.el` and `early-init.el` are tangled artifacts: never edit
-  them.  Tangle only when the user asks for it ("retangle", "you may
-  tangle").  Otherwise the user tangles.
-- **No test files.**  Do not create `test/` or ERT suites.
-- **Check what you can, ask for the rest.**  An Emacs in the sandbox
-  can byte-compile a tangled block and run batch probes; a claim about
-  redisplay needs a real frame (see the `emacs-package` skill for the
-  Xvfb recipe).  Where neither is available, validate with a
-  paren/string-balance script (mind `?\(` char literals, strings,
-  comments) and ask the user to eval and report; debug through targeted
-  questions (`C-h f`, `*Messages*`, `M-:` probes), one hypothesis at a
-  time.
-- **Reproduce in the rig with the user's configuration** before you
-  claim a fix (`<test rig>`; see `emacs-package`).  Check that the rig loads
-  the same package versions as `~/.emacs.d/elpaca/sources`.
-- Org blocks may be evaluated with `:lexical no` — avoid closures
-  that capture locals; pass args through `run-with-timer`,
-  `apply-partially`, or global/buffer-local state instead.
+- **`emacs.org` is the single source of truth.** `lisp/*.el`, `init.el` and `early-init.el` are tangled artifacts: never edit them. Tangle only when the user asks for it ("retangle", "you may tangle"). Otherwise the user tangles.
+- **No test files.** Do not create `test/` or ERT suites.
+- **Check what you can, ask for the rest.** An Emacs in the sandbox can byte-compile a tangled block and run batch probes. A claim about redisplay needs a real frame (`rig gui`). Where neither is available, validate with a paren and string balance script (mind `?\(` char literals, strings, comments). Then ask the user to eval and report. Debug through targeted questions (`C-h f`, `*Messages*`, `M-:` probes), one hypothesis at a time.
+- **Reproduce in the rig with the user's configuration** before you claim a fix. `<test rig>` is a conda env with Emacs 31 and a copy of the user's tangled config and elpaca; see `<test rig>/README.md`. Run `rig sync` first, and check that the rig loads the same package versions as `~/.emacs.d/elpaca/sources`.
+- Org blocks can be evaluated with `:lexical no`. Avoid closures that capture locals. Pass arguments through `run-with-timer`, `apply-partially`, or global or buffer-local state.
 
-## Repo layout & style
+## Repo layout and style
 
-- Literate config, `#+PROPERTY: header-args :mkdirp yes :comments org`;
-  each `***` section sets `:header-args+: :tangle lisp/my-<name>.el`.
-  `README.org` is a symlink to `emacs.org`.
-- Package manager: elpaca + use-package.  Style: `:preface` for
-  defuns/defvars/defaces, `:custom`, `:bind`, `:hook`, `:config`.
-  Built-ins get `:ensure nil`; do not add `:ensure t`.
-  Generic config lives in `(use-package emacs :ensure nil ...)` blocks.
-- Loading: every package loads through its own `use-package` block.
-  No `use-package` wrapped in another form, and never a `require` or
-  another loading path as a fallback.  Global modes start with
-  `:hook (elpaca-after-init . foo-mode)`.  Use `with-eval-after-load`
-  only for code that needs a package that is not yet loaded.  A
-  window rule stays in the `auto-side-windows` block.
-- Naming: commands/helpers `my/...` (internals `my/foo--bar`),
-  faces `my/...-face`.
-- Modal editing is **meow**; plain single-key bindings in mode maps
-  are shadowed by normal state — never define speed keys.  Preferred:
-  modified keys (the `<return>` family, `C-<up>/<down>`) plus
-  repeat-maps hung off the leader (`my/leader-map`, e.g.
-  `SPC j` → `my/code-cells-repeat-map`), pattern as in `my/debug-map`.
-  The user dislikes `C-c` prefix bindings.
-- Side windows via the user's own `auto-side-windows` package; per-side
-  buffer-name/mode lists, window parameter `header-line-format`
-  drives the custom header (`my/header-line-format-top`).
-- `define-minor-mode` gotcha: if the body starts with a non-keyword
-  form, it is eaten as the deprecated positional INIT-VALUE — keep a
-  `:lighter` (or another keyword) before the body.
+- Literate config, `#+PROPERTY: header-args :mkdirp yes :comments org`. Each `***` section sets `:header-args+: :tangle lisp/my-<name>.el`. `README.org` is a symlink to `emacs.org`.
+- Package manager: elpaca and use-package. Style: `:preface` for defuns, defvars and defaces, then `:custom`, `:bind`, `:hook`, `:config`. Built-ins get `:ensure nil`. Do not add `:ensure t`. Generic config lives in `(use-package emacs :ensure nil ...)` blocks.
+- Loading: every package loads through its own `use-package` block. No `use-package` inside another form, and never a `require` or another loading path as a fallback. Global modes start with `:hook (elpaca-after-init . foo-mode)`. Use `with-eval-after-load` only for code that needs a package that is not loaded yet. A window rule stays in the `auto-side-windows` block.
+- Naming: commands and helpers `my/...` (internals `my/foo--bar`), faces `my/...-face`.
+- Modal editing is **meow**. Normal state shadows plain single-key bindings in mode maps, so never define speed keys. Use modified keys (the `<return>` family, `C-<up>/<down>`) and repeat-maps under the leader (`my/leader-map`, for example `SPC j` → `my/code-cells-repeat-map`), as in `my/debug-map`. Do not add `C-c` prefix bindings.
+- Side windows come from the user's `auto-side-windows` package: buffer-name and mode lists per side. The window parameter `header-line-format` drives the custom header (`my/header-line-format-top`).
+- `define-minor-mode`: a body that starts with a non-keyword form loses that form as the deprecated positional INIT-VALUE. Keep a `:lighter` (or another keyword) before the body.
 
-## Display-property rendering lore
+Display engine rules (overlays, display properties, scrolling): read `emacs-package` [reference.md](../emacs-package/reference.md) before you change rendering code.
 
-Lives in the `emacs-package` skill, under "Display engine rules for
-overlay-heavy UIs".  It was learned here and applies to both, so it is
-written down once.  The two facts this configuration leans on most:
-a `display` property on real buffer text scrolls smoothly where a tall
-overlay string jumps, and display specs do not nest, so anything with
-images or `(space :align-to ...)` inside has to ride an overlay string.
+## Features that became packages
 
-## Features that grew into packages
-
-Four of them left `emacs.org` and now live on their own, each with its
-own README, test suite and CI (see the `emacs-package` skill):
+These features live in their own repositories, each with README, tests and CI (see the `emacs-package` skill):
 
 | Package | What the configuration keeps |
 |---|---|
@@ -88,45 +45,30 @@ own README, test suite and CI (see the `emacs-package` skill):
 | `auto-tab-groups` | which commands open a tab group |
 | `window-box` | a box around the windows the config chooses |
 
-The rule after an extraction is one copy of the code: the org block
-becomes a `use-package` block that configures the package, and the
-implementation is not carried along.  What stays personal stays in the
-configuration — keybindings, window placement, options set for this
-setup.
+Keep one copy of the code. The org block is a `use-package` block that configures the package and holds no implementation. Personal settings stay in the configuration: keybindings, window placement, options for this setup.
 
-## Git flow (see git-conventions skill)
+## Git flow
 
-- Branches: `main` (full old history; a documented exception to
-  `git-conventions`, adopted going forward) and `dev` (work).
-  Commits go to `dev`; merges to `main` are fast-forward, done when
-  stable and after a `chore: tangle` commit brings `lisp/*.el`
-  current.  Never rewrite pushed history.
-- Conventional commits, one concern each.  Agent commits contain
-  **emacs.org only**.  Tangled files are committed in the `chore:
-  tangle` commit.
-- Splitting mixed changes: reconstruct intermediate `emacs.org`
-  states by splicing org subtrees (headline → next `**** `) between
-  the committed and working versions, commit each state.
+- `main` holds `chore: init` and `--no-ff` merges from `dev`. Commits go to `dev`. Push over HTTPS (see git-conventions).
+- Conventional commits, one concern each. Agent work commits contain **emacs.org only**.
+- Tangled files go into a separate `chore: tangle` commit. When the user allowed tangling, the agent makes this commit. Otherwise the user does.
+- To split mixed changes, build intermediate `emacs.org` states by splicing org subtrees (headline to next `**** `) between the committed and the working version. Commit each state.
 
 ## Hand a fix to the user for testing
 
-The user tests in the running Emacs, which loads packages from
-`~/.emacs.d/elpaca`.  "Sync elpaca" means, for each changed package:
+Do this only when the user says "sync elpaca", "delete builds" or similar. It is the one exception to the rule never to touch the user's environment. The running Emacs loads packages from `~/.emacs.d/elpaca`. The elpaca source clone does not have the work commit. For each changed package:
 
 1. Commit the fix on the package's `dev` branch.
-2. Check out that commit in `~/.emacs.d/elpaca/sources/<pkg>`.
-   Look for uncommitted edits there first.
-3. Delete `~/.emacs.d/elpaca/builds/<pkg>` and the package's files
-   in `~/.emacs.d/eln-cache`, so that elpaca rebuilds it.
-4. If the configuration changed too and the user allowed it, tangle.
-5. Tell the user what to restart and what to look for.
+2. Run `git -C ~/.emacs.d/elpaca/sources/<pkg> status --short`. If it shows uncommitted edits, stop and ask the user.
+3. Run `git -C ~/.emacs.d/elpaca/sources/<pkg> fetch <work checkout> dev`, then `git -C ~/.emacs.d/elpaca/sources/<pkg> checkout FETCH_HEAD`.
+4. Delete `~/.emacs.d/elpaca/builds/<pkg>` and the package's files in `~/.emacs.d/eln-cache`, so that elpaca rebuilds it.
+5. If the configuration changed too and the user allowed it, tangle.
+6. Tell the user what to restart and what to look for.
 
 ## Debugging etiquette
 
-- The user tests interactively and reports in short German messages.
-  Give precise probes and expected outputs, one hypothesis at a time.
-- UI alignment is tuned empirically: change one knob per iteration
-  and say which number to tweak in which direction.
+- The user tests interactively and reports in short German messages. Give exact probes and expected outputs, one hypothesis at a time.
+- Tune UI alignment by trial: change one value per iteration and say which number to change in which direction.
 
 ---
 
@@ -135,5 +77,4 @@ The user tests in the running Emacs, which loads packages from
 This skill assumes the following prerequisite skills are loaded.
 Use the `skill` tool to load them before using this one:
 
-- **git-conventions** — two-branch flow, conventional commits,
-  pre-commit hooks, push and attribution rules, tagging and releases.
+- **git-conventions**: two-branch flow, conventional commits, pre-commit hooks, push and attribution rules, tagging and releases.
