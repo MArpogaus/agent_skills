@@ -20,7 +20,9 @@ metadata: {stack: emacs, requires: [dev-conventions, emacs-package, git-conventi
   and `early-init.el` are tangled artifacts: never edit them. Tangle
   only when the user asks for it ("retangle", "you may tangle").
   Otherwise the user tangles.
-- **No test files.** Do not create `test/` or ERT suites.
+- **No test files in this repository.** Do not create `test/` or ERT
+  suites here. A package under `packages/<name>` follows
+  `emacs-package`.
 - **Check what you can, ask for the rest.** An Emacs in the sandbox can
   byte-compile a tangled block and run batch probes. A claim about
   redisplay needs a real frame (`<test rig>/rig gui`). Where neither is
@@ -86,10 +88,8 @@ and CI (see the `emacs-package` skill):
 | `auto-tab-groups` | which commands open a tab group |
 | `window-box` | a box around the windows the config chooses |
 
-Keep one copy of the code. The org block is a `use-package` block that
-configures the package and holds no implementation. Personal settings
-stay in the configuration: keybindings, window placement, options for
-this setup.
+One copy of the code: see `emacs-package`, "Hard rules" and
+"Extracting a package from a configuration".
 
 Work on each package in `<user home>/.emacs.d/packages/<name>`, the
 user's checkout. Make no other clone.
@@ -144,8 +144,8 @@ work commit. For each changed package:
 
 ## Required skills
 
-This skill assumes the following prerequisite skills are loaded. Use the
-`skill` tool to load them before using this one:
+This skill assumes the following prerequisite skills are loaded.
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: design principles, verification, review loop,
   code and documentation style.
