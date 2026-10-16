@@ -15,9 +15,9 @@ metadata: {stack: meta, requires: [dev-conventions]}
 
 This skill creates a skill: a reusable SKILL.md that agents load on
 demand. The result is generic and contains all the specifics that the
-domain needs. For a change to an existing skill, edit the file in
-place, then do steps 6, 8 and 9. Update its `README.org` row when its
-scope changed.
+domain needs. For a change to an existing skill, edit the file in place,
+then do steps 6, 8 and 9. Update its `README.org` row when its scope
+changed.
 
 ## Hard rules
 
@@ -25,13 +25,12 @@ scope changed.
   when", "Use in" or "Use before". It names the files, commands or user
   words that load the skill.
 - `SKILL.md` has at most 1,500 words (`wc -w`); `dev-conventions` is
-  exempt. Rare detail (pitfall lists,
-  long config files, arithmetic) goes into one `reference.md` beside
-  it, or a `reference/` folder when there are several files. One line
-  in `SKILL.md` says when to read it.
-- Every `SKILL.md` over 600 words has `## Hard rules` as its first H2:
-  5 to 10 short imperative bullets with the rules that the agent breaks
-  most. The sections below do not restate them.
+  exempt. Rare detail (pitfall lists, long config files, arithmetic)
+  goes into one `reference.md` beside it, or a `reference/` folder when
+  there are several files. One line in `SKILL.md` says when to read it.
+- Every `SKILL.md` over 600 words has `## Hard rules` as its first H2.
+  It holds 5 to 10 short imperative bullets: the rules that the agent
+  breaks most. The sections below do not restate them.
 - Write only what tools do not enforce. Do not restate what a linter,
   formatter or pre-commit hook already checks.
 - Do not restate a rule that another skill owns. Point to it by skill
@@ -42,9 +41,9 @@ scope changed.
 
 ## Working directory
 
-All skills live in `<repo>/skills/<name>/SKILL.md`. Both harnesses
-read the checkout in place. Edit the files in the checkout. There is
-nothing to copy or sync.
+All skills live in `<repo>/skills/<name>/SKILL.md`. Both harnesses read
+the checkout in place. Edit the files in the checkout. There is nothing
+to copy or sync.
 
 ## Procedure
 
@@ -54,8 +53,8 @@ Use the question tool (Claude Code: `AskUserQuestion`) to ask the user
 for the name. The name:
 
 - has 1 to 64 characters,
-- matches the regex `^[a-z0-9]+(-[a-z0-9]+)*$` (lowercase
-  alphanumeric words joined by single hyphens).
+- matches the regex `^[a-z0-9]+(-[a-z0-9]+)*$` (lowercase alphanumeric
+  words joined by single hyphens).
 
 If the name does not match, ask again.
 
@@ -104,9 +103,8 @@ metadata: {stack: <words>, requires: [<skill>, ...]}
   `org-mode latex beamer`, `meta`).
 - `metadata.requires`: the skills this one depends on, as a flow list
   (`requires: [git-conventions, python-dev]`), or `[]`.
-- `metadata.audience` (optional): the readers of the output, for
-  example `researchers`. Set it only when the skill writes for a fixed
-  audience.
+- `metadata.audience` (optional): the readers of the output, for example
+  `researchers`. Set it only when the skill writes for a fixed audience.
 
 ### 5. Generate the skill
 
@@ -115,21 +113,20 @@ Create `skills/<name>/SKILL.md` with:
 - the YAML frontmatter from steps 1 to 4,
 - the H1 `# Skill: <Title>`,
 - clear sections (phases, steps, conventions, references),
-- placeholders such as `<project>`, `<package>` or `<your-org>` instead
-  of paths, project names or environment details,
+- placeholders as the hard rule "The repo is public" says,
 - code examples that use the agent's tools (Claude Code: Read, Edit,
   Write, Bash),
 - a **Required skills** section at the end when `metadata.requires` is
   not empty, after a `---` line. It tells the agent to load each listed
-  skill with the skill tool (Claude Code: `Skill`). Copy the format
-  from `python-dev`.
+  skill with the skill tool (Claude Code: `Skill`). Copy the format from
+  `python-dev`.
 
 ### 6. Grow by replacing
 
 A skill competes for the agent's attention with every other loaded
-skill. The agent skims a long skill and breaks its rules. When the
-user corrects the same thing twice, add the rule, and look for a rule
-that it makes redundant.
+skill. The agent skims a long skill and breaks its rules. When the user
+corrects the same thing twice, add the rule, and look for a rule that it
+makes redundant.
 
 ### 7. File structure
 
@@ -148,9 +145,9 @@ are relative to the skill directory.
 
 ### 8. Review against the user's rules
 
-Do this step when you create or change a skill from session
-experience. Run the Coverage view (`dev-conventions`, "4.3 Reviewers")
-on the change:
+Do this step when you create or change a skill from session experience.
+Run the Coverage view (`dev-conventions`, "4.3 Reviewers") on the
+change:
 
 1. Read the user's messages of the sessions that led to the change.
 2. Read the memory notes that touch the skill's domain.
@@ -169,8 +166,7 @@ After writing, check that the hard rules and steps 1 to 5 hold:
   `compatibility` and `metadata` with `stack` and `requires`.
 - `grep -n '^# Skill: ' skills/<name>/SKILL.md` finds the H1.
 - Each skill in `requires` has a line in the **Required skills**
-  section. When the text cites `dev-conventions`, it is in
-  `requires`.
+  section. When the text cites `dev-conventions`, it is in `requires`.
 
 ### 10. Register in repo
 
@@ -178,10 +174,9 @@ After you create the skill file:
 
 - [ ] Add the skill to the table in `README.org`
 - [ ] Check that the descriptions in `.claude-plugin/plugin.json` and
-      `.claude-plugin/marketplace.json` still cover the collection
+  `.claude-plugin/marketplace.json` still cover the collection
 - [ ] Check that the skill loads: in Claude Code,
-      `claude plugin details marpogaus-skills@marpogaus-skills`
-      lists it
+  `claude plugin details marpogaus-skills@marpogaus-skills` lists it
 - [ ] `git add` the new skill directory and the changed files
 - [ ] Commit with the message `feat: add <name> skill definition`
 
@@ -189,8 +184,8 @@ After you create the skill file:
 
 ## Required skills
 
-This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+This skill assumes the following prerequisite skills are loaded. Use the
+`skill` tool to load them before using this one:
 
-- **dev-conventions**: workspace placeholders, the Coverage review
-  view, and documentation style.
+- **dev-conventions**: workspace placeholders, the Coverage review view,
+  and documentation style.
