@@ -16,13 +16,11 @@ metadata: {stack: emacs, requires: [git-conventions]}
 
 ## Hard rules
 
-- Run plain `make` (compile, checkdoc, lint, test) before every push, not a subset.
 - Run every code path with `emacs -Q` defaults, not only with the author's configuration.
-- Prove each new test red before you call it done.
 - A package sets no user options and no key bindings. The README recommends them.
 - Prefer no dependency: a built-in or a subprocess first, a soft dependency for optional features.
 - After an extraction, one copy of the code exists: the configuration only configures the package.
-- Keep the `;; Assisted-by:` header line (see "File headers").
+- Add `;; Assisted-by: <tool name>` to every file of a package published on MELPA, and keep it where it exists ("File headers").
 
 Read [reference.md](reference.md) before you build or debug overlays, display properties, margins, fringes, header lines, scrolling over tall blocks, pixel tests or demo GIFs.
 
@@ -53,7 +51,7 @@ docs/implementation.org     mechanism, measurements, test notes
 test/<package>-test.el
 ```
 
-`.dir-locals.el` does not set `sentence-end-double-space`. Two spaces after a sentence apply only in Emacs Lisp docstrings and `;;; Commentary:` sections.
+`.dir-locals.el` does not set `sentence-end-double-space`.
 
 A multi-file package adds one companion per optional integration next to the main file (`<package>-<topic>.el`). Each companion needs its own header block. package-lint checks the symbol prefix against the file name: `foo-project.el` may only define `foo-project-*`.
 
@@ -73,7 +71,7 @@ Every file, companions and test files included:
 ;; Package-Requires: ((emacs "29.1"))
 ;; Keywords: convenience
 ;; URL: https://github.com/<owner>/foo
-;; Assisted-by: <tool>
+;; Assisted-by: <tool name>
 
 ;; This file is not part of GNU Emacs.
 ;; <GPLv3 blurb, 14 lines>
@@ -87,7 +85,7 @@ Every file, companions and test files included:
 ;;; foo.el ends here
 ```
 
-- Add the `;; Assisted-by: <tool>` line when the project's archive asks for it (MELPA does). git-conventions' no-attribution rule covers commits, tags, pull requests and issues only.
+- The `;; Assisted-by:` line follows the hard rule. The no-attribution rule of `git-conventions` covers commits, tags, pull requests and issues only.
 - The email can be ROT13 obfuscated. Keep the form the existing files use.
 - `Package-Requires` in the main file decides what MELPA installs. Nothing installs a companion's requirements, so a companion that needs a newer Emacs forces the main file up too.
 - `Keywords` contains at least one word from `finder-known-keywords` (`convenience`, `tools`, `languages`).

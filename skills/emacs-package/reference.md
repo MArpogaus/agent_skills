@@ -115,6 +115,6 @@ Check every package that comes from a configuration for these. Run every path wi
 - **`comint-last-prompt` during output** points inside the output. Copy to the end of the buffer and strip the prompt from the text.
 - **A declaration between `;;;###autoload` and its definition** takes the cookie. Check the generated autoloads file.
 - **A buffer-local minor mode dies with the major mode** (`kill-all-local-variables`). Mark it `permanent-local` and re-apply its setup from `after-change-major-mode-hook`.
-- **A new window inherits the fringes and margins of the window it was split from.** To restore a window, ask what the frame or the buffer gives it, not what the window has now.
+- **A new window inherits the fringes and margins of its parent window.** To restore a window, read the values from the frame or the buffer. Do not read them from the window.
 - **A rule that reads the window reads the package's own values.** Ask the buffer as well.
 - **`(setq some-mode 1)` in documentation** does not run the mode body. Document the mode function call.
