@@ -14,16 +14,18 @@ metadata: {stack: sandbox conda uv nix, requires: [dev-conventions]}
 
 # Skill: Sandbox Environment
 
-The agent's home is `$HOME` (in this sandbox `<agent home>`). All tools
-for the agent's own use go there. In skills, `~/Notes`, `~/.emacs.d` and
-`~/Projekte` mean the user's home. In a sandbox the agent's `$HOME`
-differs: resolve the user's home first (here `<user home>`).
+The agent's home is `$HOME`. All tools for the agent's own use go
+there. For paths under `~` in skills, see `dev-conventions`, "6. Sandbox
+and environment safety".
 
 ## Hard rules
 
 - Install tools for the agent only under `$HOME`. Never install into
   the user's home, the user's project environment (`.venv`, a conda env
   of the project, `node_modules`), a lock file, or the system.
+- Tools for the agent's own use follow this skill, also in a Python
+  project. The project `.venv` stays untouched. A package the project
+  needs is reported, as `python-dev`, "uv and the environment", says.
 - This skill applies only when `$HOME` is not the user's home.
   Otherwise install nothing and report the missing tool.
 - Never run `sudo`, `dnf`, `rpm-ostree`, `apt` or `flatpak install` for
@@ -33,8 +35,9 @@ differs: resolve the user's home first (here `<user home>`).
   wiped without warning.
 - List the existing envs and tools before you install. Reuse one when
   it has the tool or can take it.
-- When you cannot install a tool after the steps below, stop and
-  report the tool, the command and the error to the user. Do not
+- When you cannot install a tool after the steps below, stop that
+  part of the work and report it as `dev-conventions`, "2. Asking and
+  acting", says. Give the tool, the command and the error. Do not
   work around a missing tool with a hand-written replacement.
 
 ## 1. Look first
@@ -49,8 +52,8 @@ micromamba env list
 command -v nix || ls -d ~/.nix-profile
 ```
 
-`<test rig>/env` is the shared Emacs and TeX rig, owned by `emacs-config`
-and `org-beamer-presentation`. Do not change it for an unrelated
+`<test rig>` is the shared Emacs and TeX rig; its README names its
+location. `emacs-config` and `org-beamer-presentation` own it. Do not change it for an unrelated
 project.
 
 ## 2. Choose the installer
