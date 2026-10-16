@@ -6,7 +6,8 @@ description: >
   NumPy docstrings, pytest-xdist, CI matrix, MkDocs + mkdocstrings +
   mike docs, commitizen, README.org and matplotlib figures. Use in
   any repo with `pyproject.toml` or Python sources, before editing
-  Python code, tests, docs, CI or uv settings.
+  Python code, tests, docs, CI or uv settings, or to port a change
+  to the skeleton.
 license: MIT
 compatibility: claude-code opencode
 metadata: {stack: python, requires: [dev-conventions, git-conventions]}
@@ -14,18 +15,28 @@ metadata: {stack: python, requires: [dev-conventions, git-conventions]}
 
 # Skill: Python Development
 
-## When to use
-
-Load this skill before you create or change a Python project of the
-user: `pyproject.toml`, source, docstrings, tests, CI, docs or
-configuration. Also load it to port a generic improvement back to
-the skeleton.
-
 This skill holds only what no tool enforces. Ruff and pre-commit
 enforce quotes, line length, import order, formatting and whitespace.
-Do not hand-check these rules; run the hooks.
+Do not hand-check these rules. Run the hooks.
 
-Read [reference.md](reference.md) when you write the pre-commit, test or docs configuration.
+Read [reference.md](reference.md) when you write the pre-commit, test
+or docs configuration.
+
+## Hard rules
+
+- Run no `uv sync`, `uv run`, `uv add`, `uv remove` or `uv lock`
+  unless the user asks (section "uv and the environment").
+- Never write a literal version into `pyproject.toml` or
+  `__init__.py` (section "One version source").
+- Usage examples live only in notebooks. Docstrings are API reference
+  only. The README shows no code beyond the install command.
+- Do not run a notebook unless the user asks. Edit its `.py` file
+  only, and say that the edit did not run.
+- Use setuptools. Do not use hatchling.
+- Do not accept a keyword argument that the function does not use.
+  Do not add `**kwargs` "for later".
+- Apply each generic config change to the skeleton too (section
+  "Project setup").
 
 ## Design
 
@@ -36,10 +47,6 @@ These rules extend the principles in `dev-conventions`.
 - Use built-ins before custom machinery. Select an implementation
   with `getattr` or an `importlib` dotted path, not a registry.
   Check subclasses with `__init_subclass__`, not with a metaclass.
-- Do not accept a keyword argument that the function does not use.
-  Do not add `**kwargs` "for later".
-- Scripts have no mode switches. Write one config file for each
-  variant. Duplication between configs is acceptable.
 - Annotate every function signature. Use `X | None` and `list[X]`.
 - Do not use `ty`.
 
@@ -48,7 +55,6 @@ These rules extend the principles in `dev-conventions`.
 New projects start from the skeleton
 <https://github.com/MArpogaus/minimal_python_project_skeleton>.
 When the skeleton and this skill disagree, this skill is correct.
-Fix the skeleton in the same pass.
 
 1. Clone the skeleton and remove its `.git` folder.
 2. Run `git init` and make the root commit and the `dev` branch as
@@ -56,9 +62,10 @@ Fix the skeleton in the same pass.
 3. Adapt the metadata, the package directory and the dependencies.
    Commit on `dev`.
 
-When you make a generic config change (hook revisions, CI, ruff
-rules), apply the same change to the skeleton. Commit it there
-separately, for example `chore: bump pre-commit ruff rev`.
+A generic config change (hook revisions, CI, ruff rules) also goes to
+the skeleton, for example `chore: bump pre-commit ruff rev`. When the
+skeleton checkout is mounted, apply the change there as a separate
+commit. Otherwise list it under "Open".
 
 Layout:
 
@@ -69,7 +76,7 @@ test/                conftest.py, test_<module>.py
 docs/                index.md, api/<module>.md
 notebooks/           jupytext py:percent files
 README.org           source; README.md is exported and committed
-CHANGELOG.md         written by `cz bump` only
+CHANGELOG.md         written by `cz bump` only, tracked
 pyproject.toml  mkdocs.yml  uv.lock  .envrc  .pre-commit-config.yaml
 ```
 
@@ -77,8 +84,6 @@ Source modules use `# %%` cell markers for sections: description,
 imports, globals, private helpers, public functions.
 
 ## pyproject.toml
-
-Use setuptools. Do not use hatchling.
 
 ```toml
 [build-system]
@@ -128,8 +133,7 @@ that NumPy style does not use.
 
 ### One version source
 
-The version is in git tags only. Never write a literal version into
-`pyproject.toml` or `__init__.py`. When the package needs
+The version is in git tags only. When the package needs
 `__version__`, read the installed metadata:
 
 ```python
@@ -141,22 +145,26 @@ __version__ = version("<hyphenated-name>")
 ### Pre-commit
 
 Use the base hooks from `git-conventions` ("Pre-commit hooks"),
-plus ruff (`--fix`) and ruff-format. Exclude `uv.lock` from
-`pretty-format-toml`, because uv owns that file. The additions are
-in [reference.md](reference.md).
+plus ruff (`--fix`) and ruff-format. The additions are in
+[reference.md](reference.md).
+
+### Formatting sweeps
+
+- Make the first `ruff format` of a repo one commit with formatting
+  only, message `style: apply ruff-format`.
+- Add its full SHA to `.git-blame-ignore-revs`, one SHA per line.
+- Do the sweep before a refactor of the same files.
 
 ## uv and the environment
 
-The environment and the lock file belong to the user. Do not run
-`uv sync`, `uv run`, `uv add`, `uv remove` or `uv lock` unless the
-user asks. `uv run` and `uv sync` re-sync `.venv` and can replace
-the interpreter under a running kernel.
+The environment and the lock file belong to the user. `uv run` and
+`uv sync` re-sync `.venv` and can replace the interpreter under a
+running kernel.
 
-- Use the existing `.venv/bin/python` read-only. For a quick check,
-  use the system `python3`.
+- Run code and tests with `.venv/bin/python`. Install nothing into
+  it. Without `.venv`, use the system `python3`.
 - Report a missing package. Do not install it.
 - `uv.lock` is committed. `.envrc` holds `layout python` for direnv.
-- When in doubt, ask.
 
 ## Docstrings
 
@@ -168,12 +176,11 @@ docstring. Ruff `D` checks presence and form.
   `Raises`, `Attributes`, `References`, `Notes`.
 - An underline of dashes has the same length as its header.
 - A parameter entry is `name : type`. For an optional parameter,
-  write `type, optional` and end with ``by default ``value``.``.
+  write `type, optional` and end with `by default <value>.`
 - Write mathematics in LaTeX: `:math:` inline, `.. math::` for a
   block.
-- Docstrings are API reference only. Do not put examples, tutorials
-  or background in a docstring or on an API page.
-- Usage examples live only in notebooks.
+- Put no examples, tutorials or background in a docstring or on an
+  API page.
 
 ## Notebooks
 
@@ -182,10 +189,6 @@ source. Ignore `notebooks/*.ipynb` in git. Regenerate a notebook
 with `uvx jupytext --to ipynb <name>.py`. A notebook with a Colab
 badge is the one exception: track that single `.ipynb` without
 output and regenerate it in the same commit as its `.py`.
-
-For a change to a notebook plot, edit the `.py` file only. Do not
-run the notebook unless the user asks. Say that the edit did not
-run.
 
 ## Tests
 
@@ -226,11 +229,6 @@ branch to `gh-pages`.
 - Set GitHub Pages to branch `gh-pages`, path `/ (root)`. A `/docs`
   path fails the build.
 
-## Changelog and releases
-
-Commitizen writes `CHANGELOG.md` during `cz bump`. Never edit the
-changelog by hand. The release flow is in `git-conventions`.
-
 ## README.org
 
 - `README.org` is the source. Export `README.md` with Emacs and
@@ -239,11 +237,9 @@ changelog by hand. The release flow is in `git-conventions`.
 - Structure, after the Best-README-Template: badges, title, local
   TOC, About The Project, Getting Started (Installation, Usage),
   Contributing, License, Contact.
-- Install instructions use `uv add <package>`.
-- Code blocks use `:session`, a `#+NAME:` and an `:exports` value.
-  Use `code` for imports and plots, `both` when the output helps,
-  `nil` for install blocks.
-- Blocks with the same `:tangle` target become one runnable script.
+- The only code block is the install command, `uv add <package>`.
+  Usage links to the demo notebook in `notebooks/` with a full
+  GitHub URL.
 
 ## Figures
 
@@ -256,6 +252,8 @@ changelog by hand. The release flow is in `git-conventions`.
   foreground and accent colours.
 - Across one project, use one colour for each meaning. Define the
   colours once and import them.
+
+---
 
 ## Required skills
 

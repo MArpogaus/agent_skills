@@ -18,7 +18,8 @@ Start from the base file in the `git-conventions` reference.md
       - id: ruff-format
 ```
 
-Add `exclude: ^uv\.lock$` to the `pretty-format-toml` hook.
+Add `exclude: ^uv\.lock$` to the `pretty-format-toml` hook, because
+uv owns that file.
 
 ## test.yaml
 
