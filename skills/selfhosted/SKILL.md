@@ -14,6 +14,15 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 
 # Skill: Self-hosted home server
 
+## Hard rules
+
+- Deploy to the production host only when the user asks for it in this session.
+- Test every change on the test VM first.
+- If the logind session count rises by more than 50 during a deploy, stop and tell the user.
+- Roles assume a clean host (dev-conventions, "1. Design principles"). Give one-off steps for the existing production host to the user as manual steps.
+- Never automate migrations.
+- On the test VM, run commands yourself. On the production host, run only read-only commands, and say before each one that needs a PIN.
+
 ## Platform
 
 - The host runs Fedora CoreOS and rebases to SecureBlue on first boot.
@@ -74,16 +83,12 @@ with a screenshot.
   no `run0`, `systemd-run` or `machinectl` directly. No custom become
   plugin and no pipelining.
 - Each `run0` call opens a logind session. Count them before and after a
-  deploy with `loginctl --no-legend list-sessions | wc -l`. If the count
-  rises by more than 50 during a deploy, stop and tell the user. Too
+  deploy with `loginctl --no-legend list-sessions | wc -l`. Too
   many sessions wedge polkit, and only a reboot clears them. Never leave
   a `run0` call in the background.
 
 ## Clean host only
 
-- Roles assume a fresh host (dev-conventions, "1. Design principles").
-- Give one-off steps for the existing production host to the user as a
-  list of manual steps.
 - Write no wrapper deploy scripts. Document the exact commands:
 
   ```bash
@@ -99,29 +104,31 @@ with a screenshot.
 
 ## Test cycle
 
-1. Test every change on the test VM first. Deploy to the production
-   host only when the user asks for it in this session.
-2. `test/start_vm.py --fresh` builds a new VM; `--platform <butane
+1. `test/start_vm.py --fresh` builds a new VM; `--platform <butane
    file>` adds the platform config. After the rebase, the user shuts the
    VM down and runs `--save-base`. `--restore` resets the disk to that
    base.
-3. The agent cannot start the VM. Ask the user for `--restore` or
-   `--fresh`, and wait until the user says the VM is up.
-4. Before a release that changes a role, test on a fresh VM. A
+2. The agent cannot start the VM. Ask the user for `--restore` or
+   `--fresh`, and wait until the user says the VM is up. Autonomous:
+   record it as a blocker (`dev-conventions`, "2. Asking and acting")
+   and work on something else.
+3. Before a release that changes a role, test on a fresh VM. A
    long-lived VM hides first-install bugs.
-5. Deploy, deploy again (expect `changed=0`), then run the functional
+4. Deploy, deploy again (expect `changed=0`), then run the functional
    test.
-6. A deploy reads the live working tree. During a deploy, do not edit
+5. A deploy reads the live working tree. During a deploy, do not edit
    files or switch submodule branches. Use `git worktree`.
 
 ## Root gate on the production host
 
 - The SSH key is on the user's hardware key, so each new SSH connection needs
   the user's PIN. Reuse one connection (`ControlMaster`,
-  `ControlPersist`). Tell the user before each step that needs a PIN.
+  `ControlPersist`).
 - Root needs an open gate. The user runs `open the root gate --no-timer]` as `core` on the host and enters core's password once. A
   timer closes the gate, or `close the root gate` closes it at once.
 - The deploy stops when the gate is closed. Then ask the user to open it.
+  Autonomous: record it as a blocker (`dev-conventions`, "2. Asking and
+  acting") and work on something else.
 - "gate open", "pin entered" or "timer extended" from the user means:
   continue at once.
 - When done, tell the user, who closes the gate.
@@ -132,11 +139,12 @@ with a screenshot.
 - Dependabot updates actions, and pre-commit hooks follow
   git-conventions, "Pre-commit hooks". In service repos, Renovate (`.github/renovate.json`, a regex manager over the `*_image`
   defaults) opens image update PRs against `dev`.
-- The user tags service repos by hand with the upstream version:
+- The agent tags no service repo. The user tags them by hand with the upstream version:
   <service> uses the <service> major (`35`, then `35.1`), bunker the
   WAF version, the others `v1.0`.
-- The production host runs tagged releases only. A change deployed there
-  gets a patch release, so the tags match the host.
+- The production host runs tagged releases only. For a change deployed
+  there, ask the user to tag a patch release of each changed service
+  repo, so the tags match the host.
 
 ## Security
 
@@ -160,9 +168,7 @@ with a screenshot.
   exception that seems necessary all of a sudden.
 - For a hard bug, give fresh subagents the bug report only, not your
   findings.
-- If you have SSH access, run the command yourself. Do not ask the user
-  to run it.
-- If probes of a device fail again and again, stop and ask the user.
+- If probes of a device fail 3 times in a row, stop and ask the user.
 - Confirm an upstream defect (for example in SecureBlue) before you
   draft an issue. The user posts it.
 - Deferred items go to the project's tasks in the user's agenda (`gtd`
