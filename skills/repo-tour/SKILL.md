@@ -22,7 +22,7 @@ for later stops.
 Never start from `main()`. Spend one cheap call to learn the shape:
 
 ```bash
-cd <project> && ls && git ls-files -z | xargs -0 wc -l | sort -n | tail
+cd <project> && ls && git ls-files -z | xargs -0 wc -l | grep -v ' total$' | sort -n | tail
 ```
 
 Read the manifest and what the repo says about itself: `README`,
