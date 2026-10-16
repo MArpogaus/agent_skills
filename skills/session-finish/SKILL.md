@@ -16,8 +16,8 @@ metadata: {stack: meta, requires: [dev-conventions, git-conventions, gtd]}
 
 # Skill: Finish a session
 
-`<start>` is the session's first commit in a repo. Find it with
-`git log --since=<session start>` or in `git reflog`.
+`<start>` is the oldest commit that this session made in a repo. Find
+it in `git reflog`.
 
 ## Hard rules
 
@@ -27,7 +27,9 @@ metadata: {stack: meta, requires: [dev-conventions, git-conventions, gtd]}
 - Never delete the user's files. Stashes, pushes and agenda states
   follow the "Hard rules" of `dev-conventions`, `git-conventions` and
   `gtd`.
-- Never commit report and plan files (`findings.md`, `HANDOFF.md`).
+- Never commit report and plan files: see `dev-conventions`,
+  "2. Asking and acting" (`HANDOFF.md`), and its reference.md,
+  "findings.md".
 - Edit a skill only when the user agrees to the change.
 
 ## 1. Background work
@@ -47,10 +49,9 @@ For each repo the session touched:
    longer needs.
 2. Read the session's diff: use `git diff <start>^..HEAD`, or
    `git diff $(git hash-object -t tree /dev/null)..HEAD` when `<start>`
-   is the root commit. Look for dead
-   code, debug prints, commented-out code, unused options and
-   arguments, history in comments, and docs that still describe the
-   old state.
+   is the root commit. Look for dead code, debug prints, commented-out
+   code, unused options and arguments, history in comments, and docs
+   that still describe the old state.
 3. Run `git worktree list`, `git stash list` and `git branch`. Remove
    the worktrees and branches that you made and that are merged. List
    your stashes and unmerged branches under "Open".
@@ -65,11 +66,12 @@ turned reviews off, read your own diff once with the Simplicity view.
 ## 4. Git state
 
 - Commit everything that belongs in history, as `git-conventions`
-  requires. Report unpushed commits (`git log --oneline @{u}.. 2>/dev/null || git log --oneline --branches --not --remotes`).
-- For `findings.md`, see `dev-conventions` reference.md, "findings.md".
-  Delete report and plan files when they are done. If work stays open,
-  write `HANDOFF.md` in the repo root, listed in `.git/info/exclude`:
-  done, open, next steps, where things live.
+  requires. Report unpushed commits with the command in
+  `dev-conventions`, "Hard rules".
+- Delete report and plan files when they are done. If work stays open
+  and another worker continues or the user asks, write `HANDOFF.md` as
+  `dev-conventions`, "2. Asking and acting", says: done, open, next
+  steps, where things live.
 
 ## 5. Agenda
 
