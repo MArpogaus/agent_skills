@@ -31,7 +31,7 @@ pages too.
   `~…~`, `=…=` or `$…$` becomes a subscript. In a block title
   (`:options {…}`) write `\_`, because that text is raw LaTeX.
 - **A line that starts with a number and a period becomes a list item.**
-  Reflow so no wrapped line starts with `1435. The`.
+  Reflow so no wrapped line starts with `2024. The`.
 - **List options.** ox-beamer reads only `:environment`, `:overlay` and
   `:options` on a list. `:options` does not set spacing.
 - **Frame text after an in-frame block** must not be a child of the
@@ -104,8 +104,8 @@ A deck can compute its figures and tables in Python `src` blocks.
 - A block must never print an Org heading. The heading ends the drawer,
   and the next run appends a second copy. Print `\begin{columns}` export
   blocks instead.
-- A column called `iat` is reachable only as `frame["iat"]`.
-  `frame.iat` is the pandas indexer.
+- A column whose name is a pandas attribute (`iat`, `loc`, `T`) is
+  reachable only as `frame["<name>"]`.
 - Cache the run's numbers as CSV or JSON in the sidecar. All other
   blocks read only the cache, so the deck rebuilds without the run.
 
@@ -140,8 +140,8 @@ A deck can compute its figures and tables in Python `src` blocks.
   `bbox`.
 - **Log axes** need a clip floor for zeros. Label that tick for what it
   is, not `0`.
-- **Comparable values only.** Do not sum losses over models with
-  different node counts. Plot one node instead.
+- **Comparable values only.** Do not sum losses over models of
+  different size.
 - **Noisy series.** Show the full range in one panel, often on a log
   axis, and the settled range with a rolling mean in a second panel.
 - **Explain marks in the figure.** Label what a band or a dot is.

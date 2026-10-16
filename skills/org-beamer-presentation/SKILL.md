@@ -38,8 +38,8 @@ message.
 - No overlay reveals of text or punch lines. A step-by-step build of one
   figure with its math (`\multiinclude`, `<2->`) is allowed when the user
   asks for an animation.
-- No rhetorical bold lead-ins and no bold on conclusions. Field labels in
-  an entity grid (for example `*Idea:*`, `*Status:*`) stay bold.
+- No rhetorical bold lead-ins and no bold on conclusions. Field labels
+  in an entity grid (`*Idea:*`, `*Status:*`) keep their emphasis.
 - Never invent content. Mark schematic numbers as schematic on the
   slide. No code or math for a non-specialist audience. Spell out
   jargon.
@@ -48,7 +48,7 @@ message.
 
 ## 1. Before writing
 
-Read two or three of the user's earlier decks in `<presentations dir>`,
+Read two of the user's earlier decks in `<presentations dir>`,
 the newest first, plus one of the same talk type. Their density is the
 target: about 20 words per frame, one figure and 1 or 2 short bullets.
 
@@ -130,7 +130,7 @@ emacs -Q --batch -l org -l ox-beamer \
                 (quote (("" "xcolor" t)
                         ("AUTO" "polyglossia" t ("xelatex" "lualatex"))))
                 org-latex-pdf-process
-                (list "latexmk -f -pdf -%latex -interaction=nonstopmode \
+                (list "latexmk -f -%latex -interaction=nonstopmode \
                        -output-directory=%o %f"))' \
   "<file>.org" -f org-beamer-export-to-pdf
 ```
@@ -142,8 +142,7 @@ generated figures, read `reference/pitfalls.md`.
 
 Run these with the `PATH` of section 3 (`<test rig>`). Tool paths are
 relative to this skill's directory. A clean log does not prove a
-correct deck. Do steps 1 to 4 after each build. Do step 5 once, before
-you report.
+correct deck. Do these steps after each build.
 
 1. Build the PDF. `pdftotext <file>.pdf - | grep -c '??'` prints `0`.
 2. Count frames with `pdfinfo` and compare with the budget.
@@ -153,8 +152,6 @@ you report.
 4. Check the semantics of each figure. Find its data source by file
    path. Check that axes, sides, labels and colours show what the text
    says.
-5. Report a numbered list of problems, one line each, so the user can
-   accept items by number.
 
 In each review round whose range changes a deck, add these views to
 those in `dev-conventions`, "4.3 Reviewers":

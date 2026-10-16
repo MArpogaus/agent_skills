@@ -6,7 +6,7 @@ frame needs it. Use `#+BEAMER_HEADER:` for beamer-only settings.
 
 * Numbers from a data file
 Reads a value from a JSON file in the sidecar. Write
-`{{{num(model.auc)}}}` in the text, or `{{{num(cohort.n,%d)}}}` for a
+`{{{num(model.auc)}}}` in the text, or `{{{num(data.n,%d)}}}` for a
 different format. Keys are dot-separated.
 
 #+begin_src org

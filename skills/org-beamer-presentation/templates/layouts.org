@@ -38,7 +38,7 @@ Figure left, text right. Org wraps consecutive =:BMCOL:= siblings in
 #+end_src
 
 * Two contrasting examples
-Two figures at one shared scale, for example two DAGs. Never more than
+Two figures at one shared scale, for example two graphs. Never more than
 two.
 
 #+begin_src org
@@ -69,12 +69,12 @@ title above a list is allowed, as in the user's decks.
 #+end_src
 
 * Entity grid
-For partners or projects: one block per entity, the same fields in
-every block, lines joined with =\\=.
+For items that share the same fields: one block per item, lines
+joined with =\\=.
 
 #+begin_src org
 ,*** [[<url>][<Name>]] (<place>) :B_block:
-,*Idee:* <one line> \\
+,*Idea:* <one line> \\
 ,*Status:* <one line>
 #+end_src
 
@@ -84,7 +84,7 @@ Only for a specialist audience. Always a raw export block.
 #+begin_src org
 ,#+begin_export latex
 \begin{equation*}
-  f_y(y \mid x) = f_z(h(y \mid x)) \, \lvert h'(y \mid x) \rvert
+  \hat{\theta} = \arg\min_\theta L(\theta)
 \end{equation*}
 ,#+end_export
 #+end_src
