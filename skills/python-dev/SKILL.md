@@ -36,7 +36,8 @@ or docs configuration.
 - Do not accept a keyword argument that the function does not use.
   Do not add `**kwargs` "for later".
 - Apply each config change that fits every project (hook revisions,
-  CI, ruff rules) to the skeleton too (section "Project setup").
+  CI, ruff rules) to `<skeleton checkout>` too (section "Project
+  setup").
 
 ## Design
 
@@ -60,10 +61,10 @@ When the skeleton and this skill disagree, this skill is correct.
 3. Adapt the metadata, the package directory and the dependencies.
    Commit on `dev`.
 
-For the skeleton change, use a message such as
-`chore: bump pre-commit ruff rev`. When the skeleton checkout is
-mounted, apply the change there as a separate commit. Otherwise list
-it under "Open".
+Resolve `<skeleton checkout>` as `dev-conventions` says ("6. Sandbox
+and environment safety"). Apply the skeleton change there as a
+separate commit, with a message such as
+`chore: bump pre-commit ruff rev`.
 
 Layout:
 
@@ -115,6 +116,7 @@ convention = "numpy"
 [tool.pytest.ini_options]
 addopts = ["-v", "--tb=short", "-n", "auto", "--dist=loadfile"]
 testpaths = ["test"]
+markers = ["slow: trains or fits; runs nightly only"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -183,9 +185,11 @@ docstring. Ruff `D` checks presence and form.
 
 Notebooks are jupytext `py:percent` files. The `.py` file is the
 source. Ignore `notebooks/*.ipynb` in git. Regenerate a notebook
-with `uvx jupytext --to ipynb <name>.py`. A notebook with a Colab
-badge is the one exception: track that single `.ipynb` without
-output and regenerate it in the same commit as its `.py`.
+with `uvx jupytext --to ipynb <name>.py`.
+
+A notebook with a Colab badge is the one exception. Track its
+`.ipynb` without output. Regenerate it in the same commit as its
+`.py`.
 
 ## Tests
 
@@ -238,8 +242,8 @@ branch to `gh-pages`.
 - Structure, after the Best-README-Template: badges, title, local
   TOC, About The Project, Getting Started (Installation, Usage),
   Contributing, License, Contact.
-- The install command is `uv add <package>`. Usage links to the demo notebook in `notebooks/` with a full
-  GitHub URL.
+- The install command is `uv add <package>`. Usage links to the demo
+  notebook in `notebooks/` with a full GitHub URL.
 
 ## Figures
 
@@ -250,8 +254,6 @@ branch to `gh-pages`.
   an axes.
 - Write labels with mathematics in LaTeX, for example
   `r"$\sigma^2$"`.
-- Colours follow the target medium. For a slide deck, use the theme
-  foreground and accent colours.
 - Across one project, use one colour for each meaning. Define the
   colours once and import them.
 

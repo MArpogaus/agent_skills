@@ -59,13 +59,6 @@ jobs:
       - run: pytest
 ```
 
-Register the marker in `pyproject.toml`:
-
-```toml
-[tool.pytest.ini_options]
-markers = ["slow: trains or fits; runs nightly only"]
-```
-
 ## docs.yaml
 
 ```yaml
