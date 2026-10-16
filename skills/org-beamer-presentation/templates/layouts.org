@@ -10,7 +10,7 @@ One figure and at most two short lines. Plain lines need no bullets
 when there is only one.
 
 #+begin_src org
-,#+ATTR_LATEX: :width 0.85\linewidth
+,#+ATTR_LATEX: :width \linewidth
 [[file:<figure>.pdf]]
 
 - <line of at most 12 words> [cite:@Key]
@@ -58,8 +58,8 @@ two.
 #+end_src
 
 * Text frame
-At most four bullets of at most ten words. A short bold label above a
-list is allowed, as in the user's decks.
+At most three bullets, each at most two lines at full width. A short
+bold label above a list is allowed, as in the user's decks.
 
 #+begin_src org
 ,*<Label>*
@@ -102,13 +102,10 @@ Few columns, few words. For =p{}= widths see =reference/pitfalls.md=.
 
 * Code frame
 Only for a specialist audience. Needs the code stanza from
-=header-extras.org= and =:BEAMER_OPT: fragile=.
+=header-extras.org=. ox-beamer marks the frame fragile by itself.
 
 #+begin_src org
 ,** <Frame title>
-:PROPERTIES:
-:BEAMER_OPT: fragile
-:END:
 ,#+ATTR_LATEX: :options {<Block title>}
 ,#+begin_block
 ,#+begin_src python

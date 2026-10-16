@@ -2,19 +2,19 @@
 name: org-beamer-presentation
 description: >
   Author Beamer talks as Org mode files exported to LaTeX and PDF, in the
-  user's sparse, figure-first style.  Hard rules: at most one frame per
-  minute, figure frames with at most two short lines, at most four short
-  bullets on a text frame, theme colours only, no overlays, no marketing,
-  cut or split instead of shrinking.  Covers the default metropolis-dark
-  design, denote file naming with a sidecar figure folder, global biblatex
-  citations, headless export and page-by-page verification.  Use when
-  making or revising a slide deck.
+  user's sparse, figure-first style. Hard rules: at most one frame per
+  minute, figure frames with at most two short lines, at most three
+  bullets on a text frame, theme colours only, no marketing, cut or split
+  instead of shrinking. Covers the default metropolis-dark design, denote
+  file naming with a sidecar figure folder, global biblatex citations,
+  headless export and page-by-page verification. Use for slides, Folien,
+  Vortrag, talk, Beamer, or an `.org` file under a `presentations/`
+  folder.
 license: MIT
 compatibility: claude-code opencode
 metadata:
   stack: org-mode latex beamer
-  requires:
-    - git-conventions
+  requires: [git-conventions]
 ---
 
 # Skill: Org mode Beamer presentations
@@ -29,13 +29,13 @@ message.
 - Budget: at most one frame per minute of talk.
 - A talk of 15 minutes or less has no section, TOC or agenda frames.
   A longer talk may use the section TOC stanza from
-  `templates/header-extras.org`.  One closing frame is allowed.  No
+  `templates/header-extras.org`. One closing frame is allowed. No
   appendix unless the user asks for one.
 - Figure first. A figure frame has at most 2 lines of at most 12 words.
-- A text frame has at most 4 bullets of at most 10 words. Never put more
-  than 2 text-only frames in a row.
-- Titles are short plain statements. No marketing, no teasers, no
-  punch lines.
+- A text frame has at most 3 bullets. A bullet has at most 2 lines at
+  full width. Never put more than 2 text-only frames in a row.
+- A title has at most 8 words, a plain statement. No marketing, no
+  teasers, no punch lines.
 - Colours: theme foreground plus one accent. One colour per meaning:
   the same dataset has the same colour on every frame.
 - Show at most 2 examples, the two with the largest contrast.
@@ -65,13 +65,18 @@ Read 1 or 2 of the user's own decks in
 - `<workshop deck>.org`: a project workshop.
 
 Ask for the talk length and the audience when the request does not
-state them. Calculate the frame budget from the length.
+state them. Autonomous default (see `dev-conventions`, "Autonomous
+sessions"): 15 minutes, specialist audience, slug from `#+title:`, tag
+`presentation`. Calculate the frame budget from the length.
 
 ## 3. Design
 
 Use metropolis-dark. `templates/header.org` carries it as the active
 stanza. Use Szeged/dolphin or SimplePlus only when the user asks for
 them. The other two stanzas in the header show the lines to change.
+SimplePlus is not part of TeX Live. The user installs it from
+`github.com/pm25/SimplePlus-BeamerTheme` and puts it on `TEXINPUTS`
+(stanza "Local package on TEXINPUTS" in `header-extras.org`).
 
 The header is bare. `templates/header-extras.org` holds the optional
 stanzas, each with its trigger. Add a stanza only when a frame needs it.
@@ -82,8 +87,10 @@ a frame.
 
 **Structure.** `#+OPTIONS: H:2`: `* Section` groups frames, `** Title` is
 one frame, `***` headings are columns or blocks inside the frame. The
-title frame comes from `#+title:`, `#+subtitle:` and `#+author:`. A
-frame is mostly figure or mostly text. For a figure beside text, use a
+title frame comes from `#+title:`, `#+subtitle:` and `#+author:`.
+Order the deck for a listener without prior knowledge. Introduce each
+model, data set and setup before its results. Add one step of
+complexity per frame. A frame is mostly figure or mostly text. For a figure beside text, use a
 0.55/0.45 or 0.5/0.5 column split with the figure on the left. Text does
 not repeat numbers that the figure shows. Use `:noexport:` to park a
 frame. Lines that start with `# ` inside a frame are the user's speaker
@@ -97,7 +104,7 @@ prose: do not change them. A German deck writes ß, not ss.
 ```
 
 The identifier matches `#+identifier:`, the tags match `#+filetags:`.
-Ask the user for slug and tags. Put figures in the sidecar folder as
+Ask the user for slug and tags (autonomous default in §2). Put figures in the sidecar folder as
 vector PDF where possible, and set `\graphicspath` to it. Never edit the
 `.tex`.
 
@@ -174,7 +181,7 @@ For a review with subagents, give each reviewer one view:
 
 ## Required skills
 
-Load with the `skill` tool before acting on this one:
+This skill assumes the following prerequisite skills are loaded.
+Use the `skill` tool to load them before using this one:
 
-- `git-conventions`: when the presentation lives in a tracked repo and
-  changes have to be committed.
+- **git-conventions**: commits when the deck lives in a tracked repo.

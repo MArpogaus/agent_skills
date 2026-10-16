@@ -14,8 +14,7 @@ different format. Keys are dot-separated.
 #+end_src
 
 * Section TOC frames
-For talks longer than 15 minutes, for example a conference
-talk. Remove `sectionpage=none` from the metropolis options too.
+For talks longer than 15 minutes, for example a conference talk.
 
 #+begin_src org
 ,#+BEAMER_HEADER: \AtBeginSection[]{\begin{frame}<beamer>\tableofcontents[currentsection]\end{frame}}

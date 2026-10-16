@@ -37,8 +37,10 @@ pages too.
 - **Frame text after an in-frame block** must not be a child of the
   block heading. Use a `#+begin_block` special block instead of a `***`
   heading.
-- **Fragile frames.** A frame with a `src` block or a raw `tikzpicture`
-  needs `:BEAMER_OPT: fragile` in its drawer.
+- **Fragile frames.** ox-beamer marks a frame with a `src` block, an
+  example block or `~code~` as fragile by itself. Add `:BEAMER_OPT:
+  fragile` only for raw verbatim (`\verb`, `verbatim`, `lstlisting`)
+  inside a `#+begin_export latex` block.
 - A `.bbl-SAVE-ERROR` file is an interrupted biber run. Delete it.
 
 ## Code frames
@@ -50,7 +52,9 @@ pages too.
   undefined`.
 - listings knows `python` and `bash`. It has no `toml`, `yaml`, `json`
   or `text`. Put those into `#+begin_example`.
-- Put each code example in a `:B_block:` with a short title.
+- Put each code example in a `#+begin_block` special block with
+  `#+ATTR_LATEX: :options {<title>}`, as in `templates/layouts.org`. Text
+  after it stays at frame level.
 - At `aspectratio=169, smaller` a line holds about 60 monospace
   characters.
 

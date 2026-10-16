@@ -1,6 +1,6 @@
-# Presentation skeleton.  metropolis-dark is the default.  Use one of
+# Presentation skeleton. metropolis-dark is the default. Use one of
 # the commented theme stanzas only when the user asks for it, and
-# delete the others.  Everything else is opt-in, see header-extras.org.
+# delete the others. Everything else is opt-in, see header-extras.org.
 
 #+title:      <TITLE>
 #+date:       [<YYYY-MM-DD Day HH:MM>]
