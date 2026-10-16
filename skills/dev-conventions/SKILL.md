@@ -42,9 +42,8 @@ branch, attribution and the report format.
 - **No AI attribution:** see `git-conventions`, "Hard rules".
 - **Never touch the user's environment:** no project environment, lock
   file or package changes. Report a package that the project
-  environment lacks. A tool for your own use follows `sandbox-env`.
-  Safe commands: the stack skill (`python-dev`, "uv and the
-  environment").
+  environment lacks. Safe commands: the stack skill (`python-dev`,
+  "uv and the environment").
 - **The user's uncommitted edits are sacred.** Before a branch switch
   or a reset, check for them. Also check for unpushed commits:
   `git log --oneline @{u}.. 2>/dev/null || git log --oneline --branches --not --remotes`.
@@ -103,7 +102,7 @@ The simplest solution wins, over taste, habit and "best practice".
      text: it can change the task.
 3. Autonomous: record the blocker as an agenda inbox item and a GitHub
    issue (`gtd` skill, "Capture from another repo") with evidence and
-   options. File the issue only in a repo of the user. Elsewhere the
+   options. File the issue only in a repo that the user owns. Elsewhere the
    agenda inbox item alone records the blocker. When the stack skill
    names a default for this case, take it and say so in the issue.
    Otherwise work on something else. Do not decide the blocker.
@@ -125,8 +124,8 @@ The simplest solution wins, over taste, habit and "best practice".
 - **Never in code:** no open question in a comment or a doc.
 - **Outward text is a draft.** Show issue replies, posts, emails and
   pull request texts to the user before you send them. No emojis, no
-  marketing. Exception: an issue in the user's own repo that records a
-  blocker, or that the user asked for, needs no draft.
+  marketing. Exception: no draft is needed for an issue in a repo that
+  the user owns when it records a blocker or the user asked for it.
 - **Plain text deliverables:** reports and analyses are Markdown in the
   chat. Make no HTML page, artifact or chart unless the user asks for
   one.
@@ -176,11 +175,13 @@ background job. It watches the current branch (override: `BRANCH`).
 Re-arm it when it times out. When a repo joins later, re-arm the
 monitor with all repos.
 
-- **Trigger:** 100 or more changed lines outside `*.md` and `*.org`, or
-  5 or more commits that touch files outside `*.md` and `*.org`
-  (`REVIEW_LINES`, `REVIEW_COMMITS`).
-  Smaller changes accumulate. Docs-only changes, including decks in
-  `.org`, wait for the final round.
+- **Trigger:** 100 or more changed lines outside the skipped patterns,
+  or 5 or more commits that touch files outside them (`REVIEW_LINES`,
+  `REVIEW_COMMITS`). `REVIEW_SKIP` holds the skipped patterns,
+  separated by spaces (default `*.md *.org`). Smaller changes
+  accumulate. Docs-only changes, including decks in `.org`, wait for
+  the final round. In a repo where `.org` files hold code, set
+  `REVIEW_SKIP='*.md'`.
 - For rewritten history, pushed work and the state directory, read
   `reference.md`, "Commit monitor details".
 
@@ -247,7 +248,8 @@ read `reference.md`, "findings.md".
 A session is autonomous only when the user says so ("I'm away", "work
 alone", "autonomous", "bis später", "über Nacht"). A session without a
 user (headless, scheduled, a notification channel only) is also
-autonomous. Silence alone never makes a session autonomous. Every other session is interactive.
+autonomous. Silence alone never makes a session autonomous. Every
+other session is interactive.
 
 Autonomous:
 
