@@ -5,7 +5,8 @@ description: >
   space, then iterate update-config run monitor log commit until
   convergence. Uses MLflow for tracking and a background watcher for
   long runs. Use when the user asks to tune hyperparameters
-  autonomously, or when `~/.cache/hpo/` holds a state directory.
+  autonomously or to resume an HPO loop, or in a repo whose
+  `hpo_study.md` has a row with status `launched`.
 license: MIT
 compatibility: claude-code opencode
 metadata: {stack: ml, requires: [dev-conventions, ml-project, git-conventions]}
@@ -20,7 +21,7 @@ commit, as `git-conventions` says.
 ## Hard rules
 
 - Take the table action of step 3 as one step of one search-space
-  parameter, so that each change in `min_val_loss` has one cause. An
+  parameter. Then each change in `min_val_loss` has one cause. An
   action outside the search space is a blocker (`dev-conventions`,
   "2. Asking and acting").
 - Write the study log row before the launch. Update it after the run.
@@ -53,9 +54,10 @@ commit, as `git-conventions` says.
   "Per-target model configs").
 - **Search space**: a table of parameters with initial value, range
   and step.
-- **Diagnosis thresholds** for step 3: `overfit_gap`, the largest
-  accepted `min_val_loss - min_loss`, and `healthy_loss`, the
-  `min_val_loss` that counts as a good fit.
+- **Diagnosis thresholds** for step 3: `overfit_gap` and
+  `healthy_loss`. `overfit_gap` is the largest accepted
+  `min_val_loss - min_loss`. `healthy_loss` is the `min_val_loss` that
+  counts as a good fit.
 - **Stopping criteria** for step 10: `target_loss` and `max_iter`.
   `patience` (default 5) and `min_delta` (default 0.1) are optional.
 - **Run command**: for example `dvc repro train@<target>`. For a
@@ -73,7 +75,7 @@ import mlflow
 
 runs = mlflow.search_runs(
     search_all_experiments=True,
-    filter_string="tags.target = '<target-id>'",
+    filter_string="tags.target = '<target-id>' and tags.kept = '1'",
     order_by=["start_time DESC"],
     max_results=1,
 )
@@ -91,7 +93,7 @@ If no run exists, this is iteration 0: run the baseline config.
 
 | Pattern | Conclusion | Action |
 |---|---|---|
-| `min_val_loss` is NaN or inf | unstable | reduce the learning rate, change the schedule, add gradient clipping, change the base distribution |
+| `min_val_loss` is NaN or inf | unstable | reduce the learning rate, change the schedule, add gradient clipping |
 | `gap > overfit_gap` | overfitting | add regularisation, reduce capacity, increase patience |
 | `min_val_loss > healthy_loss` | underfitting | change the learning rate or schedule, then increase capacity |
 | `min_val_loss <= healthy_loss` | healthy | increase capacity by one step |
@@ -144,8 +146,8 @@ done
 ```
 
 The watcher polls every 30 seconds. A stall is no new output for 10
-polls (5 minutes). On a stall, read the log tail and the GPU use (`nvidia-smi`). If the run hangs, abort the process
-group. This also ends the watcher:
+polls (5 minutes). On a stall, read the log tail and the GPU use
+(`nvidia-smi`). If the run hangs, abort the process group. This also ends the watcher:
 
 ```bash
 kill -- -"$(cat "$STATE/pid")"; echo 143 > "$STATE/exit"
@@ -153,7 +155,8 @@ kill -- -"$(cat "$STATE/pid")"; echo 143 > "$STATE/exit"
 
 ### 8. Read the new metrics
 
-Run the query of step 2 again. The run is valid when all are true:
+Read the new run with the step 2 query without the `kept` filter.
+The run is valid when all are true:
 
 - `min_val_loss` is not NaN.
 - `best_epoch` is more than 5 and less than `max_epochs - 1`.
@@ -170,7 +173,9 @@ better).
   `committed`. Commit `params/<target>.yaml`, `dvc.lock` and
   `hpo_study.md` as
   `feat(hpo): <target-id> iter <N>: <param> <old>→<new>`. The body
-  gives `min_val_loss <old>→<new>` and the diagnosis.
+  gives `min_val_loss <old>→<new>` and the diagnosis. Tag the run as
+  kept: `mlflow.MlflowClient().set_tag(run_id, "kept", "1")`. Tag the
+  baseline run of iteration 0 the same way.
 - `improvement <= 0` or failed run: restore the config
   (`git checkout -- params/<target>.yaml dvc.lock`). Set the row
   status to `reverted` or `failed`.
@@ -184,7 +189,7 @@ Stop when one of these is true:
    `improvement < min_delta`.
 3. **Max iterations**: the iteration count reaches `max_iter`.
 4. **Search space exhausted**: all parameters are at their bounds.
-5. **Unstable**: `min_val_loss` is NaN after 3 different changes. Mark
+5. **Unstable**: `min_val_loss` is NaN after 3 different changes in a row. Mark
    this model unstable for this target in the study log.
 
 When a criterion is true, write the best config, the best metric and
