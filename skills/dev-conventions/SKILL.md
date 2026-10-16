@@ -99,10 +99,24 @@ more than anything else.
 - **Ask open questions with the question tool.**  In an interactive
   session, put every open question and every decision that is the
   user's (open review findings, design choices, scope) to the user
-  with the question tool (Claude Code: `AskUserQuestion`).  Give
-  enough background to decide and a recommended option first.  Do
-  not end a report with a list of open questions instead.  Do the
-  same when the user says "ask me" or "interview me".
+  with the question tool (Claude Code: `AskUserQuestion`).  Do not
+  end a report with a list of open questions instead.  Do the same
+  when the user says "ask me" or "interview me".  Each round follows
+  three rules:
+  1. **Context first.**  Put the findings or the report in the chat
+     before the questions.  Each option must make sense without the
+     session history: say what it changes, where, and at what cost.
+     Put the recommended option first.
+  2. **At most three questions per round.**  Ask the most important
+     ones first.  More questions wait for the next round.
+  3. **Continue at once.**  When the user submits the answers, act
+     on them in the same turn.  Read the free text beside the
+     choices: it often changes the task.
+- **Push back on blockers.**  A blocker is a wrong premise, a conflict
+  with a rule or another skill, a missing access, a failing check you
+  cannot fix, or a decision that is not yours.  Stop that part and
+  say so at once, with the evidence.  Never work around a blocker in
+  silence, and never weaken a test or a rule to get past it.
 - **Not in autonomous work.**  When the user is away (section 5), do
   not ask and do not wait: continue with the best default and collect
   the questions in the report or the notification channel.
