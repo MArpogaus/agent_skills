@@ -18,7 +18,7 @@ The design principles are in `dev-conventions`: the simplest thing that works, n
 ## Toolchain and environment
 
 - Install the toolchain and the native build dependencies (`pkg-config`, C compiler, system libraries) in the agent's home, never in the user's environment. The `sandbox-env` skill owns how.
-- Run cargo through that env, for example `micromamba run -n <env> cargo build --workspace --locked`. Set `CARGO_HOME` to the agent's home.
+- Run cargo through that env, for example `micromamba run -n <env> cargo build --workspace --locked`.
 - Only rustup reads `rust-toolchain.toml`. With conda-forge or nix, install that version explicitly (`rust=<ver>`), or use rustup in the agent's home. A newer clippy can add lints that CI does not have yet.
 - The user runs the debug build from the repository's `target/`, for example `target/debug/<bin>`. Build the binary the user runs into that directory. A build in a separate `CARGO_TARGET_DIR` leaves the user on a stale binary.
 
