@@ -1,48 +1,24 @@
 # python-dev reference
 
-Configuration files for the rules in [SKILL.md](SKILL.md).  Pin the
-actions to SHAs with `pinact` in a real workflow.
+Configuration files for the rules in [SKILL.md](SKILL.md). The
+workflows show tags. Run `pinact` after you copy them, as
+`git-conventions` says ("CI workflows").
 
 ## .pre-commit-config.yaml
 
+Start from the base file in the `git-conventions` reference.md
+("Base pre-commit config"). Add ruff as the first repo:
+
 ```yaml
-repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.10
     hooks:
       - id: ruff
         args: [--fix]
       - id: ruff-format
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: check-added-large-files
-      - id: check-executables-have-shebangs
-      - id: check-merge-conflict
-      - id: check-shebang-scripts-are-executable
-      - id: check-toml
-      - id: check-yaml
-      - id: end-of-file-fixer
-      - id: mixed-line-ending
-      - id: trailing-whitespace
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.14.0
-    hooks:
-      - id: pretty-format-yaml
-        args: [--autofix, --indent, "2"]
-      - id: pretty-format-toml
-        args: [--autofix]
-        exclude: ^uv\.lock$
-      - id: pretty-format-ini
-        args: [--autofix]
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.7.2
-    hooks:
-      - id: commitizen
-        stages: [commit-msg]
-      - id: commitizen-branch
-        stages: [pre-push]
 ```
+
+Add `exclude: ^uv\.lock$` to the `pretty-format-toml` hook.
 
 ## test.yaml
 
@@ -60,7 +36,7 @@ jobs:
     strategy:
       matrix:
         platform: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.11', '3.13']
+        python-version: ['3.11', '3.14']
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -77,7 +53,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: '3.14'
       - run: pip install .[test]
       - run: pytest
 ```
@@ -126,7 +102,7 @@ jobs:
           fi
 ```
 
-The site root returns 404 until the first deploy from `main`.  Check
+The site root returns 404 until the first deploy from `main`. Check
 and set the Pages source:
 
 ```bash
