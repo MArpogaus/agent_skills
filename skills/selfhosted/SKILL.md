@@ -1,12 +1,12 @@
 ---
 name: selfhosted
 description: >
-  Conventions for the user's self-hosted home server: Fedora CoreOS with
-  SecureBlue, rootless Podman Quadlets deployed by Ansible, the repo
+  Conventions for the user's self-hosted home server: an image-based
+  host OS, rootless Podman Quadlets deployed by Ansible, the repo
   layout, the uniform service interface, the VM-first test cycle, the
   root gate, releases, security and debugging. Use in `home-server` or
-  `home-server-*` repos, and for Ansible, Quadlet, Butane, root-gate or
-  SSH work on the test VM or the production host.
+  `home-server-*` repos. Use when Ansible, Quadlet, Butane, root-gate or
+  SSH work targets the test VM or the production host.
 license: MIT
 compatibility: claude-code opencode
 metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conventions]}
@@ -21,21 +21,21 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 - Test every change on the test VM first.
 - On the test VM, run commands yourself. On the production host, run
   only read-only commands, except a deploy the user asked for in this
-  session. Say before each command that needs the user's hardware key.
+  session.
 - If the logind session count rises by more than 50 above the count
   before the deploy, stop and tell the user.
-- Roles assume a clean install (dev-conventions, "1. Design
+- Roles assume a clean install (`dev-conventions`, "1. Design
   principles"). Give one-off steps for the existing production host to
   the user as manual steps.
 
 ## Platform
 
-- A host that runs Fedora CoreOS rebases to SecureBlue on first boot.
-  Butane files produce the Ignition config.
+- The host runs an image-based host OS. The deployment's Butane files
+  set the platform and any first-boot rebase.
 - Each service runs as rootless Podman Quadlets under its own user, on
   its own Btrfs subvolume.
-- Containers log to the journal (`LogDriver=passthrough`; nginx and
-  php-fpm log through syslog).
+- Containers log to the journal (`LogDriver=passthrough`, or syslog
+  where an image needs it).
 - Containers do not reach the LAN. Egress rules control this.
 - Ansible is the single source of truth. Image bumps, limits and
   settings change in a repo, and a redeploy applies them.
@@ -52,7 +52,7 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 - `<secrets repo>` (private): one directory per deployment with
   `inventory.yml`, `group_vars/all/vars.yml`, the Vault file
   `vault.yml`, `ssh/known_hosts` and `tasks/pre.yml`.
-- Host and platform specifics (for example SecureBlue settings) live
+- Host and platform specifics (for example host OS settings) live
   in the deployment directory and its `host_tasks_pre` hook, never in
   `home-server`.
 
@@ -81,16 +81,16 @@ with a screenshot.
 - A snapshot timer per service starts the backup sync. The sync depends
   on the automount of the target. A missing target makes the unit fail,
   and the journal shows it.
-- The nightly reboot waits for inhibitor locks. A long one-off job, for
-  example a preview backfill, runs under `systemd-inhibit`.
+- A scheduled reboot waits for inhibitor locks. A long one-off job runs
+  under `systemd-inhibit`.
 - Ansible escalates with `become` and the stock
   `community.general.run0` plugin everywhere. Playbooks and scripts call
   no `run0`, `systemd-run` or `machinectl` directly. No custom become
   plugin and no pipelining.
 - Each `run0` call opens a logind session. Count the sessions with
   `loginctl --no-legend list-sessions | wc -l`. Too many sessions wedge
-  polkit, and only a reboot clears them. Never leave
-  a `run0` call in the background.
+  polkit, and only a reboot clears them. Never leave a `run0` call in
+  the background.
 
 ## Deploy commands
 
@@ -110,8 +110,8 @@ with a screenshot.
 ## Test cycle
 
 1. `test/start_vm.py --fresh` builds a new VM; `--platform <butane
-   file>` adds the platform config. After the rebase, the user shuts the
-   VM down and runs `--save-base`. `--restore` resets the disk to that
+   file>` adds the platform config. After the first boot, the user shuts
+   the VM down and runs `--save-base`. `--restore` resets the disk to that
    base.
 2. The agent cannot start the VM. Ask the user for `--restore` or
    `--fresh`, and wait until the user says the VM is up. Autonomous:
@@ -121,36 +121,30 @@ with a screenshot.
    long-lived VM hides first-install bugs.
 4. Deploy, deploy again (expect `changed=0`), then run the functional
    test.
-5. A deploy reads the live working tree. During a deploy, do not edit
-   files or switch submodule branches. Use `git worktree`.
+5. A deploy reads the live working tree (`dev-conventions`, "6. Sandbox
+   and environment safety").
 
-## Root gate on the production host
+## SSH and root access on the production host
 
-- The SSH key is on the user's hardware key, so each new SSH connection
-  needs the user's input. Reuse one connection (`ControlMaster`,
-  `ControlPersist`).
-- Root needs an open gate. A root gate script that the deployment repo
-  provides controls it. The gate is closed by default. The user opens
-  it as `<admin user>` on the host, with or without a timer.
-- Before a command that needs root, assert that the gate is open. If it
-  is closed, stop and ask the user to open it. Autonomous: record it as
-  a blocker (`dev-conventions`, "2. Asking and acting") and work on
-  something else.
-- The gate closes on its timer, or when the user closes it.
+- Each new SSH connection can need the user's input. Reuse one
+  connection (`ControlMaster`, `ControlPersist`). Say before each
+  command that needs the user's input.
+- Root access opens only as the deployment repo's AGENTS.md says.
+  Assert it is open before a deploy; when it is closed, ask the user
+  (autonomous: record a blocker).
 - "gate open", "key unlocked" or "timer extended" from the user means:
   continue at once.
-- When done, tell the user, who closes the gate.
 
 ## Releases and CI
 
-- Pin actions as git-conventions, "CI workflows" says.
+- Pin actions as `git-conventions`, "CI workflows", says.
 - Dependabot updates actions, and pre-commit hooks follow
-  git-conventions, "Pre-commit hooks". In service repos, Renovate
+  `git-conventions`, "Pre-commit hooks". In service repos, Renovate
   (`.github/renovate.json`, a regex manager over the `*_image`
   defaults) opens image update PRs against `dev`.
 - The agent tags no service repo. The user tags them by hand. A repo
   that packages one upstream application uses the upstream version (for
-  example `35`, then `35.1`). The others use `v1.0.0`.
+  example `<major>`, then `<major>.1`). The others use `v1.0.0`.
 - The production host runs tagged releases only. For a change deployed
   there, ask the user to tag a patch release of each changed service
   repo, so the tags match the host.
@@ -176,7 +170,7 @@ with a screenshot.
 - For a hard bug, give fresh subagents the bug report only, not your
   findings.
 - If probes of a device fail 3 times in a row, stop and ask the user.
-- Confirm an upstream defect (for example in SecureBlue) before you
+- Confirm an upstream defect (for example in the host OS) before you
   draft an issue. The user posts it.
 
 ---
