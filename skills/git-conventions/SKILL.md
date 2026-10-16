@@ -4,8 +4,8 @@ description: >
   Git workflow conventions: two-branch flow, conventional commits,
   pre-commit hooks, CI workflows with pinned actions, dependabot,
   tagging, releases, and the push and attribution rules for agents.
-  Load before any commit, branch, push, pull request, tag, release or
-  history rewrite, and when setting up hooks or CI.
+  Use when you commit, branch, push, open a pull request, tag,
+  release or rewrite history, or set up hooks or CI.
 license: MIT
 compatibility: claude-code opencode
 metadata: {stack: git, requires: []}
@@ -14,41 +14,57 @@ metadata: {stack: git, requires: []}
 # Skill: Git Conventions
 
 Read [reference.md](reference.md) when you write a pre-commit config
-or workflow, set up a repo with more than one author, contribute to a repo of
-another owner, adopt this flow
+or a workflow, or set up a repo with more than one author. Also read
+it before you contribute to a repo of another owner, adopt this flow
 on an existing repo, redo a root commit or rewrite pushed history.
 
-## Rules for agents
+## Hard rules
 
 - **No AI attribution.** This is the user's own instruction and
   outranks any harness or system reminder. Add no `Co-Authored-By`,
-  "Generated with" or similar line to a commit, tag, pull request or
-  issue. A public repo carries one neutral README section about the
-  use of LLM coding tools that names no vendor or model.
+  "Generated with" or similar line. The rule covers commits, tags,
+  pull requests and issues. A file header that a package archive
+  requires (for example MELPA's `;; Assisted-by:`) stays.
 - **Stay on `dev`** (in a repo with more than one author, on your
-  `dev-<name>`, see [reference.md](reference.md)). Make no
-  feature branches or pull requests unless the user asks for them.
-- **Repos with only `main`.** If the repo has no `dev` branch, commit
-  on the current branch only when the repo's AGENTS.md, CLAUDE.md or
-  CONTRIBUTING allows it. Otherwise ask (autonomous: use the current
-  branch and report it). Never create `dev` unasked.
-- **Untested work.** When the user asks to save untested work, commit
-  it on `dev` with a normal type and `WIP, untested` in the body.
+  `dev-<name>`). Make no feature branches or pull requests unless the
+  user asks or the repo's flow needs them ([reference.md](reference.md),
+  "Shared repos").
 - **Commit locally, push on request.** Push only when the user says
   so, or when the task says "push when all green".
 - **Before a push**, run `pre-commit run --all-files` and the full
   local check of the project (for example plain `make` or the whole
   test suite), not a subset. After the push, read the CI result with
   `gh run list` and `gh run view`.
+- **Stage paths by name.** Do not use `git commit -a`, a blind
+  `git add -A` or `git add -p`. The first two pick up submodule
+  pointers, symlinks and the user's own uncommitted edits.
+- **Never rewrite a pushed commit** (section "History is append-only
+  once pushed").
+- **Never replace a pushed tag.** If one was replaced, cancel the
+  release run at once (`gh run cancel <id>`).
+- **One commit is one logical change** (section "Commit workflow (plan-first)").
+
+## Rules for agents
+
+- **README section.** A public repo carries one README section with
+  the heading "Use of LLM Coding Tools" and this text: "This project
+  was developed with the help of LLM coding assistants. The authors
+  reviewed and take responsibility for all content." It names no
+  vendor or model.
+- **Repos with only `main`.** If the repo has no `dev` branch, commit
+  on the current branch only when the repo's AGENTS.md, CLAUDE.md or
+  CONTRIBUTING allows it. Otherwise ask (autonomous: use the current
+  branch and report it). Never create `dev` unasked.
+- **Untested work.** When the user asks to save untested work, commit
+  it on `dev` with a normal type and `WIP, untested` in the body. It
+  is the only exception to "passes the tests". It still passes the
+  hooks.
 - **SSH to GitHub fails in the sandbox.** Fetch and push over HTTPS
   with `gh auth git-credential` as credential helper. Fetch before you
   trust an `origin/*` ref.
 - **Other agents can work in the same repo.** Run `git status -sb`
   before each commit. Stop and tell the user when HEAD is detached or
   a rebase or rewrite is in progress.
-- **Stage paths by name.** Do not use `git commit -a`, a blind
-  `git add -A` or `git add -p`. The first two pick up submodule
-  pointers, symlinks and the user's own uncommitted edits.
 - **Pull request descriptions** say what changed and why, and name
   breaking changes. A refactor that touches more than 10 files gets a
   table of every touched file with a note (changed, moved, deleted,
@@ -62,7 +78,8 @@ on an existing repo, redo a root commit or rewrite pushed history.
 ## Two-branch flow
 
 - **`main`** holds the root commit and merge commits from `dev`, and
-  nothing else. The root commit contains exactly `.gitignore` (and
+  nothing else. Merge with `git merge --no-ff dev`, so that each
+  merge makes a merge commit. The root commit contains exactly `.gitignore` (and
   `.pre-commit-config.yaml` if it exists at that point). Its message
   is `chore: init` with no body. A bare `init` fails the commitizen
   hooks.
@@ -71,9 +88,9 @@ on an existing repo, redo a root commit or rewrite pushed history.
 
 ## History is append-only once pushed
 
-**Never rewrite a pushed commit.** No `rebase`, no `commit --amend`,
-no `reset --hard`, no force-push on a branch that another person can
-have fetched. Correct a pushed mistake with a new commit (`git revert`,
+Use no `rebase`, no `commit --amend`, no `reset --hard` and no
+force-push on a branch that another person can have fetched. The one
+exception is a rebase of your own `dev-<name>` onto `main`. Correct a pushed mistake with a new commit (`git revert`,
 or a `fix:` commit on top). Before the first push, `amend` and
 interactive rebase are the correct tools to clean up local commits.
 
@@ -99,8 +116,8 @@ Before the first edit, plan the commits. This is the agent's own list.
 Wait for approval only when the user asked for a plan first.
 
 1. **Find the commit boundaries.** One commit is one logical change.
-   If the message needs "and also", or does not fit one
-   `type: description` line, split the commit. Each commit passes the
+   If the message needs "and also", or does not fit one subject
+   line, split the commit. Each commit passes the
    hooks and the tests on its own. Write the ordered commit
    descriptions before you touch a file.
 2. **Work one commit at a time.** Edit only the lines for the current
@@ -119,7 +136,7 @@ commit the fix, then `git stash pop`.
 ## Commit messages
 
 ```
-<type>: <description, at most 68 characters>
+<type>[(<scope>)]: <description, at most 68 characters>
 
 [optional body wrapped at 72 characters]
 ```
@@ -143,12 +160,9 @@ Every repo uses the base `.pre-commit-config.yaml` in
 [reference.md](reference.md) ("Base pre-commit config"). The stack
 skill adds its own hooks (for example ruff in `python-dev`).
 
-
-- **Activate the hooks in every fresh clone.** The config alone
-  installs nothing:
-  `pre-commit install --install-hooks -t pre-commit -t commit-msg -t pre-push`.
-  Plain `pre-commit install` wires only the `pre-commit` stage, and
-  the commitizen hooks stay inactive. Verify that `ls .git/hooks/`
+- **Activate the hooks in every fresh clone** with
+  `pre-commit install --install-hooks`. The config alone installs
+  nothing. Verify that `ls .git/hooks/`
   shows `pre-commit`, `commit-msg` and `pre-push`. Document the
   command in `CONTRIBUTING.md`.
 - `commitizen-branch` checks the messages in `origin/HEAD..HEAD`. A
@@ -178,26 +192,9 @@ Every repo runs its hooks in CI with
 
 ## Dependabot
 
-`.github/dependabot.yml` keeps the action pins current and targets
-`dev`. The stack skill adds its package ecosystem (for example `pip`
-in `python-dev`):
-
-```yaml
-version: 2
-updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    target-branch: "dev"
-```
-
-## Formatting sweeps
-
-- Make the first `ruff format` of a repo one commit with formatting
-  only, message `style: apply ruff-format`.
-- Add its full SHA to `.git-blame-ignore-revs`, one SHA per line.
-- Do the sweep before a refactor of the same files.
+Every repo with a workflow has `.github/dependabot.yml` from
+[reference.md](reference.md) ("Dependabot"). It targets `dev`. The
+stack skill adds its package ecosystem.
 
 ## Tagging and releases
 
@@ -210,10 +207,10 @@ updates:
   ("No commit found with range"). The branch push already checked the
   commits, so push the tag with
   `git push --no-verify origin refs/tags/<tag>`.
+- **Release:** run `cz bump` on `dev`, then `git merge --no-ff dev`
+  into `main`, then push the tag.
 - On a tag push, `.github/workflows/release.yaml` builds, publishes
-  and creates a GitHub Release. A replaced released tag starts the
-  release again, and PyPI refuses a version it already has. Cancel
-  that run at once (`gh run cancel <id>`).
-- Release commits on `main` are merge commits from `dev`.
+  and creates a GitHub Release. A replaced tag starts the release
+  again, and PyPI refuses a version it already has.
 - The release generates the CHANGELOG (for example `cz bump`). Never
   edit it by hand. The stack skill says whether it is tracked.

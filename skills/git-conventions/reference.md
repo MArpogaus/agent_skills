@@ -5,6 +5,7 @@ Rare procedures for the rules in [SKILL.md](SKILL.md).
 ## Base pre-commit config
 
 ```yaml
+default_install_hook_types: [pre-commit, commit-msg, pre-push]
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -52,6 +53,21 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
       - uses: pre-commit/action@v3.0.1
+```
+
+## Dependabot
+
+`.github/dependabot.yml` keeps the action pins current. The stack
+skill adds its package ecosystem (for example `pip` in `python-dev`):
+
+```yaml
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
 ```
 
 ## Shared repos: one dev branch per contributor
@@ -132,6 +148,11 @@ Count the unmerged branches first
 two branches carry work, or outside forks exist, tell the user that
 the rewrite costs more than it gives.
 
+Merge `dev` into `main` first, or stop when
+`git rev-list --count main..dev` is not 0. When other agents or the
+user have uncommitted edits, rewrite with `git commit-tree` and
+`git update-ref`, so the working tree stays untouched.
+
 ```bash
 OLD=$(git rev-parse main)
 
@@ -153,7 +174,7 @@ git commit -m "chore: import <project> <version> from the prior history"
 
 # 3. link the histories once, or each later pull request fails with
 #    "refusing to merge unrelated histories"
-git checkout -B dev-<owner> "$OLD"
+git switch -c dev-<owner> "$OLD"
 git merge --allow-unrelated-histories main-new -m "chore: adopt the new main root"
 
 # 4. publish
@@ -167,4 +188,6 @@ git push origin dev-<owner>
 - Existing release tags keep the old commits reachable.
 - After the rewrite, retarget open pull requests onto `dev-<owner>`,
   delete merged branches and protect `main`.
-- In a repo with one owner, use `dev` in place of `dev-<owner>`.
+- In a repo with one owner, use `dev` in place of `dev-<owner>`. In
+  step 3, run `git switch dev` and `git merge --ff-only "$OLD"`
+  instead of `git switch -c`, because `dev` exists.
