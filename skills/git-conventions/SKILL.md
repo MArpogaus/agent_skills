@@ -34,8 +34,8 @@ pushed history.
   so, or when the task says "push when all green".
 - **Before a push**, run `pre-commit run --all-files`. Then run the
   full local check of the project, not a subset (for example plain
-  `make` or the whole test suite). After the push, read the CI result with
-  `gh run list` and `gh run view`.
+  `make` or the whole test suite). After the push, read the CI result
+  with `gh run list` and `gh run view`.
 - **Stage paths by name.** Do not use `git commit -a`, a blind
   `git add -A` or `git add -p`. The first two pick up submodule
   pointers, symlinks and the user's own uncommitted edits. `git add -p`
@@ -82,11 +82,11 @@ pushed history.
 ## Two-branch flow
 
 - **`main`** holds the root commit and merge commits from `dev`, and
-  nothing else. Merge with `git merge --no-ff dev`, so that each
-  merge makes a merge commit. The root commit contains exactly
-  `.gitignore` (and `.pre-commit-config.yaml` if it exists at that
-  point). Its message is `chore: init` with no body. A bare `init`
-  fails the commitizen hooks.
+  nothing else (after a rewrite, also the one import snapshot). Merge
+  with `git merge --no-ff dev`, so that each merge makes a merge
+  commit. The root commit contains exactly `.gitignore` (and
+  `.pre-commit-config.yaml` if it exists at that point). Its message is
+  `chore: init` with no body. A bare `init` fails the commitizen hooks.
 - **`dev`** is the working branch. All commits and pull requests
   target `dev`. Never commit directly to `main`.
 
@@ -96,8 +96,9 @@ Use no `rebase`, no `commit --amend`, no `reset --hard` and no
 force-push on a branch that another person can have fetched. The one
 exception is a rebase of the user's `dev-<name>` onto `main`. Correct a
 pushed mistake with a new commit (`git revert`, or a `fix:` commit on
-top). Before the first push, `amend` and interactive rebase are the
-correct tools to clean up local commits. For the conditions and the
+top). Before the first push, clean up local commits with
+`commit --amend`, or `commit --fixup` plus
+`GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash`. For the conditions and the
 backup of a rewrite, read [reference.md](reference.md), "Rewrite
 `main` to the flow".
 

@@ -84,7 +84,7 @@ feat/<topic>  ->  PR  ->  dev-<name>  ->  PR  ->  main
   and can push to it directly.
 - `main` is protected: pull requests only, no direct push, no
   force-push. It holds only `chore: init` and merge commits.
-- A rebase of your own `dev-<name>` onto `main` is permitted. Never
+- A rebase of the user's `dev-<name>` onto `main` is permitted. Never
   rewrite the branch of another owner.
 
 ## Repos you do not own
@@ -163,18 +163,19 @@ the rewrite costs more than it gives.
 
 Merge `dev` into `main` first, or stop when
 `git rev-list --count main..dev` is not 0. The procedure never touches
-the working tree or the index, so uncommitted edits of the user or
-other agents stay. It builds the commits with `git commit-tree` and
+the working tree or the index, except the one-owner `--ff-only` step.
+Uncommitted edits of the user or other agents stay. It builds the commits with `git commit-tree` and
 moves the branches with `git update-ref`.
 
 ```bash
 OLD=$(git rev-parse main)
+T=archive/pre-restructure-$(date +%Y%m%d)
 
 # 1. preserve the old tip
 #    more than one owner: push a tag and a branch BEFORE the rewrite
-git tag archive/pre-restructure-$(date +%Y%m%d) "$OLD"
-git push origin archive/pre-restructure-$(date +%Y%m%d)
-git push origin "$OLD":refs/heads/archive/pre-restructure-$(date +%Y%m%d)
+git tag "$T" "$OLD"
+git push origin "refs/tags/$T"
+git push origin "$OLD:refs/heads/$T"
 #    one owner: keep a local bundle and push nothing
 git bundle create ../<repo>-pre-rewrite.bundle --all
 
