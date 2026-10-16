@@ -14,9 +14,6 @@ metadata: {stack: sandbox conda uv nix, requires: [dev-conventions]}
 
 # Skill: Sandbox Environment
 
-All tools for the agent's own use go under `$HOME` (`dev-conventions`,
-"6. Sandbox and environment safety").
-
 ## Hard rules
 
 - Install tools for the agent only under `$HOME`, also in a Python
