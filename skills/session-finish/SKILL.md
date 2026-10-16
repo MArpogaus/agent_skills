@@ -14,11 +14,11 @@ compatibility: claude-code
 metadata: {stack: meta, requires: [dev-conventions, git-conventions, gtd]}
 ---
 
-# Skill: Finish a session
+# Skill: Finish a Session
 
-`<start>` is the oldest commit that this session made in a repo. Find
-it with `git reflog --date=iso`: the oldest commit entry after the
-session's first message (its timestamp in the transcript).
+`<start>` is the oldest commit that this session made in a repo. It is
+the oldest reflog entry (`git reflog --date=iso`) after the session's
+first message whose hash appears in this session's commit output.
 
 ## Hard rules
 
@@ -81,9 +81,8 @@ Follow the `gtd` skill, "Hard rules" and "1. Safe edits".
   under `Information`.
 - Set a finished task to `DONE` when the user confirmed it, else list
   it as "to close".
-- Add follow-ups, filed issues and the open blockers that are not in
-  the agenda yet as inbox items, as in `gtd`, "Capture from another
-  repo".
+- Add follow-ups, filed issues and open blockers that are not in the
+  agenda yet as inbox items. Use `gtd`, "Capture from another repo".
 
 ## 6. Lessons
 
