@@ -20,7 +20,7 @@ Tour a codebase that the reader does not know. The reader reads **one place at a
 Never start from `main()`. Spend one cheap call to learn the shape:
 
 ```bash
-ls <project> && git -C <project> ls-files -z | xargs -0 wc -l | sort -n | tail
+cd <project> && ls && git ls-files -z | xargs -0 wc -l | sort -n | tail
 ```
 
 Read the manifest and what the repo says about itself: `README`, `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/` and the test directory (`test/` or `tests/`, as the repo has it). Then read the *definitions* of the 2 to 3 modules that the reader touches first. To place a module, grep for its call sites instead of reading it.
