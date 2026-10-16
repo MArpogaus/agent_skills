@@ -84,8 +84,9 @@ feat/<topic>  ->  PR  ->  dev-<name>  ->  PR  ->  main
   and can push to it directly.
 - `main` is protected: pull requests only, no direct push, no
   force-push. It holds only `chore: init` and merge commits.
-- A rebase of the user's `dev-<name>` onto `main` is permitted. Never
-  rewrite the branch of another owner.
+- The one exception to append-only history is a rebase of the user's
+  `dev-<name>` onto `main` when the user asks for it. Never rewrite the
+  branch of another owner.
 
 ## Repos you do not own
 
@@ -124,9 +125,9 @@ git commit -m "chore: init"
 ## Adopt this flow on an existing repo
 
 **Default: adopt the flow from now on, and do not change the
-history.** Branch `dev-<name>` off the current tip for each
-contributor, protect `main`, and route all changes through pull
-requests. This needs no rewrite and no force-push:
+history.** For each contributor, branch `dev-<name>` off the current
+tip. Protect `main` and route all changes through pull requests. This
+needs no rewrite and no force-push:
 
 ```bash
 git switch -c dev-<yourname> main
@@ -161,10 +162,11 @@ Count the unmerged branches first
 two branches carry work, or outside forks exist, tell the user that
 the rewrite costs more than it gives.
 
-Merge `dev` into `main` first, or stop when
-`git rev-list --count main..dev` is not 0. The procedure never touches
-the working tree or the index, except the one-owner `--ff-only` step.
-Uncommitted edits of the user or other agents stay. It builds the commits with `git commit-tree` and
+When a `dev` branch exists (`git rev-parse -q --verify dev`), merge it
+into `main` first, or stop when `git rev-list --count main..dev` is
+not 0. The procedure never touches the working tree or the index,
+except the one-owner `--ff-only` step. Uncommitted edits of the user or
+other agents stay. It builds the commits with `git commit-tree` and
 moves the branches with `git update-ref`.
 
 ```bash
@@ -193,7 +195,8 @@ git branch dev-<owner> "$M"
 # 4. publish
 git update-ref refs/heads/main "$S" "$OLD"
 git push --force-with-lease origin main
-git push origin dev-<owner>
+#    the range holds the old messages, which fail commitizen-branch
+git push --no-verify origin dev-<owner>
 ```
 
 - `git update-ref` also moves a checked-out `main`. Its tree equals the

@@ -44,10 +44,8 @@ pushed history.
   is append-only once pushed").
 - **Never replace a pushed tag.** If one was replaced, cancel the
   release run at once (`gh run cancel <id>`).
-- **Commit each finished logical change on your own.** Do not wait for
-  a request.
-- **One commit is one logical change** (section "Commit workflow
-  (plan-first)").
+- **Commit each finished logical change on your own,** as one commit
+  (section "Commit workflow (plan-first)"). Do not wait for a request.
 
 ## Rules for agents
 
@@ -61,9 +59,10 @@ pushed history.
   branch only when one of them allows it. Otherwise ask (autonomous:
   use the current branch and report it). Never create `dev` unasked.
 - **Untested work.** When the user asks to save untested work, commit
-  it on `dev` with a normal type and `WIP, untested` in the body. It is
-  the only exception to the rule that each commit passes the hooks and
-  the tests. It still passes the hooks.
+  it on `dev` (shared repo: the user's `dev-<name>`) with a normal type
+  and `WIP, untested` in the body. It is the only exception to the rule
+  that each commit passes the hooks and the tests. It still passes the
+  hooks.
 - **SSH to GitHub fails in the sandbox.** Fetch and push over HTTPS
   with `gh auth git-credential` as credential helper. Fetch before you
   trust an `origin/*` ref.
@@ -94,13 +93,14 @@ pushed history.
 
 Use no `rebase`, no `commit --amend`, no `reset --hard` and no
 force-push on a branch that another person can have fetched. The one
-exception is a rebase of the user's `dev-<name>` onto `main`. Correct a
-pushed mistake with a new commit (`git revert`, or a `fix:` commit on
-top). Before the first push, clean up local commits with
-`commit --amend`, or `commit --fixup` plus
-`GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash`. For the conditions and the
-backup of a rewrite, read [reference.md](reference.md), "Rewrite
-`main` to the flow".
+exception is a rebase of the user's `dev-<name>` onto `main` when the
+user asks for it. Correct a pushed mistake with a new commit
+(`git revert`, or a `fix:` commit on top). Before the first push, clean
+up local commits with `commit --amend`, or `commit --fixup` plus
+`GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>`, where
+`<base>` is `@{u}` when the branch has an upstream, else the last pushed
+commit or `--root`. For the conditions and the backup of a rewrite,
+read [reference.md](reference.md), "Rewrite `main` to the flow".
 
 ## Commit workflow (plan-first)
 
@@ -169,9 +169,8 @@ Every repo runs its hooks in CI with
 
 - **Pin every action to a SHA** with `pinact`, in every repo. Run it
   after each change to a workflow:
-  `PINACT_GITHUB_TOKEN=$(gh auth token) pinact run -u`. It pins each
-  `uses:` to a commit SHA with the tag as a comment. `-u` updates to
-  the latest release.
+  `PINACT_GITHUB_TOKEN=$(gh auth token) pinact run -u`. `-u` updates
+  to the latest release.
 - **A branch ref cannot be pinned.** For an action on a branch (for
   example `@release/v1`), set its latest release tag first. Then run
   `pinact` again.
@@ -189,8 +188,7 @@ stack skill adds its package ecosystem.
 ## Tagging and releases
 
 - **Tags** use `v<semver>` (for example `v0.1.0`), unless the repo
-  documents its own scheme (for example the upstream version it
-  packages). Ask when unsure.
+  documents its own scheme. Ask when unsure.
 - Tags are annotated, with a message that summarises the release
   (commitizen: `annotated_tag = true`).
 - The `commitizen-branch` pre-push hook fails on a push of a tag alone
