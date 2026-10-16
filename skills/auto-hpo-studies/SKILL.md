@@ -5,8 +5,8 @@ description: >
   space, then iterate update-config run monitor log commit until
   convergence. Uses MLflow for tracking and a background watcher for
   long runs. Use when the user asks to tune hyperparameters
-  autonomously, or when the repo has an `hpo_study.md` with an open
-  study.
+  autonomously, or when `~/.cache/hpo/` holds a state directory, or
+  when `hpo_study.md` has no `done` commit.
 license: MIT
 compatibility: claude-code opencode
 metadata: {stack: ml, requires: [ml-project, git-conventions]}
@@ -20,8 +20,10 @@ commit, as `git-conventions` says.
 
 ## Hard rules
 
-- Change exactly one parameter by one step of the search space in
-  each iteration, so that each change in `val_loss` has one cause.
+- Take the table action of step 3 as one step of one search-space
+  parameter, so that each change in `min_val_loss` has one cause. An
+  action outside the search space is a blocker (`dev-conventions`,
+  "2. Asking and acting").
 - Write the study log row before the launch. Update it after the run.
 - Run the watcher in the background (the harness monitor tool or a
   background job). Do not sleep in the foreground.
@@ -52,16 +54,18 @@ commit, as `git-conventions` says.
   "Per-target model configs").
 - **Search space**: a table of parameters with initial value, range
   and step.
-- **Stopping criteria**: at least two of step 10, with values for
-  `target_loss`, `min_delta`, `patience` and `max_iter`.
+- **Diagnosis thresholds** for step 3: `overfit_gap`, the largest
+  accepted `min_val_loss - min_loss`, and `healthy_loss`, the
+  `min_val_loss` that counts as a good fit.
+- **Stopping criteria** for step 10: `target_loss` and `max_iter`.
+  `patience` (default 5) and `min_delta` (default 0.1) are optional.
 - **Run command**: for example `dvc repro train@<target>`. For a
   pipeline with more than one stage, use the command that runs all
   stages.
 
-Write this as the header of `hpo_study.md` at the repo root. The
-autonomous loop uses its own row format (below) and commits once for
-each iteration. While it runs, this skill wins over the manual study
-format of `ml-project`.
+Write this as the header of `hpo_study.md` at the repo root. The log
+uses the row format below, not the manual study format of
+`ml-project`.
 
 ### 2. Fetch the current metrics
 
@@ -76,21 +80,21 @@ runs = client.search_runs(
     order_by=["start_time DESC"],
     max_results=1,
 )
-m = runs[0].data.metrics  # min_val_loss, min_loss, best_epoch, val_loss
+m = runs[0].data.metrics  # min_val_loss, min_loss, best_epoch
 ```
 
-`val_loss` is the last logged value of the run. If no run exists,
-this is iteration 0: run the baseline config.
+If no run exists, this is iteration 0: run the baseline config.
 
 ### 3. Diagnose the training state
 
+`gap = min_val_loss - min_loss`. Use the first row that matches:
+
 | Pattern | Conclusion | Action |
 |---|---|---|
-| `min_loss >> 0` and `min_val_loss >> 0` | not learning | halve the learning rate, or use cosine decay |
-| `min_loss < -100`, `min_val_loss > -50` | overfitting | add regularisation, reduce capacity, increase patience |
-| `val_loss > min_val_loss` | late overfitting | same as overfitting |
-| `min_loss ≈ min_val_loss < -50` | healthy | increase capacity by one step |
 | `min_val_loss` is NaN or inf | unstable | reduce the learning rate, change the schedule, add gradient clipping, change the base distribution |
+| `gap > overfit_gap` | overfitting | add regularisation, reduce capacity, increase patience |
+| `min_val_loss > healthy_loss` | underfitting | change the learning rate or schedule, then increase capacity |
+| `min_val_loss <= healthy_loss` | healthy | increase capacity by one step |
 
 ### 4. Decide the next change
 
@@ -107,7 +111,8 @@ Edit the config file. `ml-project` defines its fields.
 
 ### 6. Launch the run
 
-Write the row with status `launched`, then:
+Take `<N>` as the number of the last log row plus 1. Write the row
+with status `launched`, then:
 
 ```bash
 STATE=~/.cache/hpo/<target-id>; mkdir -p "$STATE" logs
@@ -124,7 +129,7 @@ into a script and call that.
 
 ### 7. Watch the run in the background
 
-Start this watcher in the background. Continue when it ends:
+Start this watcher. Continue when it ends:
 
 ```bash
 STATE=~/.cache/hpo/<target-id>; log=logs/iter<N>_<target-id>.log
@@ -133,14 +138,15 @@ until [ -f "$STATE/exit" ]; do
     sleep 30
     size=$(wc -c < "$log" 2>/dev/null || echo 0)
     if [ "$size" = "$last" ]; then still=$((still + 1)); else still=0; fi
-    [ "$still" -eq 10 ] && echo "STALL: no new output for 5 minutes"
+    [ "$still" -eq 10 ] && echo "STALL: no new output for 10 intervals"
     last=$size
 done
 [ "$(cat "$STATE/exit")" = 0 ] && echo completed > "$STATE/status" \
     || echo failed > "$STATE/status"
 ```
 
-Set the interval to 30 to 60 seconds. On a stall, read the log tail
+Set the interval to 30 to 60 seconds. A stall is no new output for
+10 cycles of the interval. On a stall, read the log tail
 and the GPU use (`nvidia-smi`). If the run hangs, abort the process
 group. This also ends the watcher:
 
@@ -161,43 +167,44 @@ Else write `failed` to `$STATE/status`.
 
 ### 9. Compare
 
-`improvement = old_val_loss - new_val_loss` (positive is better).
+`improvement = old_min_val_loss - new_min_val_loss` (positive is
+better).
 
-- `improvement > 0`: keep the config, fill in the row with status
-  `committed` and commit:
-  `feat(hpo): <target-id> iter <N>: <param> <old>→<new>`. The subject
-  has at most 68 characters. The body gives `val_loss <old>→<new>`
-  and the diagnosis.
+- `improvement > 0`: keep the config and fill in the row with status
+  `committed`. Commit `params/<target>.yaml`, `dvc.lock` and
+  `hpo_study.md` as
+  `feat(hpo): <target-id> iter <N>: <param> <old>→<new>`. The body
+  gives `min_val_loss <old>→<new>` and the diagnosis.
 - `improvement <= 0` or failed run: restore the config
-  (`git checkout -- params/<target>.yaml`), set the row status to
-  `reverted` or `failed`, and try a different parameter.
+  (`git checkout -- params/<target>.yaml dvc.lock`). Set the row
+  status to `reverted` or `failed` and try a different parameter.
 
 ### 10. Check the stopping criteria
 
 Stop when one of these is true:
 
 1. **Target reached**: `min_val_loss <= target_loss`.
-2. **Plateau**: the last `patience` iterations (default 5) each gave
-   `improvement < min_delta` (default 0.1).
+2. **Plateau**: the last `patience` iterations each gave
+   `improvement < min_delta`.
 3. **Max iterations**: the iteration count reaches `max_iter`.
 4. **Search space exhausted**: all parameters are at their bounds.
 5. **Unstable**: `min_val_loss` is NaN after 3 different changes. Mark
    this model unstable for this target in the study log.
 
-When a criterion is true: write the best config, the best metric and
-the history to the study log, run `rm -rf "$STATE"`, commit
-`feat(hpo): <target-id> done: best val_loss <best>` and report to the
-user. Else remove the state files and go to step 2.
+When a criterion is true, write the best config, the best metric and
+the history to the study log. Run `rm -rf "$STATE"`. Commit
+`feat(hpo): <target-id> done: best min_val_loss <best>` and report to
+the user. Else remove the state files and go to step 2.
 
 ## Study log rows
 
 ```markdown
-| # | Date | Param change | Old val | New val | Δ val_loss | Commit | Status |
-|---|------|--------------|---------|---------|------------|--------|--------|
-| 1 | 2026-05-22 | lr: 0.001→0.0005 | -98.16 | -130.84 | -32.68 | abc1234 | committed |
+| # | Date | Param change | Old min_val_loss | New min_val_loss | Δ min_val_loss | Commit | Status |
+|---|------|--------------|------------------|------------------|----------------|--------|--------|
+| 1 | 2026-05-22 | lr: 0.001→0.0005 | -98.16 | -130.84 | 32.68 | abc1234 | committed |
 ```
 
-Status is `launched`, `committed`, `reverted` or `failed`.
+`Δ min_val_loss` is the `improvement` of step 9. Status is `launched`, `committed`, `reverted` or `failed`.
 
 ## MLflow tags
 
@@ -229,8 +236,7 @@ When the skill loads, check in this order:
 | Situation | Response |
 |---|---|
 | The run crashes at launch | Check the config format, the dependencies and the GPU memory. Fix and run the same iteration again. |
-| NaN after 3 different changes | Stop (step 10, criterion 5). |
-| `val_loss` improves, `train_loss` stays flat | Continue. `val_loss` is the primary metric. |
+| `min_val_loss` improves, `min_loss` stays flat | Continue. `min_val_loss` is the primary metric. |
 
 ---
 
