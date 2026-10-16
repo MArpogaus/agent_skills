@@ -5,11 +5,10 @@ description: >
   space, then iterate update-config run monitor log commit until
   convergence. Uses MLflow for tracking and a background watcher for
   long runs. Use when the user asks to tune hyperparameters
-  autonomously, or when `~/.cache/hpo/` holds a state directory, or
-  when `hpo_study.md` has no `done` commit.
+  autonomously, or when `~/.cache/hpo/` holds a state directory.
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: ml, requires: [ml-project, git-conventions]}
+metadata: {stack: ml, requires: [dev-conventions, ml-project, git-conventions]}
 ---
 
 # Skill: Autonomous HPO Studies
@@ -70,17 +69,18 @@ uses the row format below, not the manual study format of
 ### 2. Fetch the current metrics
 
 ```python
-from mlflow.tracking import MlflowClient
+import mlflow
 
-client = MlflowClient()
-exp = client.get_experiment_by_name("<experiment-name>")
-runs = client.search_runs(
-    experiment_ids=[exp.experiment_id],
+runs = mlflow.search_runs(
+    search_all_experiments=True,
     filter_string="tags.target = '<target-id>'",
     order_by=["start_time DESC"],
     max_results=1,
 )
-m = runs[0].data.metrics  # min_val_loss, min_loss, best_epoch
+row = runs.iloc[0]
+min_val_loss = row["metrics.min_val_loss"]
+min_loss = row["metrics.min_loss"]
+best_epoch = row["metrics.best_epoch"]
 ```
 
 If no run exists, this is iteration 0: run the baseline config.
@@ -98,12 +98,10 @@ If no run exists, this is iteration 0: run the baseline config.
 
 ### 4. Decide the next change
 
-Explore in this order:
-
-1. Learning rate and schedule.
-2. Capacity, after the learning rate is settled.
-3. Regularisation, only when overfitting appears.
-4. Training budget (epochs, patience), last.
+Step 3 picks the row. Inside that row's action, change the first
+parameter that is not settled, in this order: learning rate and
+schedule, capacity, regularisation, training budget. A parameter is
+settled when its last 2 changes were reverted.
 
 ### 5. Apply the change
 
@@ -111,8 +109,8 @@ Edit the config file. `ml-project` defines its fields.
 
 ### 6. Launch the run
 
-Take `<N>` as the number of the last log row plus 1. Write the row
-with status `launched`, then:
+Take `<N>` as the number of the last log row plus 1. The new row has
+status `launched`. Then run:
 
 ```bash
 STATE=~/.cache/hpo/<target-id>; mkdir -p "$STATE" logs
@@ -145,9 +143,8 @@ done
     || echo failed > "$STATE/status"
 ```
 
-Set the interval to 30 to 60 seconds. A stall is no new output for
-10 cycles of the interval. On a stall, read the log tail
-and the GPU use (`nvidia-smi`). If the run hangs, abort the process
+The watcher polls every 30 seconds. A stall is no new output for 10
+polls (5 minutes). On a stall, read the log tail and the GPU use (`nvidia-smi`). If the run hangs, abort the process
 group. This also ends the watcher:
 
 ```bash
@@ -159,9 +156,8 @@ kill -- -"$(cat "$STATE/pid")"; echo 143 > "$STATE/exit"
 Run the query of step 2 again. The run is valid when all are true:
 
 - `min_val_loss` is not NaN.
-- `best_epoch` is more than 5, and less than `max_epochs` when early
-  stopping must trigger.
-- The run has the tags `target` and `hpo_iteration`.
+- `best_epoch` is more than 5 and less than `max_epochs - 1`.
+- The run has the tag `target`.
 
 Else write `failed` to `$STATE/status`.
 
@@ -177,7 +173,7 @@ better).
   gives `min_val_loss <old>→<new>` and the diagnosis.
 - `improvement <= 0` or failed run: restore the config
   (`git checkout -- params/<target>.yaml dvc.lock`). Set the row
-  status to `reverted` or `failed` and try a different parameter.
+  status to `reverted` or `failed`.
 
 ### 10. Check the stopping criteria
 
@@ -204,16 +200,16 @@ the user. Else remove the state files and go to step 2.
 | 1 | 2026-05-22 | lr: 0.001→0.0005 | -98.16 | -130.84 | 32.68 | abc1234 | committed |
 ```
 
-`Δ min_val_loss` is the `improvement` of step 9. Status is `launched`, `committed`, `reverted` or `failed`.
+`Δ min_val_loss` is the `improvement` of step 9. Status is
+`launched`, `committed`, `reverted` or `failed`.
 
 ## MLflow tags
 
-Tag each run so that step 2 finds it:
+Tag each run so that step 2 finds it. The iteration number `N` is in
+`$STATE/iter` and in the log row, not in MLflow.
 
 ```python
 mlflow.set_tag("target", "<target-id>")
-mlflow.set_tag("hpo_iteration", str(N))  # tags are text: sort with int()
-mlflow.log_param("config_file", "params/<target>.yaml")
 ```
 
 ## Resume after interruption
@@ -245,6 +241,8 @@ When the skill loads, check in this order:
 This skill assumes the following prerequisite skills are loaded.
 Use the `skill` tool to load them before using this one:
 
+- **dev-conventions**: design principles, verification, review
+  loop, code and documentation style.
 - **ml-project**: DVC pipeline orchestration, MLflow experiment
   tracking, HPO study logs, per-target configs, figure generation.
 - **git-conventions**: two-branch flow, conventional commits,
