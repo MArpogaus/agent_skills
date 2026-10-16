@@ -14,6 +14,16 @@ metadata: {stack: emacs, requires: [git-conventions]}
 
 # Skill: Emacs Package
 
+## Hard rules
+
+- Run plain `make` (compile, checkdoc, lint, test) before every push, not a subset.
+- Run every code path with `emacs -Q` defaults, not only with the author's configuration.
+- Prove each new test red before you call it done.
+- A package sets no user options and no key bindings. The README recommends them.
+- Prefer no dependency: a built-in or a subprocess first, a soft dependency for optional features.
+- After an extraction, one copy of the code exists: the configuration only configures the package.
+- Keep the `;; Assisted-by:` header line (see "File headers").
+
 Read [reference.md](reference.md) before you build or debug overlays, display properties, margins, fringes, header lines, scrolling over tall blocks, pixel tests or demo GIFs.
 
 ## Start from the template
@@ -149,10 +159,10 @@ Check every package that comes from a configuration for these:
 
 ## Dependencies and user options
 
-- Prefer no dependency. A subprocess (`call-process-region`) or a built-in costs users no install. Use soft dependencies for optional features: `(if (fboundp 'markdown-mode) (markdown-mode) (text-mode))`.
+- A subprocess (`call-process-region`) or a built-in costs users no install. Use soft dependencies for optional features: `(if (fboundp 'markdown-mode) (markdown-mode) (text-mode))`.
 - For a built-in loaded on demand, use `declare-function` and `defvar`, not `require`.
 - Call a subprocess once for all items, joined by a marker paragraph. Count the pieces that come back. If the count is wrong, fall back to one call per item.
-- A package sets no user options and no key bindings. Recommend them in the README and the commentary. A map that is active only in the package's own temporary buffers (`C-c C-c` in an edit buffer) is the exception.
+- Recommend user options and key bindings in the README and the commentary. A map that is active only in the package's own temporary buffers (`C-c C-c` in an edit buffer) is the exception.
 - No workaround for one configuration. Name the needed setting in the README.
 - The README has a minimal working configuration. Record the demo pictures with it, not with the author's configuration.
 
