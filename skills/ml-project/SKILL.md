@@ -77,9 +77,7 @@ metadata: {stack: ml, audience: researchers, requires: [dev-conventions, git-con
 ### Package philosophy
 
 Keep `src/<package>/` to at most 5 modules besides `__init__.py`.
-Scripts are thin CLI
-wrappers that call package functions. Shared logic lives in the
-package.
+Scripts are thin CLI wrappers that call package functions.
 
 ### `__init__.py` for monkey-patching
 
@@ -210,8 +208,6 @@ train:
 
 ## Experiment tracking with MLflow
 
-Add `mlruns/` to `.gitignore`.
-
 ### Logging from a training script
 
 `outdir` is `results/<target>`. The logged artifacts are the stage
@@ -277,6 +273,7 @@ Document hyperparameter optimisation as a structured log in
   `feat(hpo): <target> phase <N>: <summary>`.
 - The commit body includes the markdown table from `hpo_study.md`.
 - Delete the outputs of discarded runs (`rm -r results/<target>_v2`).
+  Their `dvc.yaml` entry and config file stay (hard rules).
   Run `dvc gc -w` only after the user agrees.
 
 ## Validating research code
@@ -317,7 +314,7 @@ fixed seed. Tests and scripts look a DGP up by name with
    authors in another language (`statsmodels`, R). Commit the reference
    output so the suite runs without R installed.
 3. **Known-truth recovery**: the generator's true parameters,
-   effects and counterfactuals, which no real dataset exposes.
+   effects and counterfactuals.
 4. **Frozen-data contracts**: the regeneration checks above.
 5. **Stability guards**: one test for each fixed regression, with
    the symptom in a comment.
@@ -377,7 +374,8 @@ Summary and BibTeX reference.
 
 Use `argparse`. Scripts never import from other scripts. They have
 no mode switches (`dev-conventions`, "1. Design principles",
-"Scripts stay dumb"). Each variant gets its own config file or `dvc.yaml` entry.
+"Scripts stay dumb"). Each variant gets its own config file or
+`dvc.yaml` entry.
 
 ```python
 import argparse
@@ -404,7 +402,7 @@ if __name__ == "__main__":
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: design principles, verification, review
   loop, code and documentation style.
