@@ -16,7 +16,8 @@ metadata: {stack: emacs, requires: [dev-conventions, emacs-package, git-conventi
 
 ## Hard rules
 
-- **`emacs.org` is the single source of truth.** `lisp/*.el`, `init.el`
+- **`emacs.org` is the single source of truth and holds the code**
+  (`dev-conventions`, "4.1 Arm the commit monitor"). `lisp/*.el`, `init.el`
   and `early-init.el` are tangled artifacts: never edit them. Tangle
   only when the user asks for it ("retangle", "you may tangle").
   Otherwise the user tangles.
@@ -31,16 +32,15 @@ metadata: {stack: emacs, requires: [dev-conventions, emacs-package, git-conventi
   report. Debug through targeted questions (`C-h f`, `*Messages*`, `M-:`
   probes), one hypothesis at a time.
 - **Reproduce in the rig with the user's configuration** before you
-  claim a fix. `<test rig>` is a conda env with Emacs 31 and a copy of
-  the user's tangled config and elpaca. Its `README.md` explains the
+  claim a fix. `<test rig>` is a directory. Its `env/` is the conda
+  env with Emacs 31. The rig holds a copy of the user's tangled config
+  and elpaca. Its `README.md` explains the
   commands. Run `<test rig>/rig sync` first, and check that the rig
   loads the same package versions as
   `<user home>/.emacs.d/elpaca/sources`.
 - Org blocks can be evaluated with `:lexical no`. Avoid closures that
   capture locals. Pass arguments through `run-with-timer`,
   `apply-partially`, or global or buffer-local state.
-- Arm the review monitor with `REVIEW_SKIP='*.md'`: `emacs.org` holds
-  the code.
 
 ## Repo layout and style
 
