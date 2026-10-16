@@ -18,7 +18,7 @@ metadata: {stack: meta, requires: [dev-conventions, git-conventions, gtd]}
 
 `<start>` is the oldest commit that this session made in a repo. Find
 it with `git reflog --date=iso`: the oldest commit entry after the
-session's first message.
+session's first message (its timestamp in the transcript).
 
 ## Hard rules
 
@@ -36,7 +36,7 @@ session's first message.
 ## 1. Background work
 
 - List the jobs, monitors and subagents you started. Wait at most 10
-  minutes for the jobs to end. List the jobs still running under
+  minutes in total for the jobs to end. List the jobs still running under
   "Running". Stop watchers that have no further use.
 - A job can have to keep running (a training run, a deploy). Then write
   in the report what it is, how to check it, and where its output goes.
