@@ -458,7 +458,11 @@ Summary and BibTeX reference.
 ### CLI interface
 
 Use `argparse` consistently.  Scripts receive all inputs as CLI
-flags, never by importing from other scripts:
+flags, never by importing from other scripts.  Scripts stay dumb: no
+mode switches such as `--outcome` or `--variant`.  Each variant gets
+its own config file or `dvc.yaml` entry, and the duplication is fine.
+`params.yaml` and `dvc.yaml` are the single source of truth; no
+wrapper scripts such as `train.sh` around them.
 
 ```python
 import argparse
