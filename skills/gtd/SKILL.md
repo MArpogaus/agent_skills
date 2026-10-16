@@ -45,9 +45,6 @@ Other writers change the same files: a sync client and open Emacs
 buffers. Uncommitted changes that you did not make can be a stale sync
 or an unsaved buffer.
 
-Commit on `main`. Stage paths by name and write the message as
-`git-conventions` says ("Hard rules", "Commit messages").
-
 ## 2. Capture
 
 - **`gtd: <text>`** adds an inbox item to `inbox.org`.
