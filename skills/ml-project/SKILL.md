@@ -22,7 +22,7 @@ metadata: {stack: ml, audience: researchers, requires: [dev-conventions, git-con
   exception. Pass it as `--config params/${item}.yaml`. List it under
   `params:` (`- params/${item}.yaml:`), not under `deps:`.
 - `params.yaml` and `dvc.yaml` are the single source of truth. Write
-  no wrapper scripts such as `train.sh` around them.
+  no wrapper scripts (`train.sh`) around them.
 - Never tune the seed. Keep it fixed and fix a bad fit with the
   hyperparameters.
 - Never delete an experiment variant (a `dvc.yaml` entry or its config
@@ -115,7 +115,7 @@ train:
   batch_size: 256
 ```
 
-The per-target values (for example `learning_rate`) live only in
+The per-target values (such as `learning_rate`) live only in
 `params/<target>.yaml`.
 
 ### dvc.yaml: foreach over targets
@@ -218,8 +218,10 @@ import mlflow
 import numpy as np
 
 
-def train(...) -> dict[str, float]:
-    """Run training and return metrics dict."""
+def train(
+    target: str, config: dict, n_epochs: int, outdir: str
+) -> dict[str, float]:
+    """Train and return the metrics."""
     mlflow.set_tag("target", target)
     mlflow.log_params(config["model"])
 
@@ -335,7 +337,7 @@ A ground-truth bound is for regressions, not for precision claims.
 ### Configs and names
 
 - Experiment configs write every option out (see `dev-conventions`,
-  "1. Design principles", "Explicit configuration").
+  "1. Design principles").
 - Names follow the notation of the paper.
 
 ### test/README.md
@@ -373,9 +375,8 @@ Summary and BibTeX reference.
 ### CLI interface
 
 Use `argparse`. Scripts never import from other scripts. They have
-no mode switches (`dev-conventions`, "1. Design principles",
-"Scripts stay dumb"). Each variant gets its own config file or
-`dvc.yaml` entry.
+no mode switches (`dev-conventions`, "1. Design principles").
+Each variant gets its own config file or `dvc.yaml` entry.
 
 ```python
 import argparse
