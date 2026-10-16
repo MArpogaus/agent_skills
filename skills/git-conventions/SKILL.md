@@ -59,8 +59,8 @@ pushed history.
   branch only when one of them allows it. Otherwise ask (autonomous:
   use the current branch and report it). Never create `dev` unasked.
 - **Untested work.** When the user asks to save untested work, commit
-  it on `dev` (shared repo: the user's `dev-<name>`) with a normal type
-  and `WIP, untested` in the body. It is the only exception to the rule
+  it on `dev` (shared repo: the user's `dev-<name>`). Use a normal type
+  and put `WIP, untested` in the body. It is the only exception to the rule
   that each commit passes the hooks and the tests. It still passes the
   hooks.
 - **SSH to GitHub fails in the sandbox.** Fetch and push over HTTPS
@@ -86,8 +86,7 @@ pushed history.
   commit. The root commit contains exactly `.gitignore` (and
   `.pre-commit-config.yaml` if it exists at that point). Its message is
   `chore: init` with no body. A bare `init` fails the commitizen hooks.
-- **`dev`** is the working branch. All commits and pull requests
-  target `dev`. Never commit directly to `main`.
+- **`dev`** is the working branch (hard rules).
 
 ## History is append-only once pushed
 
@@ -96,10 +95,10 @@ force-push on a branch that another person can have fetched. The one
 exception is a rebase of the user's `dev-<name>` onto `main` when the
 user asks for it. Correct a pushed mistake with a new commit
 (`git revert`, or a `fix:` commit on top). Before the first push, clean
-up local commits with `commit --amend`, or `commit --fixup` plus
-`GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>`, where
-`<base>` is `@{u}` when the branch has an upstream, else the last pushed
-commit or `--root`. For the conditions and the backup of a rewrite,
+up local commits with `commit --amend`, or with `commit --fixup` plus
+`GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>`. `<base>` is
+`@{u}` when the branch has an upstream, else the last pushed commit or
+`--root`. For the conditions and the backup of a rewrite,
 read [reference.md](reference.md), "Rewrite `main` to the flow".
 
 ## Commit workflow (plan-first)
@@ -175,7 +174,7 @@ Every repo runs its hooks in CI with
   example `@release/v1`), set its latest release tag first. Then run
   `pinact` again.
 - **Check that nothing is left:**
-  `grep -rn 'uses:' .github/workflows | grep -v '@[0-9a-f]\{40\}'`
+  `grep -rn 'uses:' .github/workflows | grep -v 'uses: \./' | grep -v '@[0-9a-f]\{40\}'`
   prints nothing. Keep a tag only where a tool requires one (for
   example the SLSA generator), and say so in a comment.
 

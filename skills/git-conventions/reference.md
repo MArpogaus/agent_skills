@@ -171,13 +171,15 @@ moves the branches with `git update-ref`.
 
 ```bash
 OLD=$(git rev-parse main)
-T=archive/pre-restructure-$(date +%Y%m%d)
+D=$(date +%Y%m%d)
+T=archive/pre-restructure-$D  # tag
+B=archive/$D                  # branch, a different name than the tag
 
 # 1. preserve the old tip
 #    more than one owner: push a tag and a branch BEFORE the rewrite
 git tag "$T" "$OLD"
 git push origin "refs/tags/$T"
-git push origin "$OLD:refs/heads/$T"
+git push origin "$OLD:refs/heads/$B"
 #    one owner: keep a local bundle and push nothing
 git bundle create ../<repo>-pre-rewrite.bundle --all
 
