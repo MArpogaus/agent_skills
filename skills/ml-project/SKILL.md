@@ -17,15 +17,14 @@ metadata: {stack: ml, audience: researchers, requires: [git-conventions, python-
 ## Hard rules
 
 - Scripts read CLI arguments only, never `params.yaml`. Interpolate
-  each parameter into `cmd`, for example
-  `--learning-rate ${train.learning_rate}`. Keep each value in one
-  file.
+  each global parameter into `cmd`, for example
+  `--max-epochs ${train.max_epochs}`. The per-target file is the one
+  exception. Pass it as `--config params/${item}.yaml`. List it under
+  `params:` (`- params/${item}.yaml:`), not under `deps:`.
 - `params.yaml` and `dvc.yaml` are the single source of truth. Write
   no wrapper scripts such as `train.sh` around them.
 - Never tune the seed. Keep it fixed and fix a bad fit with the
   hyperparameters.
-- Keep the number of variants small. Tune the existing config before
-  you add a new one.
 - Never replace an existing variant or change what it means.
 - Never regenerate `data/` to make a failing test pass.
 - Docs describe the method and how to run it. Results live in result
@@ -66,7 +65,7 @@ metadata: {stack: ml, audience: researchers, requires: [git-conventions, python-
 ├── dvc.yaml                 # DVC pipeline definition
 ├── dvc.lock                 # Locked pipeline (committed)
 ├── hpo_study.md             # HPO phase log
-├── pyproject.toml            # (see python-dev skill)
+├── pyproject.toml           # (see python-dev skill)
 ├── .pre-commit-config.yaml  # (see git-conventions skill)
 └── README.org               # Paper reference + reproduction guide
 ```
@@ -86,10 +85,8 @@ model code:
 ```python
 """Normalizing flows for probabilistic regression."""
 
-from <package> import distributions as _distributions
-
-# Register the custom parameterisation into the upstream package
-import <upstream-package>.distributions  # noqa: F401
+# Importing the module registers the custom distributions upstream.
+from <package> import distributions  # noqa: F401
 ```
 
 ## DVC pipeline design
@@ -102,13 +99,11 @@ targets: [<target-a>, <target-b>]
 data:
   raw_path: "data/raw"
   processed_path: "data/processed"
-  file_format: "feather"
 
 split:
   train_ratio: 0.7
   val_ratio: 0.15
   test_ratio: 0.15
-  shuffle: true
   seed: 42
 
 train:
@@ -129,54 +124,55 @@ stages:
   prepare_features:
     foreach: ${targets}
     do:
-      cmd: python scripts/prepare_features.py --target ${item}
-        --input data/raw --output data/processed/${item}
+      cmd: >-
+        python scripts/prepare_features.py --target ${item}
+        --input ${data.raw_path} --output ${data.processed_path}/${item}
       deps:
-        - data/raw
+        - ${data.raw_path}
         - scripts/prepare_features.py
       params:
         - data
       outs:
-        - data/processed/${item}/features.feather
+        - ${data.processed_path}/${item}/features.feather
 
   split_data:
     foreach: ${targets}
     do:
       cmd: >-
         python scripts/split_data.py
-          --input data/processed/${item}/features.feather
-          --outdir data/processed/${item}
-          --train-ratio ${split.train_ratio} --val-ratio ${split.val_ratio}
-          --test-ratio ${split.test_ratio} --seed ${split.seed}
+        --input ${data.processed_path}/${item}/features.feather
+        --outdir ${data.processed_path}/${item}
+        --train-ratio ${split.train_ratio} --val-ratio ${split.val_ratio}
+        --test-ratio ${split.test_ratio} --seed ${split.seed}
       deps:
-        - data/processed/${item}/features.feather
+        - ${data.processed_path}/${item}/features.feather
         - scripts/split_data.py
       params:
         - split
       outs:
-        - data/processed/${item}/train.feather
-        - data/processed/${item}/val.feather
-        - data/processed/${item}/test.feather
+        - ${data.processed_path}/${item}/train.feather
+        - ${data.processed_path}/${item}/val.feather
+        - ${data.processed_path}/${item}/test.feather
 
   train:
     foreach: ${targets}
     do:
       cmd: >-
         python scripts/train.py --target ${item}
-          --config params/${item}.yaml
-          --train-data data/processed/${item}/train.feather
-          --val-data data/processed/${item}/val.feather
-          --max-epochs ${train.max_epochs} --patience ${train.patience}
-          --batch-size ${train.batch_size}
-          --outdir results/${item}
+        --config params/${item}.yaml
+        --train-data ${data.processed_path}/${item}/train.feather
+        --val-data ${data.processed_path}/${item}/val.feather
+        --max-epochs ${train.max_epochs} --patience ${train.patience}
+        --batch-size ${train.batch_size}
+        --outdir results/${item}
       deps:
-        - data/processed/${item}/train.feather
-        - data/processed/${item}/val.feather
-        - params/${item}.yaml
+        - ${data.processed_path}/${item}/train.feather
+        - ${data.processed_path}/${item}/val.feather
         - scripts/train.py
         - src/<package>/models.py
       params:
         - train
+        - params/${item}.yaml:
       outs:
         - results/${item}/model
       metrics:
@@ -215,31 +211,40 @@ Add `mlruns/` to `.gitignore`. Use `mlflow ui` to inspect runs.
 
 ```python
 import mlflow
+import numpy as np
+
 
 def train(...) -> dict[str, float]:
     """Run training and return metrics dict."""
+    mlflow.set_tag("target", target)
     mlflow.log_params(config["model"])
-    mlflow.log_param("target", target)
 
+    losses, val_losses = [], []
     for epoch in range(n_epochs):
-        loss = train_step(...)
-        val_loss = validation_step(...)
+        losses.append(train_step(...))
+        val_losses.append(validation_step(...))
         mlflow.log_metrics(
-            {"loss": loss, "val_loss": val_loss},
+            {"loss": losses[-1], "val_loss": val_losses[-1]},
             step=epoch,
         )
 
+    best_epoch = int(np.argmin(val_losses))
+    metrics = {
+        "min_val_loss": val_losses[best_epoch],
+        "min_loss": min(losses),
+        "best_epoch": best_epoch,
+    }
+    mlflow.log_metrics(metrics)
     mlflow.log_artifact(f"{outdir}/learning_curve.png")
     mlflow.log_artifact(f"{outdir}/model_weights")
-    return {"val_loss": val_loss}
+    return metrics
 ```
 
 ## HPO study structure
 
 Document hyperparameter optimisation as a structured log in
-`hpo_study.md`. A manual study commits once per phase. The
-autonomous loop (`auto-hpo-studies`) commits once per iteration
-instead, in its own format. That skill wins while it runs.
+`hpo_study.md`. A manual study commits once per phase. The autonomous
+loop uses `auto-hpo-studies`.
 
 ### Template
 
@@ -265,8 +270,8 @@ instead, in its own format. That skill wins while it runs.
 - Manual studies: one phase per commit with message
   `feat(hpo): <target> phase <N>: <summary>`.
 - The commit body includes the markdown table from `hpo_study.md`.
-- Delete the outputs of discarded runs (`rm -r results/<target>_v2`),
-  then `dvc gc -w`.
+- Delete the outputs of discarded runs (`rm -r results/<target>_v2`).
+  Run `dvc gc -w` only after the user agrees.
 - Only the final configs for each phase remain in the repo.
 
 ## Validating research code
@@ -287,8 +292,8 @@ data/<dgp-name>/
 ```
 
 Give every generator a CLI that regenerates its own folder from a
-fixed seed, and a `REGISTRY` dict so tests and scripts look DGPs up
-by name.
+fixed seed. Keep a `REGISTRY` dict so that tests and scripts look DGPs
+up by name.
 
 ### Frozen data is a contract
 
@@ -318,11 +323,13 @@ by name.
 
 A ground-truth bound is for regressions, not for precision claims.
 
-- Keep a bound between about **1.5x and 4x** of its measured value.
-  Below 1.5x it fails on another machine for no reason. Above 4x it
-  catches nothing. A deliberately wide bound carries a `"why"` note.
-- After a change that moves numbers, re-run **every** affected variant
-  and re-pin all centres from that run, not only the ones that failed.
+- Set a bound to 1.5 to 4 times the error measured on this machine.
+  Below 1.5 times, it fails on another machine for no reason. Above 4
+  times, it catches nothing. A deliberately wide bound carries a
+  `"why"` note.
+- After a change that moves numbers, re-run **every** affected
+  variant. Re-pin all centres from that run, not only the ones that
+  failed.
 - Put a precision claim into its own tight metric.
 
 ### Configs and names
