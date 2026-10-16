@@ -14,18 +14,18 @@ metadata: {stack: sandbox conda uv nix, requires: [dev-conventions]}
 
 # Skill: Sandbox Environment
 
-The agent's home is `$HOME`. All tools for the agent's own use go
-there. For paths under `~` in skills, see `dev-conventions`, "6. Sandbox
-and environment safety".
+`~` in a skill means `$HOME`, the agent's home. All tools for the
+agent's own use go there. For paths in the user's home, see
+`dev-conventions`, "6. Sandbox and environment safety".
 
 ## Hard rules
 
-- Install tools for the agent only under `$HOME`. Never install into
-  the user's home, the user's project environment (`.venv`, a conda env
-  of the project, `node_modules`), a lock file, or the system.
-- Tools for the agent's own use follow this skill, also in a Python
-  project. The project `.venv` stays untouched. A package the project
-  needs is reported, as `python-dev`, "uv and the environment", says.
+- Install tools for the agent only under `$HOME`, also in a Python
+  project. Never install into the user's home, a lock file or the
+  system.
+- Never touch the project environment (`.venv`, a conda env of the
+  project, `node_modules`). Report what it lacks, as `python-dev`, "uv
+  and the environment", says.
 - This skill applies only when `$HOME` is not the user's home.
   Otherwise install nothing and report the missing tool.
 - Never run `sudo`, `dnf`, `rpm-ostree`, `apt` or `flatpak install` for
@@ -51,10 +51,6 @@ uv tool list
 micromamba env list
 command -v nix || ls -d ~/.nix-profile
 ```
-
-`<test rig>` is the shared Emacs and TeX rig; its README names its
-location. `emacs-config` and `org-beamer-presentation` own it. Do not change it for an unrelated
-project.
 
 ## 2. Choose the installer
 
