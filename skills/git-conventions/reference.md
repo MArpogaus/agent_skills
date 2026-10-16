@@ -41,7 +41,8 @@ repos:
 
 ## pre-commit workflow
 
-`.github/workflows/pre-commit.yaml`. Run `pinact` after you copy it (SKILL.md, "CI workflows").
+`.github/workflows/pre-commit.yaml`. Run `pinact` after you copy it
+(SKILL.md, "CI workflows").
 
 ```yaml
 name: run pre-commit hooks
@@ -72,19 +73,19 @@ updates:
 
 ## Shared repos: one dev branch per contributor
 
-With more than one author, give each author a long-lived dev branch
+With more than one owner, give each owner a long-lived dev branch
 instead of a shared `dev`:
 
 ```
 feat/<topic>  ->  PR  ->  dev-<name>  ->  PR  ->  main
 ```
 
-- `dev-<name>` is the integration branch of that author, who owns it
+- `dev-<name>` is the integration branch of that owner, who owns it
   and can push to it directly.
 - `main` is protected: pull requests only, no direct push, no
   force-push. It holds only `chore: init` and merge commits.
 - A rebase of your own `dev-<name>` onto `main` is permitted. Never
-  rewrite the branch of another author.
+  rewrite the branch of another owner.
 
 ## Repos you do not own
 
@@ -117,7 +118,8 @@ branched or pushed yet:
 ```bash
 git update-ref -d HEAD        # remove the root commit
 git rm -r --cached -q .       # empty the index
-git add .gitignore .pre-commit-config.yaml
+git add .gitignore
+[ -f .pre-commit-config.yaml ] && git add .pre-commit-config.yaml
 git commit -m "chore: init"
 ```
 
@@ -167,7 +169,8 @@ git bundle create ../<repo>-pre-rewrite.bundle --all
 # 2. new main: orphan root, then one snapshot commit
 git checkout --orphan main-new "$OLD"
 git rm -r --cached . -q
-git add .gitignore .pre-commit-config.yaml
+git add .gitignore
+[ -f .pre-commit-config.yaml ] && git add .pre-commit-config.yaml
 git commit -m "chore: init"
 git read-tree "$OLD"                               # exactly the old tree
 git commit -m "chore: import <project> <version> from the prior history"

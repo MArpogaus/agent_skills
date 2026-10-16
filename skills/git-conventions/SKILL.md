@@ -14,9 +14,10 @@ metadata: {stack: git, requires: []}
 # Skill: Git Conventions
 
 Read [reference.md](reference.md) when you write a pre-commit config
-or a workflow, or set up a repo with more than one author. Also read
-it before you contribute to a repo of another owner, adopt this flow
-on an existing repo, redo a root commit or rewrite pushed history.
+or a workflow, or set up a repo with more than one owner. Also read it
+before you contribute to a repo of another owner or adopt this flow on
+an existing repo. Read it before you redo a root commit or rewrite
+pushed history.
 
 ## Hard rules
 
@@ -25,7 +26,7 @@ on an existing repo, redo a root commit or rewrite pushed history.
   "Generated with" or similar line. The rule covers commits, tags,
   pull requests and issues. A file header that a package archive
   requires (for example MELPA's `;; Assisted-by:`) stays.
-- **Stay on `dev`** (in a repo with more than one author, on your
+- **Stay on `dev`** (in a repo with more than one owner, on your
   `dev-<name>`). Make no feature branches or pull requests unless the
   user asks or the repo's flow needs them ([reference.md](reference.md),
   "Shared repos").
@@ -38,11 +39,14 @@ on an existing repo, redo a root commit or rewrite pushed history.
 - **Stage paths by name.** Do not use `git commit -a`, a blind
   `git add -A` or `git add -p`. The first two pick up submodule
   pointers, symlinks and the user's own uncommitted edits.
-- **Never rewrite a pushed commit** (section "History is append-only
-  once pushed").
+- **Rewrite pushed history only when the user asks** (section "History
+  is append-only once pushed").
 - **Never replace a pushed tag.** If one was replaced, cancel the
   release run at once (`gh run cancel <id>`).
-- **One commit is one logical change** (section "Commit workflow (plan-first)").
+- **Commit each finished logical change on your own.** Do not wait for
+  a request.
+- **One commit is one logical change** (section "Commit workflow
+  (plan-first)").
 
 ## Rules for agents
 
@@ -56,9 +60,9 @@ on an existing repo, redo a root commit or rewrite pushed history.
   CONTRIBUTING allows it. Otherwise ask (autonomous: use the current
   branch and report it). Never create `dev` unasked.
 - **Untested work.** When the user asks to save untested work, commit
-  it on `dev` with a normal type and `WIP, untested` in the body. It
-  is the only exception to "passes the tests". It still passes the
-  hooks.
+  it on `dev` with a normal type and `WIP, untested` in the body. It is
+  the only exception to the rule that each commit passes the hooks and
+  the tests. It still passes the hooks.
 - **SSH to GitHub fails in the sandbox.** Fetch and push over HTTPS
   with `gh auth git-credential` as credential helper. Fetch before you
   trust an `origin/*` ref.
@@ -79,8 +83,9 @@ on an existing repo, redo a root commit or rewrite pushed history.
 
 - **`main`** holds the root commit and merge commits from `dev`, and
   nothing else. Merge with `git merge --no-ff dev`, so that each
-  merge makes a merge commit. The root commit contains exactly `.gitignore` (and
-  `.pre-commit-config.yaml` if it exists at that point). Its message
+  merge makes a merge commit. The root commit contains exactly
+  `.gitignore` (and `.pre-commit-config.yaml` if it exists at that
+  point). Its message
   is `chore: init` with no body. A bare `init` fails the commitizen
   hooks.
 - **`dev`** is the working branch. All commits and pull requests
@@ -90,13 +95,13 @@ on an existing repo, redo a root commit or rewrite pushed history.
 
 Use no `rebase`, no `commit --amend`, no `reset --hard` and no
 force-push on a branch that another person can have fetched. The one
-exception is a rebase of your own `dev-<name>` onto `main`. Correct a pushed mistake with a new commit (`git revert`,
-or a `fix:` commit on top). Before the first push, `amend` and
+exception is a rebase of your own `dev-<name>` onto `main`. Correct a
+pushed mistake with a new commit (`git revert`, or a `fix:` commit on
+top). Before the first push, `amend` and
 interactive rebase are the correct tools to clean up local commits.
 
-A rewrite of pushed history is permitted only when the user asks for
-it. In a repo with more than one owner, all four conditions must be
-true, else do not rewrite:
+In a repo with more than one owner, all four conditions must be true
+for a rewrite, else do not rewrite:
 
 1. Every owner agrees in writing.
 2. The old tip stays reachable: an `archive/*` tag and a branch, both
@@ -112,13 +117,12 @@ procedure is in [reference.md](reference.md).
 
 ## Commit workflow (plan-first)
 
-Before the first edit, plan the commits. This is the agent's own list.
-Wait for approval only when the user asked for a plan first.
+Before the first edit, plan the commits in your task list. Wait for
+approval only when the user asked for a plan first.
 
-1. **Find the commit boundaries.** One commit is one logical change.
-   If the message needs "and also", or does not fit one subject
-   line, split the commit. Each commit passes the
-   hooks and the tests on its own. Write the ordered commit
+1. **Find the commit boundaries.** If the message needs "and also", or
+   does not fit one subject line, split the commit. Each commit passes
+   the hooks and the tests on its own. Write the ordered commit
    descriptions before you touch a file.
 2. **Work one commit at a time.** Edit only the lines for the current
    commit. When one file needs changes for two commits, edit the file
@@ -129,9 +133,9 @@ Wait for approval only when the user asked for a plan first.
    then start the next commit.
 
 When you find an unrelated fix during the work, commit the current
-change first, then make the fix as its own commit. If the fix is
-urgent, stash the unfinished change (`git stash push -m "<topic>"`),
-commit the fix, then `git stash pop`.
+change first, then make the fix as its own commit. If the current
+change does not pass the hooks yet, stash it
+(`git stash push -m "<topic>"`), commit the fix, then `git stash pop`.
 
 ## Commit messages
 
@@ -162,9 +166,8 @@ skill adds its own hooks (for example ruff in `python-dev`).
 
 - **Activate the hooks in every fresh clone** with
   `pre-commit install --install-hooks`. The config alone installs
-  nothing. Verify that `ls .git/hooks/`
-  shows `pre-commit`, `commit-msg` and `pre-push`. Document the
-  command in `CONTRIBUTING.md`.
+  nothing. Verify that `ls .git/hooks/` shows `pre-commit`, `commit-msg`
+  and `pre-push`. Document the command in `CONTRIBUTING.md`.
 - `commitizen-branch` checks the messages in `origin/HEAD..HEAD`. A
   repo created locally and pushed later has no `origin/HEAD`. Set it
   once with `git remote set-head origin -a`.
