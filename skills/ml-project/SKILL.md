@@ -25,7 +25,9 @@ metadata: {stack: ml, audience: researchers, requires: [dev-conventions, git-con
   no wrapper scripts such as `train.sh` around them.
 - Never tune the seed. Keep it fixed and fix a bad fit with the
   hyperparameters.
-- Never replace an existing variant or change what it means.
+- Never delete an experiment variant (a `dvc.yaml` entry or its config
+  file) or change what its name means. Tuning the values in
+  `params/<target>.yaml` is allowed.
 - Never regenerate `data/` to make a failing test pass.
 - Docs describe the method and how to run it. Results live in result
   files, reports and slides, not in docs.
@@ -74,7 +76,8 @@ metadata: {stack: ml, audience: researchers, requires: [dev-conventions, git-con
 
 ### Package philosophy
 
-Keep `src/<package>/` to at most 5 modules. Scripts are thin CLI
+Keep `src/<package>/` to at most 5 modules besides `__init__.py`.
+Scripts are thin CLI
 wrappers that call package functions. Shared logic lives in the
 package.
 
@@ -85,7 +88,7 @@ in `__init__.py`, so that the patch runs once at import, before any
 model code:
 
 ```python
-"""Normalizing flows for probabilistic regression."""
+"""<One-line package summary>."""
 
 # Importing the module registers the custom distributions upstream.
 from <package> import distributions  # noqa: F401
@@ -193,8 +196,8 @@ Place dataset-specific hyperparameters in `params/<target>.yaml`:
 
 ```yaml
 model:
-  architecture: "maf"
-  n_bijectors: 4
+  architecture: "mlp"
+  n_layers: 4
   hidden_units: [64, 64]
   activation: "relu"
   dropout_rate: 0.1
@@ -247,8 +250,7 @@ def train(...) -> dict[str, float]:
 ## HPO study structure
 
 Document hyperparameter optimisation as a structured log in
-`hpo_study.md`. A manual study commits once per phase. The autonomous
-loop uses `auto-hpo-studies`.
+`hpo_study.md`. The autonomous loop uses `auto-hpo-studies`.
 
 ### Template
 
@@ -259,7 +261,7 @@ loop uses `auto-hpo-studies`.
 
 **Objective:** Find optimal learning rate for the base architecture.
 
-| Run | learning_rate | n_bijectors | val_loss | Notes |
+| Run | learning_rate | n_layers    | val_loss | Notes |
 |-----|---------------|-------------|----------|-------|
 | 1   | 1e-2          | 4           | 0.452    | diverges after 100 epochs |
 | 2   | 3e-4          | 4           | **0.198** | best so far               |
@@ -285,7 +287,8 @@ reference to be wrong against. Build one.
 ### Simulate with known ground truth
 
 Write the data-generating process yourself, in **numpy only**, with
-no import of the model under test. Ship each frozen dataset with the truth beside it:
+no import of the model under test. Ship each frozen dataset with the
+truth beside it:
 
 ```
 data/raw/<dgp-name>/
@@ -335,7 +338,7 @@ A ground-truth bound is for regressions, not for precision claims.
 ### Configs and names
 
 - Experiment configs write every option out (see `dev-conventions`,
-  section 1, "Explicit configuration").
+  "1. Design principles", "Explicit configuration").
 - Names follow the notation of the paper.
 
 ### test/README.md
@@ -373,8 +376,8 @@ Summary and BibTeX reference.
 ### CLI interface
 
 Use `argparse`. Scripts never import from other scripts. They have
-no mode switches (`dev-conventions`, section 1, "Scripts stay
-dumb"). Each variant gets its own config file or `dvc.yaml` entry.
+no mode switches (`dev-conventions`, "1. Design principles",
+"Scripts stay dumb"). Each variant gets its own config file or `dvc.yaml` entry.
 
 ```python
 import argparse
