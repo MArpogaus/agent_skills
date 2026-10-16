@@ -115,7 +115,7 @@ train:
   batch_size: 256
 ```
 
-The per-target values (such as `learning_rate`) live only in
+The per-target values live only in
 `params/<target>.yaml`.
 
 ### dvc.yaml: foreach over targets
