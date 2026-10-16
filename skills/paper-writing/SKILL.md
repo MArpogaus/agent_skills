@@ -1,7 +1,7 @@
 ---
 name: paper-writing
 description: >
-  End-to-end academic paper writing workflow for probabilistic ML research:
+  End-to-end academic paper writing workflow for ML research:
   LaTeX project scaffolding, figure generation, writing with
   IEEE/Elsevier/UAI templates, build, and venue submission. The
   experiment code follows ml-project. A revision of an existing draft
@@ -28,9 +28,8 @@ submission. For a revision, use `latex-paper-revision`.
   existing draft keeps its directory names.
 - Before a submission, `grep -rn '\\TODO' main.tex tex/` prints
   nothing.
-- Load `biblatex` or `bibtex`, never both. Elsevier uses `bibtex`.
-- Take the class options from the venue template. When unsure,
-  check the venue template instead of guessing.
+- Load `biblatex` or `\bibliography`, never both.
+- Take the class options from the venue template. Never guess them.
 - Compile before each commit and check that the log has no undefined
   references or citations.
 
@@ -115,7 +114,6 @@ Include the preamble as a separate file (`preamble.tex`) and
 \DeclareMathOperator*{\ecdf}{ECDF}
 \DeclareMathOperator{\softmax}{softmax}
 \DeclareMathOperator{\softplus}{softplus}
-\DeclareMathOperator{\Be}{Be}
 ```
 
 #### Standard notation conventions
@@ -138,8 +136,8 @@ Include the preamble as a separate file (`preamble.tex`) and
 ### Bibliography
 
 The preamble loads `biblatex` with `biber`. Print with
-`\printbibliography`. For Elsevier, remove the `biblatex` block from
-the preamble and use the `elsarticle-num` style:
+`\printbibliography`. Elsevier uses `bibtex`: remove the `biblatex`
+block from the preamble and use the `elsarticle-num` style:
 
 ```latex
 \bibliographystyle{elsarticle-num}
@@ -149,16 +147,12 @@ the preamble and use the `elsarticle-num` style:
 ### Acronyms (`glossaries.tex`)
 
 ```latex
-\newacronym{CTM}{CTM}{conditional transformation model}
-\newacronym{NF}{NF}{normalizing flow}
 \newacronym{MLE}{MLE}{maximum likelihood estimation}
-\newacronym{CRPS}{CRPS}{continuous ranked probability score}
 \newacronym{NLL}{NLL}{negative log-likelihood}
-\newacronym{GMM}{GMM}{Gaussian mixture model}
 ```
 
-Use in text: `\gls{NF}` (the first use expands the full form),
-`\glspl{NF}` (plural), `\acrfull{NF}` (always the full form).
+Use in text: `\gls{MLE}` (the first use expands the full form),
+`\glspl{MLE}` (plural), `\acrfull{MLE}` (always the full form).
 
 ## Phase 2: Figure generation
 
@@ -330,7 +324,7 @@ mv final.pdf "FINAL_PAPER.PDF"
 
 ### Elsevier (elsarticle)
 
-- **Build:** `latexmk -pdf` (uses `bibtex` backend, not `biber`)
+- **Build:** `latexmk -pdf`
 - **Front matter:** `\begin{frontmatter}` with `\begin{abstract}`,
   `\begin{keyword}`, `\journal{...}`
 - **Source package:** `.tex` + all figures + `.bib` + class file
@@ -348,7 +342,7 @@ mv final.pdf "FINAL_PAPER.PDF"
 - **Build:** `latexmk -pdf`
 - **Options:** `\usepackage[accepted]{icml<year>}` for the camera-ready
   version. Without an option, the package builds the anonymous review
-  version. Check the venue template of the current year.
+  version. The options can change each year.
 - **Opening:** `\twocolumn[` for title block + abstract
 
 ### arXiv
@@ -367,7 +361,7 @@ mv final.pdf "FINAL_PAPER.PDF"
 - PGFPlots: https://pgfplots.sourceforge.net/
 - An earlier paper that used the target class is the best reference
   for a venue: ask the user for one and copy its setup. Autonomous:
-  take the venue template's default and record the question
+  take the class defaults and record the question
   (`dev-conventions`, "2. Asking and acting").
 
 ---
