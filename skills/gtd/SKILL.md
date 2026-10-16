@@ -13,7 +13,7 @@ compatibility: claude-code
 metadata: {stack: org, requires: [dev-conventions, git-conventions]}
 ---
 
-# Skill: GTD agenda
+# Skill: GTD Agenda
 
 The agenda is a git repository of Org files at `<agenda repo>`. Its
 `AGENTS.md` holds the data model: the files, the heading template,
