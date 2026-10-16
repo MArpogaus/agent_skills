@@ -62,7 +62,7 @@ cargo test -p <crate> --locked
 - `clippy.toml`, `deny.toml` and the workspace `Cargo.toml` with the
   lints live at the root.
 
-Example from a compositor project:
+Example layout:
 
 ```
 crates/<core-model>/   data model and API types; no heavy dependencies
