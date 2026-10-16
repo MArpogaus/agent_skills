@@ -24,8 +24,9 @@ metadata: {stack: emacs, requires: [git-conventions]}
   dependency for optional features.
 - After an extraction, one copy of the code exists: the configuration
   only configures the package.
-- Add `;; Assisted-by: <tool name>` to every file of a package published
-  on MELPA, and keep it where it exists ("File headers").
+- Add `;; Assisted-by: <tool name>` to every file of a package that is
+  on MELPA or that you prepare for MELPA, and keep it where it exists
+  ("File headers").
 
 Read [reference.md](reference.md) before you build or debug overlays,
 display properties, margins, fringes, header lines, scrolling over tall
@@ -101,8 +102,8 @@ Every file, companions and test files included:
 
 - `<tool name>`: Use the value that the package's other files use. In a
   new package, use the harness name (for example `Claude Code`), never a
-  model name. The `Assisted-by` line goes only into a package published
-  on MELPA (hard rules).
+  model name. The `Assisted-by` line goes only into a package that is
+  on MELPA or that you prepare for MELPA (hard rules).
 - The email can be ROT13 obfuscated. Keep the form the existing files
   use.
 - `Package-Requires` in the main file decides what MELPA installs.
@@ -225,8 +226,8 @@ When you review a package that comes from a configuration, read
 
 ## Required skills
 
-This skill assumes the following prerequisite skills are loaded. Use the
-`skill` tool to load them before using this one:
+This skill assumes the following prerequisite skills are loaded.
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **git-conventions**: two-branch flow, conventional commits, pre-commit
   hooks, push and attribution rules, tagging and releases.
