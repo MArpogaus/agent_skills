@@ -166,7 +166,7 @@ Elsewhere:
   down. Track `(cons (window-start) (window-vscroll nil t))` after each
   event and `redisplay t`.
 - In CI, the purcell/setup-emacs builds have no X. Give pixel tests
-  their own job: `apt-get install xvfb emacs-gtk`, then
+  their own job: `sudo apt-get install -y xvfb emacs-gtk`, then
   `xvfb-run make <pixel-test target>`. The project's Makefile defines
   that target. In batch the tests `skip-unless (display-graphic-p)`.
 
@@ -174,14 +174,14 @@ Elsewhere:
 
 - Capture frames with `x-export-frames`: one frame per scroll step, ten
   frames per second of hold. Do not resample the frame rate (ffmpeg
-  `fps=` drops frames unevenly). Hold the final view with `tpad`.
+  `fps=` drops frames unevenly). Hold the final view with `tpad`:
 
-      ffmpeg -framerate 13 -i frames/f%04d.png \ -filter_complex
-      "[0:v]tpad=stop_mode=clone:stop_duration=2.5,\
-      scale=820:-1:flags=lanczos,split[a][b];\
-      [a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:\
-      bayer_scale=3" -loop 0 raw.gif gifsicle -O3 --lossy=80 raw.gif -o
-      img/demo.gif
+  ```bash
+  ffmpeg -framerate 13 -i frames/f%04d.png -filter_complex \
+    "[0:v]tpad=stop_mode=clone:stop_duration=2.5,scale=820:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=3" \
+    -loop 0 raw.gif
+  gifsicle -O3 --lossy=80 raw.gif -o img/demo.gif
+  ```
 
 - For one-pixel line art, encode at the frames' own size with
   `paletteuse=dither=none` and no `--lossy`. Scaling turns one line into

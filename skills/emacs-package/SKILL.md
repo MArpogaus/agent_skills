@@ -101,7 +101,8 @@ Every file, companions and test files included:
 
 - `<tool name>`: Use the value that the package's other files use. In a
   new package, use the harness name (for example `Claude Code`), never a
-  model name.
+  model name. The `Assisted-by` line goes only into a package published
+  on MELPA (hard rules).
 - The email can be ROT13 obfuscated. Keep the form the existing files
   use.
 - `Package-Requires` in the main file decides what MELPA installs.
