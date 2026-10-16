@@ -1,7 +1,7 @@
 {
   "name": "marpogaus-skills",
   "version": "0.3.0",
-  "description": "Marcel's recurring project conventions as skills: the way of working (dev conventions, review loop, session finish, sandbox tools), git, GTD agenda, Python, Rust, Emacs, self-hosting, ML research projects, paper writing, Beamer presentations, and meta skills (create-skill, repo-tour).",
+  "description": "Recurring project conventions as skills: the way of working (dev conventions, review loop, session finish, sandbox tools), git, GTD agenda, Python, Rust, Emacs, self-hosting, ML research projects, paper writing, Beamer presentations, and meta skills (create-skill, repo-tour).",
   "author": {
     "name": "Marcel Arpogaus",
     "url": "https://github.com/MArpogaus"
@@ -9,5 +9,5 @@
   "homepage": "https://github.com/MArpogaus/agent_skills",
   "repository": "https://github.com/MArpogaus/agent_skills",
   "license": "MIT",
-  "keywords": ["conventions", "python", "git", "emacs", "ml", "research", "latex"]
+  "keywords": ["conventions", "python", "rust", "git", "emacs", "org", "ml", "research", "latex", "ansible", "gtd"]
 }
