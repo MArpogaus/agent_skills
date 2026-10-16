@@ -7,7 +7,7 @@ description: >
   record lessons in memory or as skill changes, and give a short final
   report. Run it once per session, not after each task. Use when the
   user ends the session ("finish", "wrap up", "Feierabend", "session
-  beenden", "done for today"), or before the last message of an
+  beenden", "done for today"). Use before the last message of an
   autonomous session.
 license: MIT
 compatibility: claude-code
@@ -35,7 +35,7 @@ it in `git reflog`.
 ## 1. Background work
 
 - List the jobs, monitors and subagents you started. Wait at most 10
-  minutes. List the jobs still running under "Running". Stop watchers
+  minutes for the jobs to end. List the jobs still running under "Running". Stop watchers
   that have no further use.
 - A job can have to keep running (a training run, a deploy). Then write
   in the report what it is, how to check it, and where its output goes.
@@ -68,10 +68,8 @@ turned reviews off, read your own diff once with the Simplicity view.
 - Commit everything that belongs in history, as `git-conventions`
   requires. Report unpushed commits with the command in
   `dev-conventions`, "Hard rules".
-- Delete report and plan files when they are done. If work stays open
-  and another worker continues or the user asks, write `HANDOFF.md` as
-  `dev-conventions`, "2. Asking and acting", says: done, open, next
-  steps, where things live.
+- Delete report and plan files when they are done. For open work, see
+  the hard rules (`HANDOFF.md`).
 
 ## 5. Agenda
 
