@@ -29,7 +29,8 @@ or docs configuration.
 - Never write a literal version into `pyproject.toml` or
   `__init__.py` (section "One version source").
 - Usage examples live only in notebooks. Docstrings are API reference
-  only. The README shows no code beyond the install command.
+  only. The README shows no code beyond the install command
+  `uv add <package>` (`ml-project` adds the reproduction commands).
 - Do not run a notebook unless the user asks. Edit its `.py` file
   only, and say that the edit did not run.
 - Use setuptools. Do not use hatchling.
@@ -64,7 +65,8 @@ When the skeleton and this skill disagree, this skill is correct.
 Resolve `<skeleton checkout>` as `dev-conventions` says ("6. Sandbox
 and environment safety"). Apply the skeleton change there as a
 separate commit, with a message such as
-`chore: bump pre-commit ruff rev`.
+`chore: bump pre-commit ruff rev`. When `<skeleton checkout>` does not
+resolve or is not mounted, list the change under "Open".
 
 Layout:
 
@@ -163,8 +165,7 @@ running kernel.
 
 - Run code and tests with `.venv/bin/python`. Without `.venv`, use
   the system `python3`.
-- Install nothing into the project `.venv`. Report a package that the
-  project `.venv` lacks. A tool for your own use follows `sandbox-env`.
+- A tool for your own use follows `sandbox-env`.
 - `uv.lock` is committed. `.envrc` holds `layout python` for direnv.
 
 ## Docstrings
@@ -242,8 +243,6 @@ branch to `gh-pages`.
 - Structure, after the Best-README-Template: badges, title, local
   TOC, About The Project, Getting Started (Installation, Usage),
   Contributing, License, Contact.
-- The install command is `uv add <package>`. Usage links to the demo
-  notebook in `notebooks/` with a full GitHub URL.
 
 ## Figures
 
