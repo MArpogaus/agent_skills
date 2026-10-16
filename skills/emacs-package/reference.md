@@ -46,6 +46,7 @@ Read this before you build or debug an overlay-heavy UI, a pixel test or a demo 
 - The window parameters `tab-line-format`, `header-line-format` and `mode-line-format` override per window. Call `force-mode-line-update` after a change.
 - `format-mode-line` with a FACE argument attaches no face to the returned string. Add the face after the call.
 - `char-displayable-p` answers for the character set, not the font. On a graphical frame ask `(internal-char-font nil CHAR)` and keep a plain-text fallback. Nerd font glyphs always need this.
+- Icons in one row have the same weight and size. Prefer thin, unfilled glyphs. Give each icon its own plain-text fallback.
 - `fringe-bitmap-p` is in fringe.el: `(require 'fringe)`. A build without fringes still defines `define-fringe-bitmap`, so a test guard asks `(fringe-bitmap-p 'left-arrow)`.
 - A theme applies through `enable-theme`. Hook `enable-theme-functions`, not advice on `load-theme`.
 

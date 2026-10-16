@@ -38,13 +38,16 @@ Layout, identical in every package:
 COPYING                     GPLv3
 Makefile                    compile, checkdoc, lint, test
 README.org                  Best-README-Template style, org
+docs/implementation.org     mechanism, measurements, test notes
 <package>.el
 test/<package>-test.el
 ```
 
-`.dir-locals.el` does not set `sentence-end-double-space`. Two spaces after a sentence apply in docstrings only.
+`.dir-locals.el` does not set `sentence-end-double-space`. Two spaces after a sentence apply only in Emacs Lisp docstrings and `;;; Commentary:` sections.
 
 A multi-file package adds one companion per optional integration next to the main file (`<package>-<topic>.el`). Each companion needs its own header block. package-lint checks the symbol prefix against the file name: `foo-project.el` may only define `foo-project-*`.
+
+README.org sections, in order: About The Project, Getting Started, Usage, Customization, Known Limits, Comparison with Other Packages, How It Works, Development, Contributions, License, Contact. Mechanism, measurements and test notes go to `docs/implementation.org`.
 
 ## File headers
 
@@ -73,6 +76,7 @@ Every file, companions and test files included:
 ;;; foo.el ends here
 ```
 
+- Keep the `;; Assisted-by:` header line. MELPA asks for it. git-conventions' no-attribution rule covers commits, tags, pull requests and issues only.
 - The email can be ROT13 obfuscated. Keep the form the existing files use.
 - `Package-Requires` in the main file decides what MELPA installs. Nothing installs a companion's requirements, so a companion that needs a newer Emacs forces the main file up too.
 - `Keywords` contains at least one word from `finder-known-keywords` (`convenience`, `tools`, `languages`).
@@ -91,7 +95,7 @@ Every file, companions and test files included:
 
 - Put Elisp programs into make variables, not into recipe lines. Inside a quoted recipe line the backslash reaches Emacs literally and breaks the form.
 - `compile`, `lint` and `test` depend on `$(SANDBOX)`, and `BATCH` calls `package-initialize`. Otherwise the dependencies are missing from the load path.
-- CI matrix: the oldest supported release first, then the current releases, then `snapshot` with `continue-on-error`. Use `purcell/setup-emacs`.
+- CI matrix: the oldest supported release first, then the current releases, then `snapshot` with `continue-on-error`. Use `purcell/setup-emacs`. Each job sets `timeout-minutes: 20`.
 
 ## Docstrings
 
