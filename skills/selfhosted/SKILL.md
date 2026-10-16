@@ -20,8 +20,9 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 - On the test VM, run commands yourself. On the production host, run
   only read-only commands, except a deploy the user asked for in this
   session.
-- If the logind session count rises by more than 50 above the count
-  before the deploy, stop and tell the user.
+- Count the logind sessions before a deploy. If the count rises more
+  than 50 above that number while the deploy runs, stop the deploy and
+  tell the user.
 - Roles assume a clean install (`dev-conventions`, "1. Design
   principles"). Give one-off steps for the existing production host to
   the user as manual steps.
@@ -102,9 +103,10 @@ with a screenshot.
 
 - `-e '{"deploy_services": ["<service>"]}'` limits a run to the listed
   service roles.
-- A temporary change on the host does not touch the role. Use a runtime
-  setting, for example
-  `systemctl --user set-property --runtime <unit> CPUQuota=200%`.
+- A temporary change does not touch the role. Use a runtime setting,
+  for example
+  `systemctl --user set-property --runtime <unit> CPUQuota=200%`. On
+  the production host, give the command to the user (hard rules).
 
 ## Test cycle
 
