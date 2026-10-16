@@ -17,7 +17,7 @@ Tour a codebase that the reader does not know. The reader reads **one
 place at a time**. The agent picks that place well and leaves the rest
 for later stops.
 
-## Phase 1: orient (silent, one command)
+## Phase 1: orient (silent, cheap)
 
 Never start from `main()`. Spend one cheap call to learn the shape:
 
