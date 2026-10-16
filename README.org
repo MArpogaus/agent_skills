@@ -16,9 +16,9 @@ Clone to =~/.agents/=, which opencode reads natively:
   git clone git@github.com:MArpogaus/agent_skills.git ~/.agents
 #+end_src
 
-=~/.agents/skills/= is then the single source of truth.  Register the
-same checkout with Claude Code, which reads it **in place** — no copy,
-no symlink, nothing to keep in sync:
+=~/.agents/skills/= is then the single source of truth. Claude Code
+reads the same checkout **in place**. There is no copy, no symlink and
+nothing to keep in sync. Register it with Claude Code:
 
 #+begin_src bash :exports code
   claude plugin marketplace add ~/.agents
@@ -35,7 +35,7 @@ Or install straight from GitHub on a machine without the checkout:
 Inspect what a session pays for them with
 =claude plugin details marpogaus-skills@marpogaus-skills=.
 
-All skills are licensed under MIT — see =LICENSE=.
+All skills are licensed under MIT: see =LICENSE=.
 
 ** Available skills
 
@@ -48,7 +48,7 @@ All skills are licensed under MIT — see =LICENSE=.
 | latex-paper-revision   | LaTeX paper revision and enhancement workflow    |
 | ml-project             | Research ML project conventions (DVC, MLflow, HPO) |
 | auto-hpo-studies       | Autonomous HPO loop: define target, iterate update-config run monitor commit until convergence. Uses MLflow and a background watcher |
-| paper-writing          | End-to-end paper writing workflow: figure generation, LaTeX templates (IEEE/Elsevier/UAI), revision cycles, venue submission |
+| paper-writing          | End-to-end paper writing workflow: figure generation, LaTeX templates (IEEE/Elsevier/UAI), venue submission |
 | emacs-config           | The literate Emacs configuration: org-only editing, naming, package idioms, git flow |
 | emacs-package          | Emacs Lisp packages: layout, the make check pipeline, ERT, display engine rules, MELPA |
 | org-beamer-presentation | Org → Beamer → PDF talks: hard rules for few words and figure-first frames, metropolis-dark, denote naming |
