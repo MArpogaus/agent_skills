@@ -98,6 +98,23 @@ Create `skills/<name>/SKILL.md` with:
   load them via the skill tool (Claude Code: `Skill`; see examples
   in existing skills)
 
+### Size and shape
+
+A skill competes for the agent's attention with every other loaded
+skill.  Long skills get skimmed, and their rules get broken.
+
+- **Budget:** at most about 1,500 words in `SKILL.md`.  Rarely needed
+  detail (pitfall lists, long config files, arithmetic) goes into one
+  `reference.md` beside it, with one line in `SKILL.md` that says when
+  to read it.
+- **Hard rules first.**  The rules the agent breaks most go at the
+  top, as short imperative bullets.
+- **Only what tools do not enforce.**  Do not restate what a linter,
+  formatter or pre-commit hook already checks.
+- **State what is.**  No "learned the hard way", no incident stories.
+- **Grow by replacing.**  When the user corrects the same thing twice,
+  add the rule, and look for a rule it makes redundant.
+
 ### 6. File structure
 
 Each skill lives in its own directory:
@@ -122,6 +139,7 @@ After writing, verify:
       information is hardcoded
 - [ ] The skill uses existing patterns from nearby skills
 - [ ] The file is named `SKILL.md` (all caps)
+- [ ] `SKILL.md` keeps to the size budget, hard rules first
 - [ ] If `metadata.requires` is non-empty, a **Required skills**
       section exists at the end of the file with explicit
       instructions to load each listed skill via the `skill` tool
