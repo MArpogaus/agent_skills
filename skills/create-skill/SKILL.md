@@ -5,18 +5,19 @@ description: >
   collection: determine requirements, domain, workflows and conventions,
   write the SKILL.md, check it against the user's rules, and register
   it. Use when the user asks to add, write, scaffold or change a skill,
-  or when a session proposes a skill change from its lessons.
+  or to apply a skill change that the user agreed to.
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: meta, requires: []}
+metadata: {stack: meta, requires: [dev-conventions]}
 ---
 
 # Skill: Create a New Agent Skill
 
 This skill creates a skill: a reusable SKILL.md that agents load on
 demand. The result is generic and contains all the specifics that the
-domain needs. For a change to an existing skill, do steps 5, 6, 8 and 9
-only.
+domain needs. For a change to an existing skill, edit the file in
+place, then do steps 6, 8 and 9. Update its `README.org` row when its
+scope changed.
 
 ## Hard rules
 
@@ -37,7 +38,7 @@ only.
   name and section heading, and check that the heading exists.
 - State what is. No history, no incident stories.
 - The repo is public. No private paths, hosts, names or project names:
-  use the placeholders of `dev-conventions` section 6.
+  use the workspace placeholders of `dev-conventions` section 6.
 
 ## Working directory
 
@@ -158,7 +159,18 @@ on the change:
 
 ### 9. Verification
 
-After writing, verify: the hard rules and steps 1 to 5 hold.
+After writing, check that the hard rules and steps 1 to 5 hold:
+
+- `wc -w skills/<name>/SKILL.md` prints at most 1,500.
+- Over 600 words, `grep -n '^## ' skills/<name>/SKILL.md` lists
+  `## Hard rules` first.
+- The frontmatter has `name` (equal to the directory name),
+  `description` (ending with the trigger sentence), `license: MIT`,
+  `compatibility` and `metadata` with `stack` and `requires`.
+- `grep -n '^# Skill: ' skills/<name>/SKILL.md` finds the H1.
+- Each skill in `requires` has a line in the **Required skills**
+  section. When the text cites `dev-conventions`, it is in
+  `requires`.
 
 ### 10. Register in repo
 
@@ -172,3 +184,13 @@ After you create the skill file:
       lists it
 - [ ] `git add` the new skill directory and the changed files
 - [ ] Commit with the message `feat: add <name> skill definition`
+
+---
+
+## Required skills
+
+This skill assumes the following prerequisite skills are loaded.
+Use the `skill` tool to load them before using this one:
+
+- **dev-conventions**: workspace placeholders, the Coverage review
+  view, and documentation style.
