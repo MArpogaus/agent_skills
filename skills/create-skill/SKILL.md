@@ -8,9 +8,7 @@ description: >
   or when a session proposes a skill change from its lessons.
 license: MIT
 compatibility: claude-code opencode
-metadata:
-  stack: meta
-  requires: []
+metadata: {stack: meta, requires: []}
 ---
 
 # Skill: Create a New Agent Skill
@@ -19,6 +17,25 @@ This skill creates a skill: a reusable SKILL.md that agents load on
 demand. The result is generic, except a skill for one named workspace
 (for example the agenda or one config repo), which names its paths. It
 contains all the specifics that the domain needs.
+
+## Hard rules
+
+- The description ends with a trigger sentence: "Use when ...", which
+  names the files, commands or user words that load the skill.
+- `SKILL.md` has at most about 1,500 words. Rare detail (pitfall lists,
+  long config files, arithmetic) goes into one `reference.md` beside
+  it, or a `reference/` folder when there are several files. One line
+  in `SKILL.md` says when to read it.
+- Every `SKILL.md` over about 600 words starts with `## Hard rules`: 5
+  to 10 short imperative bullets with the rules that the agent breaks
+  most. The sections below do not restate them.
+- Write only what tools do not enforce. Do not restate what a linter,
+  formatter or pre-commit hook already checks.
+- Do not restate a rule that another skill owns. Point to it by skill
+  name and section heading, and check that the heading exists.
+- State what is. No history, no incident stories.
+- No private or environment detail, except the paths of a workspace
+  skill.
 
 ## Working directory
 
@@ -42,9 +59,8 @@ If the name does not match, ask again.
 ### 2. Determine description
 
 Ask the user for a description of 1 to 1024 characters. It tells an
-agent whether to load the skill. It ends with a trigger sentence: "Use
-when ...", which names the files, commands or user words that load it.
-Examples:
+agent whether to load the skill. Put routing sentences before the
+trigger sentence. Examples:
 
 - "Linting, formatting, and type-checking Python projects with ruff and
   mypy. Use when a repo has a `pyproject.toml`."
@@ -66,7 +82,16 @@ Ask the user structured questions about the scope. Collect at least:
 
 ### 4. Set frontmatter
 
-Set these without asking the user:
+Set these without asking the user. Write `metadata` in flow style:
+
+```yaml
+name: <name>
+description: >
+  <description>
+license: MIT
+compatibility: claude-code opencode
+metadata: {stack: <words>, requires: [<skill>, ...]}
+```
 
 - `license: MIT`
 - `compatibility`: a space-separated list of the harnesses where you
@@ -76,6 +101,9 @@ Set these without asking the user:
   `org-mode latex beamer`, `meta`).
 - `metadata.requires`: the skills this one depends on, as a flow list
   (`requires: [git-conventions, python-dev]`), or `[]`.
+- `metadata.audience` (optional): the readers of the output, for
+  example `researchers`. Set it only when the skill writes for a fixed
+  audience.
 
 ### 5. Generate the skill
 
@@ -87,28 +115,19 @@ Create `skills/<name>/SKILL.md` with:
 - placeholders such as `<project>`, `<package>` or `<your-org>` instead
   of paths, project names or environment details (the workspace
   exception is in the introduction),
-- code examples that use the agent's tools (Read, Edit, Write, Bash),
+- code examples that use the agent's tools (Claude Code: Read, Edit,
+  Write, Bash),
 - a **Required skills** section at the end when `metadata.requires` is
-  not empty. It tells the agent to load each listed skill with the
-  skill tool (Claude Code: `Skill`). Copy the format from
-  `git-conventions`.
+  not empty, after a `---` line. It tells the agent to load each listed
+  skill with the skill tool (Claude Code: `Skill`). Copy the format
+  from `python-dev`.
 
-### 6. Size and shape
+### 6. Grow by replacing
 
 A skill competes for the agent's attention with every other loaded
-skill. The agent skims a long skill and breaks its rules.
-
-- **Budget:** at most about 1,500 words in `SKILL.md`. Rare detail
-  (pitfall lists, long config files, arithmetic) goes into one
-  `reference.md` beside it, or a `reference/` folder when there are
-  several files. One line in `SKILL.md` says when to read it.
-- **Hard rules first.** Put the rules that the agent breaks most at the
-  top, as short imperative bullets.
-- **Only what tools do not enforce.** Do not restate what a linter,
-  formatter or pre-commit hook already checks.
-- **State what is.** No history, no incident stories.
-- **Grow by replacing.** When the user corrects the same thing twice,
-  add the rule, and look for a rule it makes redundant.
+skill. The agent skims a long skill and breaks its rules. When the
+user corrects the same thing twice, add the rule, and look for a rule
+that it makes redundant.
 
 ### 7. File structure
 
@@ -127,8 +146,9 @@ are relative to the skill directory.
 
 ### 8. Review against the user's rules
 
-Do this step (the Coverage view) when you create or change a skill
-from session experience:
+Do this step when you create or change a skill from session
+experience. Run the Coverage view (`dev-conventions`, "4.3 Reviewers")
+on the change:
 
 1. Read the user's messages of the sessions that led to the change.
 2. Read the memory notes that touch the skill's domain.
@@ -143,13 +163,12 @@ After writing, verify:
 - [ ] `name` matches the regex `^[a-z0-9]+(-[a-z0-9]+)*$`
 - [ ] `description` has 1 to 1024 characters and ends with a trigger
       sentence
-- [ ] No private or environment detail is hardcoded, except the paths
-      of a workspace skill
 - [ ] The skill uses the patterns of nearby skills
 - [ ] The file is named `SKILL.md` (all caps)
-- [ ] `SKILL.md` keeps to the size budget, hard rules first
+- [ ] `SKILL.md` keeps to the hard rules
 - [ ] If `metadata.requires` is not empty, a **Required skills**
-      section at the end tells the agent to load each listed skill
+      section after a `---` line at the end tells the agent to load
+      each listed skill
 
 ### 10. Register in repo
 
