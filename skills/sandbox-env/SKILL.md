@@ -14,20 +14,19 @@ metadata: {stack: sandbox conda uv nix, requires: [dev-conventions]}
 
 # Skill: Sandbox Environment
 
-`~` in a skill means `$HOME`, the agent's home. All tools for the
-agent's own use go there. For paths in the user's home, see
-`dev-conventions`, "6. Sandbox and environment safety".
+All tools for the agent's own use go under `$HOME` (`dev-conventions`,
+"6. Sandbox and environment safety").
 
 ## Hard rules
 
 - Install tools for the agent only under `$HOME`, also in a Python
-  project. Never install into the user's home, a lock file or the
-  system.
-- Never touch the project environment (`.venv`, a conda env of the
-  project, `node_modules`). Report what it lacks, as `python-dev`, "uv
-  and the environment", says.
-- This skill applies only when `$HOME` is not the user's home.
-  Otherwise install nothing and report the missing tool.
+  project. Never install into the user's home or the system.
+- The project environment (`.venv`, a project conda env,
+  `node_modules`) belongs to the user (`dev-conventions`, "Hard rules").
+- This skill applies only when `$HOME` differs from `<user home>`
+  (resolve it as `dev-conventions`, "6. Sandbox and environment safety",
+  says). When they are equal, install nothing and report the missing
+  tool.
 - Never run `sudo`, `dnf`, `rpm-ostree`, `apt` or `flatpak install` for
   the agent's tools. Commands for the host follow `dev-conventions`,
   "6. Sandbox and environment safety".
@@ -35,10 +34,10 @@ agent's own use go there. For paths in the user's home, see
   wiped without warning.
 - List the existing envs and tools before you install. Reuse one when
   it has the tool or can take it.
-- When you cannot install a tool after the steps below, stop that
-  part of the work and report it as `dev-conventions`, "2. Asking and
-  acting", says. Give the tool, the command and the error. Do not
-  work around a missing tool with a hand-written replacement.
+- A tool you cannot install after the steps below is a blocker
+  (`dev-conventions`, "2. Asking and acting"): give the tool, the
+  command and the error. Do not work around a missing tool with a
+  hand-written replacement.
 
 ## 1. Look first
 
