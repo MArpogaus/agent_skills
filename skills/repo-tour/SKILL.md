@@ -13,79 +13,62 @@ metadata: {stack: meta, requires: []}
 
 # Skill: Repo Tour
 
-Tour someone else's codebase without drowning them in it. The reader reads
-**one place at a time**; the agent's job is to pick that place well and shut
-up about the rest.
+Tour a codebase that the reader does not know. The reader reads **one place at a time**. The agent picks that place well and leaves the rest for later stops.
 
-## Phase 1 — orient (silent, one command)
+## Phase 1: orient (silent, one command)
 
-Never start from `main()`. Spend one cheap call learning the shape:
+Never start from `main()`. Spend one cheap call to learn the shape:
 
 ```bash
-ls <project> && find <src> -name '*.py' | xargs wc -l | sort -n
+ls <project> && git ls-files | xargs wc -l | sort -n | tail
 ```
 
-Read the manifest and whatever the repo says about itself — `README`,
-`CLAUDE.md` / `AGENTS.md` / `CONTRIBUTING.md`, `docs/`, `tests/` — then the
-*definitions* of the two or three modules the reader will touch first. Grep
-for call sites instead of reading modules you only need to place.
+Read the manifest and what the repo says about itself: `README`, `CLAUDE.md`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/`, `tests/`. Then read the *definitions* of the 2 to 3 modules that the reader touches first. To place a module, grep for its call sites instead of reading it.
 
-## Phase 2 — pick the entry point
+## Phase 2: pick the entry point
 
-The entry point is **the first thing the user writes**, not the first thing
-that runs. Ordered by dependency, lowest first:
+The entry point is **the first thing the user writes**, not the first thing that runs. In dependency order, lowest first:
 
-1. the data / spec / config layer the user authors,
-2. the registry or registry-like module where behavior for #1 is declared,
-3. the build/build-time module that turns #1 + #2 into objects,
-4. the orchestrator the user calls,
-5. tests and example scripts — the ground truth of what "correct" means,
-6. anything else (CLI, CI, release flow) only on request.
+1. the data, spec or config layer that the user writes,
+2. the registry (or a similar module) that declares the behavior for #1,
+3. the build module that turns #1 and #2 into objects,
+4. the orchestrator that the user calls,
+5. tests and example scripts: they define what "correct" means,
+6. anything else (CLI, CI, release flow), only on request.
 
-State the two or three things worth noticing at the entry point — an odd
-invariant, a derived-not-stored field, a refusal that fires early — then
-**stop**. End with `Ask away, or say "next".`
+At the entry point, state 2 to 3 things to notice: an odd invariant, a derived field that is not stored, a refusal that fires early. Then **stop**. End with `Ask away, or say "next".`
 
-## Phase 3 — the stop format
+## Phase 3: the stop format
 
-Every stop is this short. Link the file, anchor the lines, say what to look
-for:
+Every stop is this short. Link the file, anchor the lines and say what to look for:
 
 ```markdown
-**Stop N — <one-line why this place>.**
+**Stop N: <one-line reason for this place>.**
 
-Read [`Symbol`](src/pkg/module.py#L907) — <what it is>.
-Then [`other`](src/pkg/module.py#L87) — <what to notice>.
+Read [`Symbol`](src/pkg/module.py#L907): <what it is>.
+Then [`other`](src/pkg/module.py#L87): <what to notice>.
 
-<2–3 sentences of the invariant or the trick that lives here.>
+<2 to 3 sentences about the invariant or the trick that lives here.>
 
 Ask away, or say "next".
 ```
 
 Rules:
 
-- Links are relative to the repo root, with `#L<a>[-L<b>]` anchors taken
-  from the **current** file, never from memory.
-- One stop per message. Never two stops, never a preview of stops 4–9.
-- Names come from the code, not from your vocabulary for the code.
-- Prose longer than the snippet you are explaining is a stop you picked too
-  big — split it or shrink it.
+- Links are relative to the repo root. Take the `#L<a>[-L<b>]` anchors from the **current** file, never from memory.
+- Send one stop per message. Never send two stops or a preview of later stops.
+- Take names from the code, not from your own words for the code.
+- If the prose is longer than the snippet it explains, the stop is too big. Split it or make it smaller.
 
-## Phase 4 — answering questions about the current stop
+## Phase 4: answer questions about the current stop
 
-Questions are about the stop, not about you. Answer from the code:
+Answer from the code:
 
-- Quote the branch, not a paraphrase of it.
-- If the claim is checkable in seconds, **run it** and paste the output —
-  a measured `parse("a") -> ("k", (1,))` beats a paragraph about how the
-  parser canonicalises.
-- Say why it is written that way — the invariant it protects, the failure it
-  prevents. If there is no why, say "no why, it's just the shape of X".
-- Answer only the question asked. Unsolicited context is the next stop's
-  content, spent now.
+- Quote the branch. Do not paraphrase it.
+- If a claim takes less than 10 seconds to check, **run it** and paste the output. A measured `parse("a") -> ("k", (1,))` is better than a paragraph about the parser.
+- Say why the code has this form: the invariant it protects, the failure it prevents. If there is no reason, say so.
+- Answer only the question. Extra context belongs to the next stop.
 
-## Phase 5 — next
+## Phase 5: next
 
-`next` moves one step down the dependency order of phase 2. Before moving,
-sweep for what the question thread left open and offer it as a stop later.
-When the map is walked, name what was skipped and let the reader choose.
+`next` moves one step down the dependency order of phase 2. Before you move, find what the questions left open and offer it as a later stop. When all stops are done, name what the tour skipped and let the reader choose.
