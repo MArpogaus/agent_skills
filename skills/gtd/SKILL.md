@@ -1,7 +1,7 @@
 ---
 name: gtd
 description: >
-  The user's GTD routine in the Org agenda at <agenda repo>: capture
+  The user's GTD routine in the Org agenda at `<agenda repo>`: capture
   ("gtd: ..." and "<project>: ..."), the day review ("Tagesreview"),
   inbox triage one project at a time, the retro with its journal entry,
   the weekly review, and how an agent in another repo records a blocker
@@ -18,21 +18,23 @@ metadata: {stack: org, requires: [git-conventions]}
 The agenda is a git repository of Org files at `<agenda repo>`. Its
 `AGENTS.md` holds the data model: the files, the heading template,
 the keywords, the sort order, the day frame and the Org bookkeeping.
-This skill holds the procedures. If the two disagree, `AGENTS.md` wins
-for the data model and this skill wins for the procedures.
+This skill holds the procedures. Where they differ, `AGENTS.md` wins.
 
-Notes live in the Denote silos `<notes dir>/work` (default) and
-`<notes dir>/private`.
+Notes live in the Denote silos under `<notes dir>`: the notes silos the
+`AGENTS.md` names. This skill gives permission to commit on the agenda
+repo's `main`.
 
 ## Hard rules
 
 - Read `AGENTS.md` before the first edit in a session.
 - Run `git -C <agenda repo> status --short` before each edit. Never
-  revert or overwrite changes that you did not make.
+  revert or overwrite changes that you did not make. When a file you
+  want to change has such changes, stop and tell the user.
 - Stage only the files you changed (`git add FILE`). Commit each change
   at once.
 - Ask before you set `DONE` or `KILL` and before you delete text. "X is
-  done" from the user is the consent. Do not ask again.
+  done" from the user is the consent. Do not ask again. Autonomous:
+  skip the edit and list the item under "Open" in the final report.
 - Archiving (section 6) is a move and needs no question.
 - Never send mail. Mail drafts go into a code block for the user to
   copy.
@@ -41,14 +43,11 @@ Notes live in the Denote silos `<notes dir>/work` (default) and
 
 ## 1. Safe edits
 
-Other writers change the same files: the phone sync and open Emacs
-buffers.
+Other writers change the same files: a sync client and open Emacs
+buffers. Uncommitted changes that you did not make can be a stale sync
+or an unsaved buffer.
 
-- If a file you want to change has uncommitted changes that you did
-  not make, stop and tell the user. They can be a stale sync or an
-  unsaved buffer.
-- Commit on the agenda repo's current branch (`main`) with a short
-  conventional message in English.
+Commit on `main` with a short conventional message in English.
 
 ## 2. Capture
 
@@ -79,10 +78,10 @@ Keep the details in the issue. The inbox item is a pointer.
 The agent shell sends "Tagesreview nach AGENTS.md." as its first message
 when the agenda session starts.
 
-1. Read the last journal entry, especially "Morgen".
+1. Read the last journal entry, especially its field for tomorrow.
 2. Read the calendar for today and the next 14 days, and the mail
-   since the date of the last journal entry (mail and calendar connector, read
-   only).
+   since the date of the last journal entry (the mail and calendar
+   connector, read only).
 3. Report in at most 30 lines: today's appointments, deadlines and
    scheduled tasks; the `NEXT` tasks; the inbox count; the mail that
    asks for an action.
@@ -103,19 +102,12 @@ apply it, commit, then go to the next project.
    cookie.
 2. Carry meeting notes into their Denote notes and new tasks into the
    projects. Triage what is left in the inbox (section 4).
-3. Read today's agent sessions: the transcripts under
-   `~/.claude/projects/` changed today. Extract the user's messages
+3. Read today's agent sessions: the transcripts that changed today in
+   the harness's transcript location (Claude Code: `~/.claude/projects/`). Extract the user's messages
    and look for what went well, what went badly, and decisions.
-4. Write the journal entry in the date tree of `journal.org` with
-   these five fields, one line each:
-
-   ```
-   - Erledigt :: ...
-   - Gut :: ...
-   - Schlecht :: ...
-   - Entscheidungen :: ...
-   - Morgen :: ...
-   ```
+4. Write the journal entry in the date tree of `journal.org` with the
+   fields `AGENTS.md` names, one line each. They cover what is done,
+   what went well, what went badly, decisions and tomorrow.
 
 5. Commit.
 
