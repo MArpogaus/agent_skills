@@ -4,12 +4,11 @@ description: >
   Guided step-by-step code tour of an unfamiliar repository: orient cheaply,
   link one entry point, stop, then answer questions and offer the next stop.
   One stop at a time, markdown file links with line anchors, claims verified
-  by running the code.  Use when the user asks for a tour or walkthrough
-  of a codebase.
+  by running the code. Use when the user asks for a "tour", a
+  "walkthrough" or "show me around" a codebase.
 license: MIT
 compatibility: claude-code opencode
-metadata:
-  stack: meta
+metadata: {stack: meta, requires: []}
 ---
 
 # Skill: Repo Tour
@@ -79,8 +78,7 @@ Questions are about the stop, not about you. Answer from the code:
 - Quote the branch, not a paraphrase of it.
 - If the claim is checkable in seconds, **run it** and paste the output —
   a measured `parse("a") -> ("k", (1,))` beats a paragraph about how the
-  parser canonicalises. Use the project's own runner (`uv run`,
-  `bundle exec`, `pnpm`, …).
+  parser canonicalises.
 - Say why it is written that way — the invariant it protects, the failure it
   prevents. If there is no why, say "no why, it's just the shape of X".
 - Answer only the question asked. Unsolicited context is the next stop's
@@ -91,7 +89,3 @@ Questions are about the stop, not about you. Answer from the code:
 `next` moves one step down the dependency order of phase 2. Before moving,
 sweep for what the question thread left open and offer it as a stop later.
 When the map is walked, name what was skipped and let the reader choose.
-
-## Required skills
-
-None — this skill needs no other skill to run.
