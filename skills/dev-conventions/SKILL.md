@@ -2,19 +2,21 @@
 name: dev-conventions
 description: >
   How the user and the agent work together on software projects, in any
-  language: design principles (simplest thing that works, no
-  reinvention, no backwards compatibility before 1.0), when to ask and
-  when to act, verification by running and by looking, the continuous
-  review loop (a commit monitor starts subagent reviews when enough
-  changes pile up), autonomous sessions, sandbox safety, and code,
-  comment and documentation style.  Load at the start of any
-  development session.
+  language: the simplest solution wins (justify every addition, delete
+  before you add, no special treatments), when to ask and when to act
+  (question rounds with context, at most three questions, push back on
+  blockers), verification by running and by looking, the continuous
+  review loop with sceptical reviewer views, autonomous sessions,
+  sandbox safety, and code, comment and documentation style.  Load at
+  the start of any development session.
 license: MIT
 compatibility: claude-code opencode
 metadata:
   stack: meta
   requires:
     - git-conventions
+    - gtd
+    - session-finish
 ---
 
 # Skill: Development Conventions
@@ -119,7 +121,8 @@ more than anything else.
   silence, and never weaken a test or a rule to get past it.
 - **Not in autonomous work.**  When the user is away (section 5), do
   not ask and do not wait: continue with the best default and collect
-  the questions in the report or the notification channel.
+  the questions in the report or the notification channel.  Record
+  each blocker as described in section 5.
 - **Never in code.**  An open question never goes into a code comment
   or a doc.
 - **Plain explanations.**  When the user does not understand, explain
@@ -348,11 +351,13 @@ The user often leaves the agent alone for hours.
   restart it.
 - **When idle**, do hygiene work: leftovers, drifted docs, alignment
   across repos.
-- **Handoff files.**  At the end of a session, or when asked, write
-  the state (done, open, next steps, where things live) to
-  `HANDOFF.md` in the repo root, listed in `.git/info/exclude`.
-  Report and plan files are never committed; delete them when they
-  are no longer needed.
+- **End of session.**  Run the `session-finish` skill before you
+  report "done" or hand over.
+- **Blockers when alone.**  Record each blocker in two places: an
+  inbox item in the user's agenda (the `gtd` skill, "Capture from
+  another repo") and an issue in the repo (`gh issue create`) with the
+  evidence and the options.  Then continue with other work.  Do not
+  decide the blocker yourself.
 - **Other agents.**  When the user says "another agent works on X",
   do not touch X.  When the user says "just file issues", file issues
   and fix nothing.
@@ -451,17 +456,12 @@ The user often leaves the agent alone for hours.
 
 ## Checklist before "done"
 
+- [ ] For each addition I can say why no simpler form works.
 - [ ] I ran it in the user's real setup and looked at the output.
-- [ ] Pictures are regenerated and checked, if drawing code changed.
-- [ ] The commit monitor is armed, and every `REVIEW` range got its
-      round.
-- [ ] The final review round came back clean.
-- [ ] No leftovers: dead code, stale files, drifted docs, debug output.
-- [ ] No backwards-compatibility code, no anecdotes, no obvious
-      comments.
-- [ ] Every GitHub Action is pinned to a SHA with `pinact`.
-- [ ] Git work follows `git-conventions`.
-- [ ] Open questions are in my reply, not in the code.
+- [ ] Every `REVIEW` range got its round, and the final round came
+      back clean twice in a row.
+- [ ] Blockers are reported, or recorded in the agenda and as issues.
+- [ ] The `session-finish` skill ran.
 
 ---
 
@@ -472,3 +472,5 @@ Use the `skill` tool to load them before using this one:
 
 - **git-conventions** — two-branch flow, conventional commits,
   pre-commit hooks, push and attribution rules, tagging and releases.
+- **gtd** — where blockers and follow-ups go in the user's agenda.
+- **session-finish** — the cleanup to run at the end of each session.
