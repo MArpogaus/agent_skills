@@ -12,7 +12,7 @@ compatibility: claude-code opencode
 metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conventions]}
 ---
 
-# Skill: Self-hosted home server
+# Skill: Self-Hosted Home Server
 
 ## Hard rules
 
@@ -20,9 +20,9 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 - On the test VM, run commands yourself. On the production host, run
   only read-only commands, except a deploy the user asked for in this
   session.
-- Count the logind sessions before a deploy. If the count rises more
-  than 50 above that number while the deploy runs, stop the deploy and
-  tell the user.
+- Count the logind sessions before a deploy. Count again after each
+  playbook run. If the count is more than 50 above the first count,
+  stop the deploy and tell the user.
 - Roles assume a clean install (`dev-conventions`, "1. Design
   principles"). Give one-off steps for the existing production host to
   the user as manual steps.
@@ -61,7 +61,7 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 - Config is separate from code. Each service takes
   `<name>_service_config` and carries sane, generic defaults.
 - CPU and memory limits work the same for every container of every
-  service: `<name>_service_cpu` and `<name>_service_memory` are dicts
+  service. `<name>_service_cpu` and `<name>_service_memory` are dicts
   per container, merged over the role defaults.
 - Similar features use one implementation and one variable shape in
   every service. Per-service proxy settings follow the same pattern.
