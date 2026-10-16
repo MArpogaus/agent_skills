@@ -15,11 +15,12 @@ metadata: {stack: meta, requires: [git-conventions]}
 
 # Skill: Development Conventions
 
-These skills are the user's instructions. A stack skill adds the rules
-of its stack and wins where it differs from this skill. A project rule
-(the repo's AGENTS.md, CLAUDE.md or CONTRIBUTING) wins over both. A
-skill wins over a harness default (when to commit, which branch,
-attribution).
+These skills are the user's instructions. Every skill other than this
+one is a stack skill. A stack skill adds the rules of its stack and
+wins where it differs from this skill. A project rule (the repo's
+AGENTS.md, CLAUDE.md or CONTRIBUTING) wins over both. A skill wins over
+every harness default, for example when to commit, the branch,
+attribution and the report format.
 
 ## Hard rules
 
@@ -31,25 +32,24 @@ attribution).
 - **Do not reinvent.** Look in the repo, the standard library, the
   platform, upstream and the installed dependencies first. A
   reimplementation is a defect.
-- **Ask and act in this order:** a blocker stops that part of the work;
-  in an interactive session, ask the decisions that are the user's; in
-  an autonomous session, never ask and never wait (section 2).
+- **Blockers stop that part of the work.** Interactive: ask the
+  decisions that are the user's. Autonomous: never ask and never wait
+  (section 2).
 - **Run it and look at it before you report.** Never report "fixed" on
-  reasoning. Screenshot what draws (UI, plots, slides, GIFs) in every
-  output mode.
-- **No AI attribution** in commits, pull requests or files: see
-  `git-conventions`, "Rules for agents".
+  reasoning. Screenshot what draws (UI, plots, slides, GIFs) in each
+  theme and mode the project supports.
+- **No AI attribution:** see `git-conventions`, "Hard rules".
 - **Never touch the user's environment:** no project environment, lock
   file or package changes. Report a missing package. Safe commands: the
   stack skill (`python-dev`, "uv and the environment").
-- **The user's uncommitted edits are sacred.** Check for them and for
-  unpushed commits (`git log --oneline @{u}..`) before a branch switch
-  or a reset. Stash with a message. Never drop a stash.
+- **The user's uncommitted edits are sacred.** Before a branch switch
+  or a reset, check for them and for unpushed commits:
+  `git log --oneline @{u}.. 2>/dev/null || git log --oneline --branches --not --remotes`.
+  Stash with a message. Never drop a stash.
 
 ## 1. Design principles
 
-The simplest solution wins, over taste, habit and "best practice". The
-first three hard rules apply here too.
+The simplest solution wins, over taste, habit and "best practice".
 
 - **No special treatments.** No registries, mixins, plugins, frameworks
   or wrappers for one use, no class where a function does, no generator
@@ -62,7 +62,8 @@ first three hard rules apply here too.
 - **Defaults only with a reason.** Opinionated defaults go into the
   user's configuration, not into the library.
 - **Explicit configuration:** experiment and deployment configs list
-  every option, defaults included. Keep the number of variants small.
+  every option, defaults included. Duplication between variant configs
+  is accepted. Do not factor it out. Keep the number of variants small.
   Tune the existing config before you add a new one.
 - **No backwards compatibility before 1.0.** No obsolete aliases, no
   deprecation warnings, no text about earlier versions. A 1.0 is a clean
@@ -86,10 +87,10 @@ first three hard rules apply here too.
    missing access, a check you cannot fix or a decision that is not
    yours is also a blocker. Report it with evidence. Never work around
    it in silence or weaken a test or rule to pass it.
-2. Interactive (section 5): ask each decision that is the user's
-   (design, scope, and the findings that section 4.3 says to ask about)
-   with the question tool (Claude Code: `AskUserQuestion`). Do the same
-   on "ask me" or "interview me".
+2. Interactive (section 5): ask each decision that is the user's with
+   the question tool (Claude Code: `AskUserQuestion`). These are design,
+   scope, and the findings that section 4.3 says to ask about. Do the
+   same on "ask me" or "interview me".
    - **Context first.** Each option makes sense without the session
      history: what it changes, where, at what cost. Put the recommended
      option first.
@@ -98,8 +99,15 @@ first three hard rules apply here too.
      text: it can change the task.
 3. Autonomous: record the blocker as an agenda inbox item and a GitHub
    issue (`gtd` skill, "Capture from another repo") with evidence and
-   options. Take the default the stack skill names, or work on something
-   else. Do not decide the blocker.
+   options. File the issue only in a repo of the user. Elsewhere the
+   agenda inbox item alone records the blocker. Take the default the
+   stack skill names, or work on something else. Do not decide the
+   blocker.
+
+- **Issues.** Before you file an issue, check the open issues and the
+  roadmap.
+- **Deferred items and follow-ups** go to the agenda (`gtd`), not to
+  files in the repo.
 
 - **Findings and questions.** Put findings in the chat as a numbered
   list with stable numbers. Ask for the decisions with the question
@@ -110,21 +118,19 @@ first three hard rules apply here too.
   user agrees. Plan in the chat unless the user asks for a file.
 - **Never in code:** no open question in a comment or a doc.
 - **Outward text is a draft.** Show issue replies, posts, emails and
-  pull request texts to the user before you send them. No em or en
-  dashes, no emojis, no marketing. Exception: an issue in the user's own
+  pull request texts to the user before you send them. No emojis, no
+  marketing. Exception: an issue in the user's own
   repo that records a blocker, or that the user asked for, needs no
   draft.
-- **Plain text deliverables:** Reports and analyses are Markdown in the
+- **Plain text deliverables:** reports and analyses are Markdown in the
   chat. Make no HTML page, artifact or chart unless the user asks for
   one.
-- **Mixed languages.** The user writes German, English or both, fast and
-  with typos. Answer in the language of the prompt unless a style skill
-  says otherwise.
-- **Language of written text.** Write technical explanations of code,
-  models and fixes in English, also when the prompt is German. When a
-  text is German, use German spelling (ß, 15.000). The `gtd` skill sets
-  the language of agenda entries. Over a notification channel, always
-  write English.
+- **Language.** The user writes German, English or both, fast and with
+  typos. Chat replies use the language of the prompt, but technical
+  explanations of code, models and fixes are in English. Files,
+  comments, commit messages and notification posts are English, unless
+  the file around them is German (agenda: `gtd`). German text uses
+  German spelling (ß, 15.000).
 - **"Sorry, wrong terminal"** means: ignore that prompt and continue the
   earlier task.
 - **Be honest and plain.** Give a critical opinion directly. Explain
@@ -134,8 +140,8 @@ first three hard rules apply here too.
 
 - **Measure every claim** (numbers, citations, "raises X") by running
   code or reading the source (`gh api repos/O/R/contents/PATH`).
-- **Install what you need** to test end to end, or name what is not
-  verified.
+- **Install tools for your own use** as `sandbox-env` says, or name
+  what is not verified.
 - **Reproduce in the user's real setup** (configuration, window size,
   theme, data shape). Minimal configurations are for demos only.
 - **Measure pixels** where alignment matters.
@@ -157,8 +163,8 @@ nothing.
 
 ### 4.1 Arm the commit monitor
 
-Before the first commit in any repo except `<agenda repo>`, start one
-watcher for all repos of the session. Run
+Unless the user turned reviews off, before the first commit in any
+repo except `<agenda repo>`, start one watcher for all repos of the session. Run
 `tools/review-watch.sh REPO...` (relative to this skill's directory)
 with the monitor tool (Claude Code: `Monitor`) or as a polled
 background job. It watches the current branch (override: `BRANCH`).
@@ -264,12 +270,13 @@ Always:
 
 ## 6. Sandbox and environment safety
 
-- **Paths.** In skills, `~/Notes`, `~/.emacs.d` and `~/Projekte` mean
-  the user's home. In a sandbox the agent's `$HOME` differs: resolve the
-  user's home first (here `<user home>`).
+- **Paths.** Paths under `~` in skills mean the user's home. In a
+  sandbox, `$HOME` is the agent's home: resolve the user's home first
+  (the owner of the mounted checkouts).
+- **Placeholders.** Resolve each `<placeholder>` from the workspace
+  `AGENTS.md`, then from agent memory. Ask when neither has it.
 - **Work only on the mounted checkouts.** Report a missing or read-only
   path. Never clone around it or push from a local copy.
-- **Install tools for yourself** as the `sandbox-env` skill says.
 - **The working directory can reset:** `cd` per command or `git -C`.
 - **Do not edit what a running job reads.** Wait, or use a worktree.
 - **Commands for the host:** give the exact command or a script file.
@@ -281,7 +288,7 @@ Always:
   invent terms.
 - **Spacing.** One space after a sentence. Only Emacs docstrings and
   `;;; Commentary:` keep two spaces.
-- **Simplified Technical English** in docs: at most 25 words per
+- **Simplified Technical English** in docs and outward text: at most 25 words per
   sentence, active voice, one word for one thing, no em or en dashes, no
   first person.
 - **Comment only a "why"** the code cannot say. No banners beyond the
@@ -302,8 +309,6 @@ Always:
   the repos.
 - **Match the existing style** of the user's earlier work of the same
   kind (decks: `org-beamer-presentation`).
-- **Visual check:** before you report, check plots and slides for
-  overlaps, overfull frames, missing content and broken math.
 
 ---
 
