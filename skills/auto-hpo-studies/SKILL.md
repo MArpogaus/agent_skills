@@ -76,10 +76,11 @@ runs = client.search_runs(
     order_by=["start_time DESC"],
     max_results=1,
 )
-m = runs[0].data.metrics  # min_val_loss, min_loss, best_epoch
+m = runs[0].data.metrics  # min_val_loss, min_loss, best_epoch, val_loss
 ```
 
-If no run exists, this is iteration 0: run the baseline config.
+`val_loss` is the last logged value of the run. If no run exists,
+this is iteration 0: run the baseline config.
 
 ### 3. Diagnose the training state
 
@@ -87,7 +88,7 @@ If no run exists, this is iteration 0: run the baseline config.
 |---|---|---|
 | `min_loss >> 0` and `min_val_loss >> 0` | not learning | halve the learning rate, or use cosine decay |
 | `min_loss < -100`, `min_val_loss > -50` | overfitting | add regularisation, reduce capacity, increase patience |
-| `final_val_loss > min_val_loss` | late overfitting | same as overfitting |
+| `val_loss > min_val_loss` | late overfitting | same as overfitting |
 | `min_loss ≈ min_val_loss < -50` | healthy | increase capacity by one step |
 | `min_val_loss` is NaN or inf | unstable | reduce the learning rate, change the schedule, add gradient clipping, change the base distribution |
 
@@ -109,7 +110,7 @@ Edit the config file. `ml-project` defines its fields.
 Write the row with status `launched`, then:
 
 ```bash
-STATE=~/.cache/hpo/<target-id>; mkdir -p "$STATE"
+STATE=~/.cache/hpo/<target-id>; mkdir -p "$STATE" logs
 echo running > "$STATE/status"; echo <N> > "$STATE/iter"
 echo "<param>:<old>-><new>" > "$STATE/change"
 nohup setsid sh -c '<run-command> > logs/iter<N>_<target-id>.log 2>&1
@@ -164,8 +165,9 @@ Else write `failed` to `$STATE/status`.
 
 - `improvement > 0`: keep the config, fill in the row with status
   `committed` and commit:
-  `feat(hpo): <target-id> iter <N>: <param> <old>→<new> (val: <old>→<new>)`.
-  The body can give the diagnosis.
+  `feat(hpo): <target-id> iter <N>: <param> <old>→<new>`. The subject
+  has at most 68 characters. The body gives `val_loss <old>→<new>`
+  and the diagnosis.
 - `improvement <= 0` or failed run: restore the config
   (`git checkout -- params/<target>.yaml`), set the row status to
   `reverted` or `failed`, and try a different parameter.
@@ -179,6 +181,8 @@ Stop when one of these is true:
    `improvement < min_delta` (default 0.1).
 3. **Max iterations**: the iteration count reaches `max_iter`.
 4. **Search space exhausted**: all parameters are at their bounds.
+5. **Unstable**: `min_val_loss` is NaN after 3 different changes. Mark
+   this model unstable for this target in the study log.
 
 When a criterion is true: write the best config, the best metric and
 the history to the study log, run `rm -rf "$STATE"`, commit
@@ -207,8 +211,7 @@ mlflow.log_param("config_file", "params/<target>.yaml")
 
 ## Resume after interruption
 
-When the skill loads and `hpo_study.md` has a row that is not
-`committed`, find the state and continue:
+When the skill loads, check in this order:
 
 1. No `hpo_study.md`: ask the user for the definition (step 1).
 2. `status` is `running` and the process in `pid` is alive: start
@@ -226,8 +229,10 @@ When the skill loads and `hpo_study.md` has a row that is not
 | Situation | Response |
 |---|---|
 | The run crashes at launch | Check the config format, the dependencies and the GPU memory. Fix and run the same iteration again. |
-| NaN after 3 different changes | Mark this model unstable for this target in the study log. Stop the study. |
+| NaN after 3 different changes | Stop (step 10, criterion 5). |
 | `val_loss` improves, `train_loss` stays flat | Continue. `val_loss` is the primary metric. |
+
+---
 
 ## Required skills
 
