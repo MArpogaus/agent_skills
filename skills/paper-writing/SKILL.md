@@ -75,11 +75,17 @@ Include the preamble as a separate file (`preamble.tex`) and
 \usepackage[font=small, labelfont=bf]{caption}
 \usepackage[font=small, labelfont=bf]{subcaption}
 
+% ---- plots ----
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{dateplot, fillbetween}
+
 % ---- tables ----
 \usepackage{booktabs, multirow, array}
 
 % ---- hyperlinks ----
-\usepackage[colorlinks=true, citecolor=blue, linkcolor=blue, urlcolor=blue]{hyperref}
+\usepackage[colorlinks=true, citecolor=blue, linkcolor=blue,
+            urlcolor=blue]{hyperref}
 \usepackage[nameinlink, capitalize]{cleveref}
 
 % ---- colours ----
@@ -167,13 +173,10 @@ into `gfx/`.
 ### TikZ / PGFPlots for inline figures
 
 For data-driven plots that should match the document font, use
-`pgfplots` with CSV data:
+`pgfplots` with CSV data. The `fill between` plot needs the
+`fillbetween` library in the preamble (see "Required packages"):
 
 ```latex
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.18}
-\usetikzlibrary{pgfplots.dateplot, pgfplots.fillbetween}
-
 \begin{figure}[t]
   \centering
   \definecolor{mpl_blue}{HTML}{1F77B4}
@@ -187,9 +190,12 @@ For data-driven plots that should match the document font, use
     ]
       \addplot[color=mpl_blue, line width=0.8pt]
         table[x=time, y=median, col sep=comma] {csv/<series>.csv};
+      \addplot[name path=up, draw=none]
+        table[x=time, y=upper, col sep=comma] {csv/<series>.csv};
+      \addplot[name path=lo, draw=none]
+        table[x=time, y=lower, col sep=comma] {csv/<series>.csv};
       \addplot[fill=mpl_blue, fill opacity=0.25]
-        table[x=time, y=lower, col sep=comma] {csv/<series>.csv}
-        \closedcycle;
+        fill between[of=up and lo];
     \end{axis}
   \end{tikzpicture}
   \caption{Median and 90\% interval of <quantity>.}
@@ -243,16 +249,10 @@ starts with its heading and label, for example
 \end{document}
 ```
 
-### Writing workflow
+### Labels and BibTeX keys
 
-1. **Draft**: write each section as a separate, numbered file
-   (`01_introduction.tex`, `02_background.tex`, ...).
-2. **Cross-references**: use `\label{sec:...}`, `\label{fig:...}`,
-   `\label{tab:...}` consistently. Reference with `\Cref{...}`.
-3. **Bibliography**: keep a single `references.bib`. Add entries
-   as you write, using BibTeX keys like `author2023title`.
-4. **Glossaries**: define acronyms once in `glossaries.tex` and use
-   `\gls{}` throughout.
+Label with `sec:`, `fig:` and `tab:` prefixes and reference with
+`\Cref{...}`. BibTeX keys follow `author2023title`.
 
 ### Accepted acknowledgments patterns (`tex/07_acknowledgments.tex`)
 
@@ -287,7 +287,7 @@ shopt -s nullglob  # an unmatched *.cls or *.bst expands to nothing
 DEST="./final"
 ENGINE="-lualatex"  # the venue build flag of Phase 5: -lualatex or -pdf
 
-# Clean and prepare (latexmk -C removes only LaTeX output, never sources)
+# Clean (latexmk -C removes only LaTeX output, never sources)
 latexmk -C
 rm -rf "$DEST"
 mkdir -p "$DEST"
@@ -317,10 +317,16 @@ mv final.pdf "FINAL_PAPER.PDF"
 ### IEEE (IEEEtran)
 
 - **Build:** `latexmk -lualatex -shell-escape`
-- **Source package:** flattened `.tex` + `gfx/` + `csv/` (if present) + `.bib` + `.bbl`
+- **Source package:** flattened `.tex` + `gfx/` + `csv/` (if
+  present) + `.bib` + `.bbl`
+- **Packages:** do not load `caption`: it conflicts with IEEEtran.
+  Remove the `caption` and `subcaption` lines from the preamble
+  (`subcaption` loads `caption`).
 - **Keywords:** `\IEEEkeywords{...}`
 - **Author bios:** `\IEEEbiography{...}` (camera-ready only)
-- **Review:** `\IEEEpeerreviewmaketitle` for anonymised review version
+- **Review:** `\IEEEpeerreviewmaketitle` for the anonymised review
+  version. It needs the `peerreview` class option:
+  `\documentclass[peerreview]{IEEEtran}`.
 
 ### Elsevier (elsarticle)
 
@@ -369,7 +375,7 @@ mv final.pdf "FINAL_PAPER.PDF"
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: design principles, verification, review
   loop, code and documentation style.
