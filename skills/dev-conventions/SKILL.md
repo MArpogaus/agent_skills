@@ -448,9 +448,6 @@ The user often leaves the agent alone for hours.
   punch lines.  Figures carry the slide.  See
   `org-beamer-presentation`.
 - **Icons** in one set have the same weight and size.
-- **Dashboards** put key metrics and aggregates at the top, detail
-  views and logs at the bottom.  The plot type fits the data, and
-  every panel has a complete legend and explains itself.
 - **Before you report**, check plots and slides for overlaps, overfull
   frames and broken math.
 
