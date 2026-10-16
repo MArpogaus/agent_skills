@@ -3,10 +3,11 @@ name: paper-writing
 description: >
   End-to-end academic paper writing workflow for probabilistic ML research:
   LaTeX project scaffolding, figure generation, writing with
-  IEEE/Elsevier/UAI templates, build, and venue submission. Use when
-  the user asks to start, write, build or submit a paper. The
-  experiment code follows ml-project. A revision of an existing draft follows
-  latex-paper-revision.
+  IEEE/Elsevier/UAI templates, build, and venue submission. The
+  experiment code follows ml-project. A revision of an existing draft
+  follows latex-paper-revision. Use when the user asks to start,
+  write, build or submit a paper, or in a repo with `main.tex` and
+  `references.bib`.
 license: MIT
 compatibility: claude-code opencode
 metadata: {stack: ml latex, audience: researchers, requires: [git-conventions, python-dev, ml-project]}
@@ -17,6 +18,21 @@ metadata: {stack: ml latex, audience: researchers, requires: [git-conventions, p
 Load this skill to write a new academic paper: from the finished
 experiments through figures, LaTeX writing and the camera-ready
 submission. For a revision, use `latex-paper-revision`.
+
+## Hard rules
+
+- Every number, result and citation in the text comes from data or
+  sources the user provided. Never invent one. Mark a gap with
+  `\TODO{...}`.
+- Section files live in `tex/`, figures in `gfx/`. Use no other
+  directory names.
+- Before a submission, `grep -rn '\\TODO' main.tex tex/` prints
+  nothing.
+- Load `biblatex` or `bibtex`, never both. Elsevier uses `bibtex`.
+- Take the class options from the venue template. When unsure,
+  check the venue template instead of guessing.
+- Compile after each edit session and check that the log has no
+  undefined references or citations.
 
 ## Phase 1: LaTeX project scaffolding
 
@@ -30,14 +46,14 @@ submission. For a revision, use `latex-paper-revision`.
 ├── latexmkrc                 # latexmk config (optional)
 ├── preamble.tex              # Packages, macros, operators (\input'ed)
 ├── glossaries.tex            # \newacronym definitions (\input'ed)
-├── tex/ or sections/         # Section files
+├── tex/                      # Section files
 │   ├── 01_introduction.tex
 │   ├── 02_method.tex
 │   ├── 03_experiments.tex
 │   ├── 04_results.tex
 │   └── 05_conclusion.tex
-├── gfx/ or figures/          # Figures (PDF, PNG, TikZ)
-├── csv/                      # Data files for PGFPlots
+├── gfx/                      # Figures (PDF, PNG)
+├── csv/                      # Data files for PGFPlots (optional)
 ├── tikz/                     # TikZ figure sources
 └── response_to_reviewers.tex # Revision response (optional)
 ```
@@ -49,7 +65,7 @@ submission. For a revision, use `latex-paper-revision`.
 | IEEE           | `IEEEtran`                       | `[journal,dvipsnames]`               |
 | Elsevier       | `elsarticle`                     | `[final,5p,times,twocolumn]`         |
 | UAI            | `uai2025` (custom class file)    | `[accepted]` or blank                |
-| ICML           | `article` + `icml2021` package   | `[accepted]` or blind for review     |
+| ICML           | `article` + `icml2021` package   | `[accepted]`, none for review        |
 | arXiv          | same as main class               | remove copyright lines               |
 
 ### Preamble template
@@ -162,6 +178,8 @@ Use in text: `\gls{BNF}` (first use expands full form), `\glspl{BNF}`
 Generate publication-quality figures in Python and include the
 resulting PDF in LaTeX. Figure scripts follow `python-dev`
 ("Figures"). `ml-project` says where the scripts and figures live.
+Copy the PDFs from the `figures/` directory of the experiment repo
+into `gfx/`.
 
 ### TikZ / PGFPlots for inline figures
 
@@ -212,6 +230,7 @@ A figure names its own experiment, for example
 All papers follow the same canonical structure:
 
 ```latex
+\documentclass[journal]{IEEEtran}
 \input{preamble.tex}
 
 \begin{document}
@@ -264,8 +283,7 @@ All papers follow the same canonical structure:
 2. **Cross-references**: use `\label{sec:...}`, `\label{fig:...}`,
    `\label{tab:...}` consistently. Reference with `\Cref{...}` or
    `\autoref{...}`.
-3. **Placeholders**: mark incomplete sections with `\TODO{...}` for
-   easy grep before submission.
+3. **Placeholders**: mark incomplete sections with `\TODO{...}`.
 4. **Bibliography**: keep a single `references.bib`. Add entries
    as you write, using BibTeX keys like `author2023title`.
 5. **Glossaries**: define acronyms once in `glossaries.tex` and use
@@ -302,6 +320,7 @@ Create `compile.sh` for one-command camera-ready build:
 ```bash
 #!/bin/bash
 set -eux
+shopt -s nullglob  # an unmatched *.cls or *.bst expands to nothing
 
 DEST="./final"
 
@@ -309,7 +328,8 @@ DEST="./final"
 latexmk -C
 rm -rf "$DEST"
 mkdir -p "$DEST"
-cp -r gfx csv *.bib "$DEST"
+cp -r gfx *.bib *.cls *.bst "$DEST"  # venue class and style files
+[ -d csv ] && cp -r csv "$DEST"
 
 # Flatten document (replace \input{} with file contents)
 latexdiff --flatten main.tex main.tex |
@@ -334,7 +354,7 @@ mv final.pdf "FINAL_PAPER.PDF"
 ### IEEE (IEEEtran)
 
 - **Build:** `latexmk -lualatex -shell-escape`
-- **Source package:** flattened `.tex` + `gfx/` + `csv/` + `.bib` + `.bbl`
+- **Source package:** flattened `.tex` + `gfx/` + `csv/` (if present) + `.bib` + `.bbl`
 - **Keywords:** `\IEEEkeywords{...}`
 - **Author bios:** `\IEEEbiography{...}` (camera-ready only)
 - **Review:** `\IEEEpeerreviewmaketitle` for anonymised review version
@@ -359,8 +379,9 @@ mv final.pdf "FINAL_PAPER.PDF"
 ### ICML (icml2021)
 
 - **Build:** `latexmk -pdf`
-- **Options:** `\usepackage[accepted]{icml2021}` or blind for review
-- **Anonymised:** use `[blind]` option during review phase
+- **Options:** `\usepackage[accepted]{icml2021}` for the camera-ready
+  version. Without an option, the package builds the anonymous review
+  version. Check the venue template of the current year.
 - **Opening:** `\twocolumn[` for title block + abstract
 
 ### arXiv
@@ -379,6 +400,8 @@ mv final.pdf "FINAL_PAPER.PDF"
 - PGFPlots: https://pgfplots.sourceforge.net/
 - An earlier paper that used the target class is the best reference
   for a venue: ask the user for one and copy its setup.
+
+---
 
 ## Required skills
 
