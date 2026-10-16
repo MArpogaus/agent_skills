@@ -5,8 +5,8 @@ description: >
   language: the simplest solution wins, when to ask and when to act,
   verification by running and by looking, the continuous review loop,
   autonomous sessions, sandbox safety, and code and documentation
-  style. Use before the first edit, commit or review in any repository,
-  and when the user says "plan first", "ask me", "interview me", "review
+  style. Use before the first edit, commit or review in any repository.
+  Use when the user says "plan first", "ask me", "interview me", "review
   loop", "autonomous" or "where are we".
 license: MIT
 compatibility: claude-code opencode
@@ -44,7 +44,7 @@ branch, attribution and the report format.
   file or package changes. Report a missing package. Safe commands: the
   stack skill (`python-dev`, "uv and the environment").
 - **The user's uncommitted edits are sacred.** Before a branch switch
-  or a reset, check for them and for unpushed commits:
+  or a reset, check for them. Also check for unpushed commits:
   `git log --oneline @{u}.. 2>/dev/null || git log --oneline --branches --not --remotes`.
   Stash with a message. Never drop a stash.
 
@@ -53,7 +53,7 @@ branch, attribution and the report format.
 The simplest solution wins, over taste, habit and "best practice".
 
 - **No special treatments.** No registries, mixins, plugins, frameworks
-  or wrappers for one use, no class where a function does, no generator
+  or wrappers for one use. No class where a function does. No generator
   for a file you can write by hand.
 - **Scripts stay dumb.** One task, explicit arguments, no mode switches:
   one config or script per variant.
@@ -75,10 +75,11 @@ The simplest solution wins, over taste, habit and "best practice".
   its linters apply.
 - **Contain guesses.** Keep inferred data apart from verified data:
   marked, reversible, with an off switch.
-- **Release scope:** in a release or polishing session, fix only bugs,
+- **Release scope:** when the user prepares a release, fix only bugs,
   security holes and wrong docs. Do not refactor working code that
-  nobody asked about. Test each other change: "Does it break or endanger
-  what exists today?" If not, list it for after the release.
+  nobody asked about. Put each simplifies finding and each other change
+  on a list for after the release. A review loop alone is not a
+  release.
 
 ## 2. Asking and acting
 
@@ -122,19 +123,17 @@ The simplest solution wins, over taste, habit and "best practice".
 - **Never in code:** no open question in a comment or a doc.
 - **Outward text is a draft.** Show issue replies, posts, emails and
   pull request texts to the user before you send them. No emojis, no
-  marketing. Exception: an issue in the user's own
-  repo that records a blocker, or that the user asked for, needs no
-  draft.
+  marketing. Exception: an issue in the user's own repo that records a
+  blocker, or that the user asked for, needs no draft.
 - **Plain text deliverables:** reports and analyses are Markdown in the
   chat. Make no HTML page, artifact or chart unless the user asks for
   one.
 - **Language.** The user writes German, English or both, fast and with
   typos. Chat replies use the language of the prompt. A mixed prompt
-  counts as English. Technical
-  explanations of code, models and fixes are in English. Files,
-  comments, commit messages and notification posts are English, unless
-  the file around them is German (agenda: `gtd`). German text uses
-  German spelling (ß, 15.000).
+  counts as English. Technical explanations of code, models and fixes
+  are in English. Files, comments, commit messages and notification
+  posts are English, unless the file around them is German (agenda:
+  `gtd`). German text uses German spelling (ß, 15.000).
 - **"Sorry, wrong terminal"** means: ignore that prompt and continue the
   earlier task.
 - **Be honest and plain.** Give a critical opinion directly. Explain
@@ -174,7 +173,7 @@ session. Run `tools/review-watch.sh REPO...` (relative to this skill's
 directory) with the monitor tool (Claude Code: `Monitor`) or as a polled
 background job. It watches the current branch (override: `BRANCH`).
 Re-arm it when it times out. When a repo joins later, re-arm the
-monitor with all repos and keep the state directory.
+monitor with all repos.
 
 - **Trigger:** 100 or more changed lines outside `*.md` and `*.org`, or
   5 or more commits that touch code (`REVIEW_LINES`, `REVIEW_COMMITS`).
@@ -244,8 +243,7 @@ read `reference.md`, "findings.md".
 ## 5. Interactive and autonomous sessions
 
 A session is autonomous only when the user says so ("I'm away", "work
-alone", "autonomous", "bis später", "über Nacht", "loop until clean"
-while away). A session without a user (headless, scheduled, a
+alone", "autonomous", "bis später", "über Nacht"). A session without a user (headless, scheduled, a
 notification channel only) is also autonomous. Silence alone never makes
 a session autonomous. Every other session is interactive.
 
@@ -254,9 +252,10 @@ Autonomous:
 - **Arm a watchdog:** a wake-up every 30 minutes (Claude Code:
   `ScheduleWakeup`, a cron or a loop) that resumes the work until it is
   done.
-- **Report on your own:** post one line when a background job ends or a
-  milestone lands. Do not wait for "status?". Poll the notification
-  channel for replies.
+- **Report on your own:** post one line in the chat when a background
+  job ends or a milestone lands. When the user named a notification
+  channel, post there too and poll it for replies. Do not wait for
+  "status?".
 - **Run independent work in parallel** by default, within the resource
   limits the user stated.
 - **Resume after limits** and relaunch failed subagents with the same
@@ -287,7 +286,10 @@ Always:
      `~/.claude/CLAUDE.md`; opencode: `~/.config/opencode/AGENTS.md`),
   3. agent memory.
 
-  When none has it, ask. Autonomous: record a blocker (section 2).
+  When none has it, ask. Autonomous: record a blocker (section 2). A
+  step that only needs a placeholder value and finds none goes under
+  "Open" instead of a blocker. A step that is a blocker anyway stays a
+  blocker.
   Every other `<...>` in a skill is a template slot.
 - **Work only on the mounted checkouts.** Report a missing or read-only
   path. Never clone around it or push from a local copy.
