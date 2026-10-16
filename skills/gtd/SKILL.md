@@ -130,7 +130,7 @@ apply it, commit, then go to the next project.
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: asking and acting, blockers, autonomous
   sessions.

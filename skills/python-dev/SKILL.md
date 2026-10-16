@@ -261,7 +261,7 @@ branch to `gh-pages`.
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: design principles, verification, review
   loop, code and documentation style.
