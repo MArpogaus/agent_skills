@@ -3,9 +3,9 @@ name: latex-paper-revision
 description: >
   LaTeX paper revision workflow: structural analysis, content generation,
   language polishing, figure/table integration, final cleanup, latexdiff
-  and the response to reviewers. Use when the user asks to revise,
-  polish or resubmit an existing LaTeX draft, or to answer reviewer
-  comments. A new paper follows paper-writing.
+  and the response to reviewers. A new paper follows paper-writing.
+  Use when the user asks to revise, polish or resubmit an existing
+  LaTeX draft, or to answer reviewer comments.
 license: MIT
 compatibility: claude-code opencode
 metadata: {stack: latex, requires: [paper-writing]}
@@ -16,9 +16,8 @@ metadata: {stack: latex, requires: [paper-writing]}
 A structured workflow to revise, polish and enhance academic papers
 or reports written in LaTeX.
 
-Every number, result and citation in new text comes from data or
-sources the user provided. Never invent one. Mark a gap with
-`\TODO{...}` instead. The build and check commands are in
+New text follows the rule on numbers, results and citations in
+`paper-writing` ("Hard rules"). The build and check commands are in
 `paper-writing` ("Phase 4: Build and compilation").
 
 ## Phase 1: Initial Analysis and Structural Setup
@@ -89,10 +88,11 @@ Use this phase when a revised version goes back to a venue.
 
 ### latexdiff for change tracking
 
-Compare the revised version against the submitted one:
+Compare the revised version against the submitted one. `--flatten`
+follows the `\input` files of both versions:
 
 ```bash
-latexdiff original.tex revised.tex > diff.tex
+latexdiff --flatten original.tex revised.tex > diff.tex
 latexmk -pdf diff.tex
 ```
 
@@ -133,6 +133,8 @@ v1: initial submission
 v2: revised, expanded method section, added Experiment 3,
     updated figures 2 to 4
 ```
+
+---
 
 ## Required skills
 
