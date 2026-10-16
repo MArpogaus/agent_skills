@@ -2,9 +2,7 @@
 
 Read the section you need: "Reviewer brief" when
 you spawn reviewers, "findings.md" when the user wants a review written
-down, "Commit monitor details" for rewritten history or pushed work,
-"Code, documentation and visual style" before you write comments,
-docs, plots or slides.
+down, "Commit monitor details" for rewritten history or pushed work.
 
 ## findings.md
 
@@ -52,32 +50,3 @@ with file:line, severity (breaks / endangers / simplifies / nit) and
 how to reproduce or what to delete. If you find nothing that
 matters, answer "clean".
 ```
-
-## Code, documentation and visual style
-
-### Code style
-
-- **Comment only a "why"** the code cannot say. No banners beyond the
-  stack skill's section markers.
-- **No anecdotes:** no "previously", no incident stories, no
-  before/after numbers.
-- **Docs over comments.** Move long comments into the docstring or the
-  docs.
-- **Same things look the same:** one code path, one naming scheme.
-- **Self-contained scripts** with explicit paths and arguments.
-- **Complexity limits** come from hooks. Split a function instead of
-  raising the limit.
-
-### Documentation
-
-- **The README is for a person:** what it is, how to install and run
-  it, where to read more. Details go to `docs/`, contributor rules to
-  `CONTRIBUTING`, agent rules to a skill.
-- **One place per fact.** Other docs link there. No documents outside
-  the repos.
-
-### Visual work
-
-- **Match the existing style** of the user's earlier work of the same
-  kind (decks: `org-beamer-presentation`).
-- **Before you report**, check plots and slides for overlaps.

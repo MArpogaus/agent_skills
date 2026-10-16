@@ -260,8 +260,26 @@ Pin GitHub Actions: see `git-conventions`, "CI workflows".
 - **Simplified Technical English** in docs: at most 25 words per
   sentence, active voice, one word for one thing, no em or en dashes,
   no first person.
-- Before you write comments, docs, plots or slides, read
-  `reference.md`, "Code, documentation and visual style".
+- **Comment only a "why"** the code cannot say. No banners beyond the
+  stack skill's section markers.
+- **No anecdotes:** no "previously", no incident stories, no
+  before/after numbers.
+- **Docs over comments.** Move long comments into the docstring or the
+  docs.
+- **Same things look the same:** one code path, one naming scheme.
+- **Self-contained scripts** with explicit paths and arguments.
+- **Complexity limits** come from hooks. Split a function instead of
+  raising the limit.
+
+- **The README is for a person:** what it is, how to install and run
+  it, where to read more. Details go to `docs/`, contributor rules to
+  `CONTRIBUTING`, agent rules to a skill.
+- **One place per fact.** Other docs link there. No documents outside
+  the repos.
+
+- **Match the existing style** of the user's earlier work of the same
+  kind (decks: `org-beamer-presentation`).
+- **Before you report**, check plots and slides for overlaps.
 
 ## Checklist before "done"
 
