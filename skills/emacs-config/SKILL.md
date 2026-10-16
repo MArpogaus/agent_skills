@@ -18,8 +18,8 @@ metadata: {stack: emacs, requires: [git-conventions]}
 
 - **`emacs.org` is the single source of truth.** `lisp/*.el`, `init.el` and `early-init.el` are tangled artifacts: never edit them. Tangle only when the user asks for it ("retangle", "you may tangle"). Otherwise the user tangles.
 - **No test files.** Do not create `test/` or ERT suites.
-- **Check what you can, ask for the rest.** An Emacs in the sandbox can byte-compile a tangled block and run batch probes. A claim about redisplay needs a real frame (`rig gui`). Where neither is available, validate with a paren and string balance script (mind `?\(` char literals, strings, comments). Then ask the user to eval and report. Debug through targeted questions (`C-h f`, `*Messages*`, `M-:` probes), one hypothesis at a time.
-- **Reproduce in the rig with the user's configuration** before you claim a fix. `<test rig>` is a conda env with Emacs 31 and a copy of the user's tangled config and elpaca; see `<test rig>/README.md`. Run `rig sync` first, and check that the rig loads the same package versions as `~/.emacs.d/elpaca/sources`.
+- **Check what you can, ask for the rest.** An Emacs in the sandbox can byte-compile a tangled block and run batch probes. A claim about redisplay needs a real frame (`<test rig>/rig gui`). Where neither is available, validate with a paren and string balance script (mind `?\(` char literals, strings, comments). Then ask the user to eval and report. Debug through targeted questions (`C-h f`, `*Messages*`, `M-:` probes), one hypothesis at a time.
+- **Reproduce in the rig with the user's configuration** before you claim a fix. `<test rig>` is a conda env with Emacs 31 and a copy of the user's tangled config and elpaca. Its `README.md` explains the commands. Run `<test rig>/rig sync` first, and check that the rig loads the same package versions as `~/.emacs.d/elpaca/sources`.
 - Org blocks can be evaluated with `:lexical no`. Avoid closures that capture locals. Pass arguments through `run-with-timer`, `apply-partially`, or global or buffer-local state.
 
 ## Repo layout and style
@@ -47,10 +47,12 @@ These features live in their own repositories, each with README, tests and CI (s
 
 Keep one copy of the code. The org block is a `use-package` block that configures the package and holds no implementation. Personal settings stay in the configuration: keybindings, window placement, options for this setup.
 
+Work on each package in `~/.emacs.d/packages/<name>`, the user's checkout. Make no other clone.
+
 ## Git flow
 
-- Git flow as `git-conventions`; merges into `main` use `--no-ff`.
-- Conventional commits, one concern each. Agent work commits contain **emacs.org only**.
+- Branches, merges and commit messages follow `git-conventions`.
+- Agent work commits contain **emacs.org only**, except the `chore: tangle` commit.
 - Tangled files go into a separate `chore: tangle` commit. When the user allowed tangling, the agent makes this commit. Otherwise the user does.
 - To split mixed changes, build intermediate `emacs.org` states by splicing org subtrees (headline to next `**** `) between the committed and the working version. Commit each state.
 
@@ -60,14 +62,14 @@ Do this only when the user says "sync elpaca", "delete builds" or similar. It is
 
 1. Commit the fix on the package's `dev` branch.
 2. Run `git -C ~/.emacs.d/elpaca/sources/<pkg> status --short`. If it shows uncommitted edits, stop and ask the user.
-3. Run `git -C ~/.emacs.d/elpaca/sources/<pkg> fetch <work checkout> dev`, then `git -C ~/.emacs.d/elpaca/sources/<pkg> checkout FETCH_HEAD`.
+3. Run `git -C ~/.emacs.d/elpaca/sources/<pkg> fetch ~/.emacs.d/packages/<pkg> dev`, then `git -C ~/.emacs.d/elpaca/sources/<pkg> checkout FETCH_HEAD`.
 4. Delete `~/.emacs.d/elpaca/builds/<pkg>` and the package's files in `~/.emacs.d/eln-cache`, so that elpaca rebuilds it.
 5. If the configuration changed too and the user allowed it, tangle.
 6. Tell the user what to restart and what to look for.
 
 ## Debugging etiquette
 
-- The user tests interactively and reports in short German messages. Give exact probes and expected outputs, one hypothesis at a time.
+- The user tests interactively and reports in short messages. Give exact probes and expected outputs, one hypothesis at a time.
 - Tune UI alignment by trial: change one value per iteration and say which number to change in which direction.
 
 ---
