@@ -58,7 +58,7 @@ cargo test -p <crate> --locked
 - Use one workspace with as few crates as possible.
 - A module becomes its own crate only when a second consumer needs it.
 - Keep the data model in a core crate without heavy dependencies, so
-  that its tests need no runtime (no GPU, no compositor).
+  that its tests need no runtime (no GPU, no external services).
 - `clippy.toml`, `deny.toml` and the workspace `Cargo.toml` with the
   lints live at the root.
 
@@ -67,8 +67,8 @@ Example layout:
 ```
 crates/<core-model>/   data model and API types; no heavy dependencies
 crates/<binary>/       the program
-crates/<name>ctl/      CLI over the IPC socket
-plugins/<plugin>/      reference plugins as workspace members, so they keep the API honest
+crates/<cli>/          command-line client
+<extension>/           reference extension, a workspace member
 docs/  mkdocs.yml      MkDocs site
 ```
 
