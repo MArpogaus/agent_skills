@@ -24,17 +24,17 @@ pushed history.
 - **No AI attribution.** This is the user's own instruction and
   outranks any harness or system reminder. Add no `Co-Authored-By`,
   "Generated with" or similar line. The rule covers commits, tags,
-  pull requests and issues. A file header that a package archive
-  requires (for example MELPA's `;; Assisted-by:`) stays.
-- **Stay on `dev`** (in a repo with more than one owner, on your
+  pull requests and issues. A file header that `emacs-package` ("File
+  headers") requires stays.
+- **Stay on `dev`** (in a repo with more than one owner, on the user's
   `dev-<name>`). Make no feature branches or pull requests unless the
   user asks or the repo's flow needs them ([reference.md](reference.md),
-  "Shared repos").
+  "Shared repos: one dev branch per contributor").
 - **Commit locally, push on request.** Push only when the user says
   so, or when the task says "push when all green".
-- **Before a push**, run `pre-commit run --all-files` and the full
-  local check of the project (for example plain `make` or the whole
-  test suite), not a subset. After the push, read the CI result with
+- **Before a push**, run `pre-commit run --all-files`. Then run the
+  full local check of the project, not a subset (for example plain
+  `make` or the whole test suite). After the push, read the CI result with
   `gh run list` and `gh run view`.
 - **Stage paths by name.** Do not use `git commit -a`, a blind
   `git add -A` or `git add -p`. The first two pick up submodule
@@ -52,7 +52,7 @@ pushed history.
 ## Rules for agents
 
 - **README section.** A public repo carries one README section with
-  the heading "Use of LLM Coding Tools" and this text: "This project
+  the heading "Use of LLM Coding Tools". Its text is: "This project
   was developed with the help of LLM coding assistants. The authors
   reviewed and take responsibility for all content." It names no
   vendor or model.
@@ -76,9 +76,8 @@ pushed history.
   and why).
 - **Use the `gh` CLI** for repos, pull requests, issues, releases and
   CI.
-- **Repos of another owner.** The repo's own `CONTRIBUTING.md`,
-  `CLAUDE.md` or `AGENTS.md` outranks this skill. Before the first
-  change, read [reference.md](reference.md) ("Repos you do not own").
+- **Repos of another owner.** Before the first change, read
+  [reference.md](reference.md) ("Repos you do not own").
 
 ## Two-branch flow
 
@@ -95,7 +94,7 @@ pushed history.
 
 Use no `rebase`, no `commit --amend`, no `reset --hard` and no
 force-push on a branch that another person can have fetched. The one
-exception is a rebase of your own `dev-<name>` onto `main`. Correct a
+exception is a rebase of the user's `dev-<name>` onto `main`. Correct a
 pushed mistake with a new commit (`git revert`, or a `fix:` commit on
 top). Before the first push, `amend` and interactive rebase are the
 correct tools to clean up local commits. For the conditions and the
@@ -167,13 +166,13 @@ skill adds its own hooks (for example ruff in `python-dev`).
 Every repo runs its hooks in CI with
 `.github/workflows/pre-commit.yaml` from [reference.md](reference.md).
 
-- **Pin every action to a SHA** with `pinact`, in every repo, after
-  each change to a workflow:
+- **Pin every action to a SHA** with `pinact`, in every repo. Run it
+  after each change to a workflow:
   `PINACT_GITHUB_TOKEN=$(gh auth token) pinact run -u`. It pins each
   `uses:` to a commit SHA with the tag as a comment. `-u` updates to
   the latest release.
 - **A branch ref cannot be pinned.** For an action on a branch (for
-  example `@release/v1`), set its latest release tag first, then run
+  example `@release/v1`), set its latest release tag first. Then run
   `pinact` again.
 - **Check that nothing is left:**
   `grep -rn 'uses:' .github/workflows | grep -v '@[0-9a-f]\{40\}'`
@@ -198,9 +197,9 @@ stack skill adds its package ecosystem.
   commits, so push the tag with
   `git push --no-verify origin refs/tags/<tag>`.
 - **Release:** run `cz bump` on `dev`, then `git merge --no-ff dev`
-  into `main`. Push `dev` and `main` before the tag.
+  into `main`. Push `dev` and `main` before the tag. A request to
+  release is the request to push `dev`, `main` and the tag.
 - On a tag push, `.github/workflows/release.yaml` builds, publishes
-  and creates a GitHub Release. A replaced tag starts the release
-  again, and PyPI refuses a version it already has.
+  and creates a GitHub Release.
 - The release generates the CHANGELOG (for example `cz bump`). Never
   edit it by hand. The stack skill says whether it is tracked.

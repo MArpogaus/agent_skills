@@ -174,7 +174,7 @@ OLD=$(git rev-parse main)
 #    more than one owner: push a tag and a branch BEFORE the rewrite
 git tag archive/pre-restructure-$(date +%Y%m%d) "$OLD"
 git push origin archive/pre-restructure-$(date +%Y%m%d)
-git push origin "$OLD":refs/heads/dev-<owner>
+git push origin "$OLD":refs/heads/archive/pre-restructure-$(date +%Y%m%d)
 #    one owner: keep a local bundle and push nothing
 git bundle create ../<repo>-pre-rewrite.bundle --all
 
@@ -183,7 +183,6 @@ git bundle create ../<repo>-pre-rewrite.bundle --all
 I=$(git ls-tree "$OLD" .gitignore .pre-commit-config.yaml | git mktree)
 I=$(git commit-tree "$I" -m "chore: init")
 S=$(git commit-tree "$OLD^{tree}" -p "$I" -m "chore: import <project> <version> from the prior history")
-git branch main-new "$S"
 
 # 3. link the histories once, or each later pull request fails with
 #    "refusing to merge unrelated histories"
@@ -192,7 +191,6 @@ git branch dev-<owner> "$M"
 
 # 4. publish
 git update-ref refs/heads/main "$S" "$OLD"
-git branch -D main-new
 git push --force-with-lease origin main
 git push origin dev-<owner>
 ```
@@ -205,4 +203,5 @@ git push origin dev-<owner>
 - In a repo with one owner, use `dev` in place of `dev-<owner>`. In
   step 3, run `git update-ref refs/heads/dev "$M"` instead of
   `git branch`, because `dev` exists. When `dev` is checked out, first
-  check that `git rev-parse dev` prints `$OLD`.
+  run `git merge --ff-only main` on `dev`. Then `git rev-parse dev`
+  prints `$OLD`.
