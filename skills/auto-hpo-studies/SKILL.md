@@ -3,7 +3,7 @@ name: auto-hpo-studies
 description: >
   Autonomous hyperparameter optimization loop: define target and search
   space, then iterate update-config run monitor log commit until convergence.
-  Uses MLflow for tracking, sleep-based polling for long-running tasks.
+  Uses MLflow for tracking and a background watcher for long runs.
   Use when the user asks to tune hyperparameters autonomously.
 license: MIT
 compatibility: claude-code opencode
@@ -19,7 +19,7 @@ metadata:
 
 Load when running a multi-iteration HPO study where an agent
 autonomously iterates: tweak a config parameter, launch a training
-run, monitor via sleep-based polling until completion, compare
+run, watch it in the background until it ends, compare
 results via MLflow, commit if improved, and repeat until convergence.
 
 ---
@@ -64,7 +64,7 @@ No manual intervention between iterations.
 └──────────────────────────┬──────────────────────────────┘
                            ▼
 ┌─────────────────────────────────────────────────────────┐
-│ 7. MONITOR with sleep-based polling                     │
+│ 7. MONITOR with a background watcher                    │
 │    while process running: sleep(N), check PID,          │
 │    tail log for progress, detect stalls                 │
 └──────────────────────────┬──────────────────────────────┘
@@ -214,7 +214,7 @@ quotes; if it contains a `'`, put it into a script and call that.
 If the pipeline has multiple stages (prepare → train → evaluate),
 invoke the top-level command that runs all of them.
 
-### 7 — Monitor with sleep-based polling
+### 7 — Monitor with a background watcher
 
 After launching, poll for completion.  This is the longest step —
 the agent must sleep and wait, not spin.
