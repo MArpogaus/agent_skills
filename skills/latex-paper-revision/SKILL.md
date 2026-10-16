@@ -90,8 +90,9 @@ Use this phase when a revised version goes back to a venue.
 
 ### latexdiff for change tracking
 
-Compare the revised version against the submitted one. `--flatten`
-follows the `\input` files of both versions:
+Compare the revised version against the submitted version (its git
+tag, for example `submitted-v1`). `--flatten` follows the `\input`
+files of both versions:
 
 ```bash
 latexdiff --flatten original.tex revised.tex > diff.tex
@@ -131,7 +132,7 @@ Write `response_to_reviewers.tex` as a standalone LaTeX document:
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **paper-writing**: LaTeX project layout, build and compilation,
   venue-specific submission.
