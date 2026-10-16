@@ -41,8 +41,10 @@ branch, attribution and the report format.
   theme and mode the project supports.
 - **No AI attribution:** see `git-conventions`, "Hard rules".
 - **Never touch the user's environment:** no project environment, lock
-  file or package changes. Report a missing package. Safe commands: the
-  stack skill (`python-dev`, "uv and the environment").
+  file or package changes. Report a package that the project
+  environment lacks. A tool for your own use follows `sandbox-env`.
+  Safe commands: the stack skill (`python-dev`, "uv and the
+  environment").
 - **The user's uncommitted edits are sacred.** Before a branch switch
   or a reset, check for them. Also check for unpushed commits:
   `git log --oneline @{u}.. 2>/dev/null || git log --oneline --branches --not --remotes`.
@@ -152,7 +154,6 @@ The simplest solution wins, over taste, habit and "best practice".
   code, at the project's one width and theme. Screenshots that verify a
   change still cover each theme.
 - **Prove a test red** against the code with the fix removed.
-- **Re-verify subagent findings** before you act on them.
 - **Results against a reference:** see `ml-project`, "Validating
   research code".
 - **Iterate fast, finish complete:** check with reduced sizes, run the
@@ -161,9 +162,9 @@ The simplest solution wins, over taste, habit and "best practice".
 
 ## 4. Continuous review
 
-Review runs all session by default. On "no reviews", "save tokens" or
-"no subagents", review your own changes. On review-only requests, change
-nothing.
+Review runs all session by default. "No reviews", "save tokens" and
+"no subagents" turn reviews off: arm no monitor, spawn no reviewer, and
+review your own changes. On review-only requests, change nothing.
 
 ### 4.1 Arm the commit monitor
 
@@ -176,7 +177,8 @@ Re-arm it when it times out. When a repo joins later, re-arm the
 monitor with all repos.
 
 - **Trigger:** 100 or more changed lines outside `*.md` and `*.org`, or
-  5 or more commits that touch code (`REVIEW_LINES`, `REVIEW_COMMITS`).
+  5 or more commits that touch files outside `*.md` and `*.org`
+  (`REVIEW_LINES`, `REVIEW_COMMITS`).
   Smaller changes accumulate. Docs-only changes, including decks in
   `.org`, wait for the final round.
 - For rewritten history, pushed work and the state directory, read
@@ -243,9 +245,9 @@ read `reference.md`, "findings.md".
 ## 5. Interactive and autonomous sessions
 
 A session is autonomous only when the user says so ("I'm away", "work
-alone", "autonomous", "bis später", "über Nacht"). A session without a user (headless, scheduled, a
-notification channel only) is also autonomous. Silence alone never makes
-a session autonomous. Every other session is interactive.
+alone", "autonomous", "bis später", "über Nacht"). A session without a
+user (headless, scheduled, a notification channel only) is also
+autonomous. Silence alone never makes a session autonomous. Every other session is interactive.
 
 Autonomous:
 
@@ -279,17 +281,16 @@ Always:
   example `<user home>/.emacs.d`.
 - **Placeholders.** The workspace placeholders are `<user home>`,
   `<agenda repo>`, `<notes dir>`, `<presentations dir>`, `<test rig>`,
-  `<secrets repo>`, `<admin user>` and `<skeleton checkout>`. Resolve
+  `<secrets repo>` and `<skeleton checkout>`. Resolve
   each one in this order:
   1. the `AGENTS.md` in the working directory or its nearest parent,
   2. the user-level agent instructions (Claude Code:
      `~/.claude/CLAUDE.md`; opencode: `~/.config/opencode/AGENTS.md`),
   3. agent memory.
 
-  When none has it, ask. Autonomous: record a blocker (section 2). A
-  step that only needs a placeholder value and finds none goes under
-  "Open" instead of a blocker. A step that is a blocker anyway stays a
-  blocker.
+  When none has it, ask. Autonomous: skip the step that needs the
+  value and list it under "Open" in the final report. When the task
+  cannot go on without the value, record a blocker (section 2).
   Every other `<...>` in a skill is a template slot.
 - **Work only on the mounted checkouts.** Report a missing or read-only
   path. Never clone around it or push from a local copy.
@@ -331,7 +332,7 @@ Always:
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **git-conventions**: two-branch flow, conventional commits,
   pre-commit hooks, push and attribution rules, tagging and releases.
