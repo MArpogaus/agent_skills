@@ -5,33 +5,36 @@ description: >
   jobs, scan each touched repo for leftovers, finish the review loop,
   settle git state and report files, update the user's GTD agenda,
   record lessons in memory or as skill changes, and give a short final
-  report. Run once per session: when the user ends it ("finish", "wrap
-  up", "Feierabend", "session beenden", "done for today"), or before the
-  last message of an autonomous session. Not after each task.
+  report. Run it once per session, not after each task. Use when the
+  user ends the session ("finish", "wrap up", "Feierabend", "session
+  beenden", "done for today"), or before the last message of an
+  autonomous session.
 license: MIT
 compatibility: claude-code
-metadata:
-  stack: meta
-  requires: [dev-conventions, git-conventions, gtd]
+metadata: {stack: meta, requires: [dev-conventions, git-conventions, gtd]}
 ---
 
 # Skill: Finish a session
 
-Run once per session: when the user ends it ("finish", "wrap up",
-"Feierabend", "session beenden", "done for today"), or before the last
-message of an autonomous session. Not after each task.
-
-Run the steps in order. Skip a step only when it has nothing to do, and
-say so in the report. If a step finds a blocker, report it as
-`dev-conventions`, "Asking and acting", says. Do not work around it.
-
 `<start>` is the session's first commit in a repo. Find it with
 `git log --since=<session start>` or in `git reflog`.
 
+## Hard rules
+
+- Run the steps in order. Skip a step only when it has nothing to do.
+- If a step finds a blocker, report it as `dev-conventions`, "2. Asking
+  and acting", says. Do not work around it.
+- Never delete the user's files. Drop no stash.
+- Push only when the user asked for it.
+- Never commit report and plan files (`findings.md`, `HANDOFF.md`).
+- Set a task to `DONE` only when the user confirmed it.
+- Edit a skill only when the user agrees to the change.
+
 ## 1. Background work
 
-- List the jobs, monitors and subagents you started. Wait for the ones
-  that finish within 10 minutes. Stop watchers that have no further use.
+- List the jobs, monitors and subagents you started. Wait at most 10
+  minutes. List the jobs still running under "Running". Stop watchers
+  that have no further use.
 - A job can have to keep running (a training run, a deploy). Then write
   in the report what it is, how to check it, and where its output goes.
 
@@ -41,45 +44,42 @@ For each repo the session touched:
 
 1. `git status --short`: untracked files, scratch scripts, debug
    output, temporary configs. Delete what the session made and no
-   longer needs. Never delete the user's files.
+   longer needs.
 2. Read the session's diff (`git diff <start>^..HEAD`). Look for dead
    code, debug prints, commented-out code, unused options and
    arguments, history in comments, and docs that still describe the
    old state.
-3. `git worktree list`, `git stash list`, `git branch`: remove the
-   worktrees, stashes and branches that you made and that are merged or
-   obsolete.
+3. Run `git worktree list`, `git stash list` and `git branch`. Remove
+   the worktrees and branches that you made and that are merged. List
+   your stashes and unmerged branches under "Open".
 4. Scratch files outside the repos stay in the scratchpad.
 
 ## 3. Review
 
-If code changed since the last clean round, run the final round of
-`dev-conventions`, "Continuous review". Stop after two clean rounds in
-a row. When the user turned reviews off, read your own diff once with
-the Simplicity view.
+If anything was committed since the last clean final round, run the
+final round of `dev-conventions`, "4.4 Final round". When the user
+turned reviews off, read your own diff once with the Simplicity view.
 
 ## 4. Git state
 
 - Commit everything that belongs in history, as `git-conventions`
   requires. Report unpushed commits (`git log --oneline @{u}..`).
-  Push only when the user asked for it.
-- Report and plan files (`findings.md`, see `dev-conventions`,
-  "Continuous review", and `HANDOFF.md`) are never committed. Delete
-  them when they are done. If work stays open, write `HANDOFF.md` in
-  the repo root, listed in `.git/info/exclude`: done, open, next steps,
-  where things live.
+- For `findings.md`, see `dev-conventions` reference.md, "findings.md".
+  Delete report and plan files when they are done. If work stays open,
+  write `HANDOFF.md` in the repo root, listed in `.git/info/exclude`:
+  done, open, next steps, where things live.
 
 ## 5. Agenda
 
-Follow the `gtd` skill, "Safe edits".
+Follow the `gtd` skill, "Hard rules" and "1. Safe edits".
 
 - Find the agenda project of each repo: its name, or the repo link
   under `Information`.
-- Set tasks to `DONE` that the session finished and the user
-  confirmed. For a finished task without confirmation, list it in the
-  report as "to close".
-- Add follow-ups, open blockers and filed issues as inbox items, as
-  in `gtd`, "Capture from another repo".
+- Set tasks to `DONE` that the session finished. For a finished task
+  without confirmation, list it in the report as "to close".
+- Add follow-ups, filed issues and the open blockers that are not in
+  the agenda yet as inbox items, as in `gtd`, "Capture from another
+  repo".
 - Before you file an issue, check the open issues and the roadmap, so
   you do not file what is already planned.
 
@@ -95,7 +95,7 @@ corrections, repeated instructions and frustration.
 - A rule that a skill already has but you broke: say so in the report.
   Do not repeat it in memory.
 - A rule that a skill lacks or gets wrong: propose the exact change to
-  that skill in the report. Edit the skill only when the user agrees.
+  that skill in the report.
 
 ## 7. Report
 
@@ -104,8 +104,11 @@ item:
 
 - **Done**: what changed, with commits or files.
 - **Running**: jobs from step 1.
-- **Open**: blockers, issues, unpushed work, "to close" tasks.
+- **Open**: blockers, issues, unpushed work, stashes, unmerged
+  branches, "to close" tasks.
 - **Lessons**: proposals from step 6.
+
+---
 
 ## Required skills
 
