@@ -14,6 +14,23 @@ metadata: {stack: ml, audience: researchers, requires: [git-conventions, python-
 
 # Skill: ML Research Projects
 
+## Hard rules
+
+- Scripts read CLI arguments only, never `params.yaml`. Interpolate
+  each parameter into `cmd`, for example
+  `--learning-rate ${train.learning_rate}`. Keep each value in one
+  file.
+- `params.yaml` and `dvc.yaml` are the single source of truth. Write
+  no wrapper scripts such as `train.sh` around them.
+- Never tune the seed. Keep it fixed and fix a bad fit with the
+  hyperparameters.
+- Keep the number of variants small. Tune the existing config before
+  you add a new one.
+- Never replace an existing variant or change what it means.
+- Never regenerate `data/` to make a failing test pass.
+- Docs describe the method and how to run it. Results live in result
+  files, reports and slides, not in docs.
+
 ## Project structure
 
 ```
@@ -31,17 +48,17 @@ metadata: {stack: ml, audience: researchers, requires: [git-conventions, python-
 │   └── hpo.py
 ├── src/
 │   └── <package>/
-│       ├── __init__.py      # Package docstring + optional monkey-patches
+│       ├── __init__.py      # one-line docstring + optional monkey-patches
 │       ├── data.py          # Data loading / preprocessing
 │       ├── distributions.py # Custom distribution definitions
 │       ├── models.py        # Model builders
+│       ├── simulations.py   # numpy-only DGPs with known truth
 │       └── utils.py         # I/O helpers, logging, config
 ├── test/
 │   ├── README.md            # what the tests guarantee + where truth comes from
 │   ├── conftest.py
 │   ├── test_data.py
 │   └── test_models.py
-├── simulations/             # in-package: numpy-only DGPs with known truth
 ├── params/
 │   ├── target_a.yaml        # Per-target hyperparameters
 │   └── target_b.yaml
@@ -60,9 +77,6 @@ Keep `src/<package>/` to at most 5 modules. Scripts are thin CLI
 wrappers that call package functions. Shared logic lives in the
 package.
 
-Scripts read CLI arguments only, never `params.yaml`. DVC passes
-the parameters as `--<key>=<value>` flags.
-
 ### `__init__.py` for monkey-patching
 
 Register custom distributions or layers into third-party libraries
@@ -70,7 +84,7 @@ in `__init__.py`, so that the patch runs once at import, before any
 model code:
 
 ```python
-""".. include:: ../../README.md"""
+"""Normalizing flows for probabilistic regression."""
 
 from <package> import distributions as _distributions
 
@@ -100,9 +114,11 @@ split:
 train:
   max_epochs: 500
   patience: 50
-  learning_rate: 0.001
   batch_size: 256
 ```
+
+The per-target values (for example `learning_rate`) live only in
+`params/<target>.yaml`.
 
 ### dvc.yaml: foreach over targets
 
@@ -123,6 +139,25 @@ stages:
       outs:
         - data/processed/${item}/features.feather
 
+  split_data:
+    foreach: ${targets}
+    do:
+      cmd: >-
+        python scripts/split_data.py
+          --input data/processed/${item}/features.feather
+          --outdir data/processed/${item}
+          --train-ratio ${split.train_ratio} --val-ratio ${split.val_ratio}
+          --test-ratio ${split.test_ratio} --seed ${split.seed}
+      deps:
+        - data/processed/${item}/features.feather
+        - scripts/split_data.py
+      params:
+        - split
+      outs:
+        - data/processed/${item}/train.feather
+        - data/processed/${item}/val.feather
+        - data/processed/${item}/test.feather
+
   train:
     foreach: ${targets}
     do:
@@ -131,9 +166,12 @@ stages:
           --config params/${item}.yaml
           --train-data data/processed/${item}/train.feather
           --val-data data/processed/${item}/val.feather
+          --max-epochs ${train.max_epochs} --patience ${train.patience}
+          --batch-size ${train.batch_size}
           --outdir results/${item}
       deps:
-        - data/processed/${item}
+        - data/processed/${item}/train.feather
+        - data/processed/${item}/val.feather
         - params/${item}.yaml
         - scripts/train.py
         - src/<package>/models.py
@@ -147,13 +185,6 @@ stages:
 ```
 
 ### Stage conventions
-
-| Stage | Purpose | Outputs |
-|-------|---------|---------|
-| `prepare_features` | Load raw data, engineer features, save as Feather | `features.feather` |
-| `split_data` | Train/val/test split | `{train,val,test}.feather` |
-| `train` | Fit model, save weights + metrics | `model/`, `metrics.json` |
-| `evaluate` | Compute eval metrics + plots | `figures/`, `eval_metrics.json` |
 
 Intermediate pipeline outputs are Feather files
 (`pd.read_feather`, `DataFrame.to_feather`).
@@ -222,9 +253,7 @@ instead, in its own format. That skill wins while it runs.
 | Run | learning_rate | n_bijectors | val_loss | Notes |
 |-----|---------------|-------------|----------|-------|
 | 1   | 1e-2          | 4           | 0.452    | diverges after 100 epochs |
-| 2   | 1e-3          | 4           | 0.231    | stable, underfits slowly  |
-| 3   | 3e-4          | 4           | **0.198** | best so far               |
-| 4   | 1e-4          | 4           | 0.212    | converges too slowly      |
+| 2   | 3e-4          | 4           | **0.198** | best so far               |
 
 **Winner:** `learning_rate = 3e-4`
 
@@ -236,8 +265,8 @@ instead, in its own format. That skill wins while it runs.
 - Manual studies: one phase per commit with message
   `feat(hpo): <target> phase <N>: <summary>`.
 - The commit body includes the markdown table from `hpo_study.md`.
-- File results from intermediate runs are cleaned up:
-  `git rm -r results/*_v2 results/*_v3` before committing.
+- Delete the outputs of discarded runs (`rm -r results/<target>_v2`),
+  then `dvc gc -w`.
 - Only the final configs for each phase remain in the repo.
 
 ## Validating research code
@@ -268,7 +297,6 @@ by name.
   `truth.json` and every number in the paper is unverifiable.
 - A new seed or changed equations means a **new folder**, never an
   in-place edit. Old results keep pointing at old data.
-- Never regenerate `data/` to make a failing test pass.
 
 ### Order tests by how much trust they carry
 
@@ -301,9 +329,8 @@ A ground-truth bound is for regressions, not for precision claims.
 
 - Experiment configs write every option out (see `dev-conventions`,
   section 1, "Explicit configuration").
-- Never replace an existing variant or change what it means. Add a
-  new config for a new idea. Existing configs get only hyperparameter
-  changes and fixes.
+- Add a new config only for a new idea. Existing configs get only
+  hyperparameter changes and fixes.
 - Names follow the notation of the paper.
 
 ### test/README.md
@@ -318,15 +345,11 @@ Mark anything that trains `@pytest.mark.slow` (see `python-dev`,
 
 ## Paper-oriented code structure
 
-### figures/ directory
+### Figures
 
-All paper figures live in `figures/` at repo root. Each figure
-has a script in `scripts/` that regenerates it.
-
-### Figure scripts
-
-Each figure script follows `python-dev` ("Figures"), and its
-`__main__` block saves the figure into `figures/`.
+All paper figures live in `figures/` at the repo root. Each figure
+has a script in `scripts/` that follows `python-dev` ("Figures").
+Its `__main__` block saves the figure into `figures/`.
 
 ### README.org for paper reproduction
 
@@ -338,7 +361,7 @@ Summary and BibTeX reference.
 ** Reproducing results
 
 #+begin_src bash
-  dvc checkout
+  dvc pull
   dvc repro
 #+end_src
 
@@ -352,12 +375,9 @@ Summary and BibTeX reference.
 
 ### CLI interface
 
-Use `argparse`. Scripts receive all inputs as CLI flags and never
-import from other scripts. Scripts stay dumb: no
-mode switches such as `--outcome` or `--variant`. Each variant gets
-its own config file or `dvc.yaml` entry, and the duplication is fine.
-`params.yaml` and `dvc.yaml` are the single source of truth. Write
-no wrapper scripts such as `train.sh` around them.
+Use `argparse`. Scripts never import from other scripts. They have
+no mode switches (`dev-conventions`, section 1, "Scripts stay
+dumb"). Each variant gets its own config file or `dvc.yaml` entry.
 
 ```python
 def main() -> None:
@@ -372,6 +392,8 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 ```
+
+---
 
 ## Required skills
 
