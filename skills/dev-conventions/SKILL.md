@@ -248,33 +248,50 @@ When a `REVIEW` line arrives:
 ### 4.3 Reviewer views
 
 Every round uses the three core views.  Add the others when the range
-touches their subject.
+touches their subject.  One subagent per view; a view never shares a
+subagent with another view.
 
 | View | Looks for | When |
 |---|---|---|
-| **Bugs** | wrong behaviour, regressions, unhandled real failures; each with a reproduction | always |
-| **Simplicity** (ponytail) | over-engineering, reinvented features, code for rare edge cases, backwards compatibility, dead flexibility | always |
-| **Leftovers and consistency** | dead code, stale files, drifted docs and comments, obvious or anecdotal comments, naming, the same thing done two ways, drift between repos | always |
-| **Docs** | wrong or incomplete docs, duplication, README scope, STE wording | docs or public behaviour changed |
+| **Bugs** | wrong behaviour, regressions, unhandled real failures, each with a reproduction that runs | always |
+| **Simplicity** | the simpler alternative for each addition (section 1); code, files, options and stages to delete; reinvented features; special treatments; code for rare edge cases; backwards compatibility | always |
+| **Leftovers and consistency** | dead code, stale files, drifted docs and comments, history in comments, naming, the same thing done two ways, drift between repos | always |
+| **Docs** | wrong or incomplete docs, duplication, a README that reads like a manual or an agent rules file, STE wording | docs or public behaviour changed |
 | **Security** | secrets, permissions, exposure, hardening | deployment, network, auth or secrets changed |
 | **Efficiency** | hot paths, redisplay or UI latency, runtime, deploy time | performance-relevant code changed |
 | **Usability** | public API, CLI, configuration, UI and UX, looks in every mode | user-facing surface changed |
-| **Results** | numbers against the reference (paper, ground truth, earlier run) | research or experiment code changed |
+| **Results** | numbers against the reference; the data source of every figure and table by file path; labels, sides and groups that match the data | research code, figures or slides changed |
 | **Attacker** | tries to break into or bring down a test system | on request only, never against a production host |
+
+The Simplicity view is adversarial.  It challenges every decision in
+the range, including decisions that the session agreed on.  A
+Simplicity report without a concrete deletion or simplification must
+say for each addition why no simpler form works.
 
 Brief each reviewer with **minimal context**: the repo path, the
 range, the view, and the rules below.  Do not give it your own
-findings or the session history, so that it looks with fresh eyes.
+findings, the session history or your memory, so that it looks with
+fresh eyes and does not inherit your decisions.
 
 ```
-You are a read-only reviewer. Repo: <path>. Range: <old>..<new>
-(read the diff and the files it touches). View: <view and its
-"looks for" text>.
-Rules: change no file; run no git command that changes state; contact
-no host; run no deploy. Report each finding with file:line, severity,
-and how to reproduce it. If you find nothing that matters, answer
-"clean".
+You are a read-only, sceptical reviewer. Repo: <path>. Range:
+<old>..<new> (read the diff and the files it touches). View: <view
+and its "looks for" text>.
+Rules: do not read agent memory or handoff files; question every
+decision in the range. Change no file; run no git command that
+changes state; contact no host; run no deploy. Report each finding
+with file:line, severity (breaks / endangers / simplifies / nit) and
+how to reproduce or what to delete. If you find nothing that
+matters, answer "clean".
 ```
+
+Severity decides what you do with a finding:
+
+- **breaks** and **endangers**: verify, then fix.
+- **simplifies**: verify, then apply, unless it changes behaviour the
+  user asked for; then ask (section 2).
+- **nit**: fix only when it is a one-line change in a file you touch
+  anyway.  Nits never keep a loop going.
 
 ### 4.4 Final round
 
@@ -285,9 +302,14 @@ whatever its size:
 
 1. Spawn all views that apply, with fresh reviewers.
 2. Verify, fix, commit.
-3. Repeat until a round gives no meaningful findings.  A round with
-   only docs nits counts as clean.
+3. Repeat until **two rounds in a row** come back clean.  A round is
+   clean when it has no finding of severity breaks, endangers or
+   simplifies that survives your verification.
 4. Report what changed, what was rejected and why, and what is open.
+
+There is no round limit.  When rounds keep finding things, the cause
+is upstream: the fixes add code, or a view drifts.  Then pause,
+look for that pattern, and fix the pattern, not the instance.
 
 ### 4.5 findings.md
 
