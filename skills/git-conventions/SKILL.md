@@ -265,6 +265,9 @@ updates:
 
 - **Stay on `dev`** (in a shared repo, on your `dev-<name>`).  No
   feature branches or pull requests unless the user asks for them.
+- **WIP commits on `dev` are allowed** when the user asks to save
+  untested work.  Say so in the subject (`wip: ...` or "untested" in
+  the body).
 - **Commit locally, push on request.**  Push only when the user says
   so, or when the task says "push when all green".
 - **Before a push**, run `pre-commit run --all-files` and the full
