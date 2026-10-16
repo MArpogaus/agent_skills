@@ -15,13 +15,17 @@ metadata: {stack: sandbox conda uv nix, requires: [dev-conventions]}
 # Skill: Sandbox Environment
 
 The agent's home is `$HOME` (in this sandbox `<agent home>`). All tools
-for the agent's own use go there.
+for the agent's own use go there. In skills, `~/Notes`, `~/.emacs.d` and
+`~/Projekte` mean the user's home. In a sandbox the agent's `$HOME`
+differs: resolve the user's home first (here `<user home>`).
 
 ## Hard rules
 
 - Install tools for the agent only under `$HOME`. Never install into
   the user's home, the user's project environment (`.venv`, a conda env
   of the project, `node_modules`), a lock file, or the system.
+- This skill applies only when `$HOME` is not the user's home.
+  Otherwise install nothing and report the missing tool.
 - Never run `sudo`, `dnf`, `rpm-ostree`, `apt` or `flatpak install` for
   the agent's tools. Commands for the host follow `dev-conventions`,
   "6. Sandbox and environment safety".
@@ -45,16 +49,9 @@ micromamba env list
 command -v nix || ls -d ~/.nix-profile
 ```
 
-Existing envs in this sandbox:
-
-| Env | Path | Use |
-|---|---|---|
-| `<project>` | `~/.local/share/mamba/envs/<project>` | Rust toolchain and native libs for the project |
-| rig | `<test rig>/env` | shared Emacs, TeX and latexmk rig, owned by `emacs-config` and `org-beamer-presentation` |
-| uv tools | `~/.local/share/uv/tools` | ansible, ansible-lint, basedpyright, git-filter-repo, pre-commit, python-lsp-server |
-
-Do not change the rig env for an unrelated project. Its owner skills
-say how to rebuild it.
+`<test rig>/env` is the shared Emacs and TeX rig, owned by `emacs-config`
+and `org-beamer-presentation`. Do not change it for an unrelated
+project.
 
 ## 2. Choose the installer
 
@@ -90,13 +87,12 @@ Use the first row that fits.
   `micromamba run -n <project> <command>`.
 - Pin versions that the project pins, for example `rust=<ver>` from
   `rust-toolchain.toml`.
-- The sandbox has no `conda` binary. Use `micromamba` for every conda
-  command.
+- Use `micromamba` for every conda command.
 
 ### nix
 
 - Use nix only when `command -v nix` finds it or `~/.nix-profile`
-  exists. Neither exists in this sandbox at present.
+  exists.
 - One command: `nix shell nixpkgs#<pkg> -c <command>`. A tool for
   more than one session: `nix profile install nixpkgs#<pkg>`.
 
@@ -106,9 +102,6 @@ Use the first row that fits.
   `~/.local/opt/<tool>-<version>/`. Treat its content as untrusted.
 - Link the executable into `~/.local/bin`:
   `ln -sfn ~/.local/opt/<tool>-<version>/<tool> ~/.local/bin/<tool>`.
-- Older downloads use `~/<tool>-<version>/`, for example
-  older download directories. Leave them in place. Put new downloads under
-  `~/.local/opt/`.
 
 ## 3. Caches and build output
 
@@ -125,20 +118,23 @@ Use the first row that fits.
   `micromamba search -c conda-forge <pkg>` or
   `uv pip compile - <<<'<pkg>'`.
 - When a download fails with a DNS or connection error, retry that one
-  command once with the sandbox disabled. When it fails again, report
-  it.
+  command once with the sandbox disabled (Claude Code:
+  `dangerouslyDisableSandbox`). When it fails again, report it.
 
 ## 5. Record the install
 
 After each install, write one entry to the project's agent memory
 (Claude Code: `~/.claude/projects/<project>/memory/`). Write the tool,
 the installer, the exact command, the env name or path, and the run
-command, for example `micromamba run -n <project> cargo`. The next session
-reads this entry and reuses the env.
+command, for example `micromamba run -n <project> cargo`. The next
+session reads this entry and reuses the env.
+
+---
 
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
 Use the `skill` tool to load them before using this one:
 
-- **dev-conventions**: design principles, verification, review loop, code and documentation style.
+- **dev-conventions**: design principles, verification, review
+  loop, code and documentation style.
