@@ -5,12 +5,12 @@ description: >
   ("gtd: ..." and "<project>: ..."), the day review ("Tagesreview"),
   inbox triage one project at a time, the retro with its journal entry,
   the weekly review, and how an agent in another repo records a blocker
-  or follow-up there. Use when the session runs in the agenda workspace,
-  when the user says "gtd", "Tagesreview", "Retro", "Wochenreview" or
-  "inbox", and when a session must leave a task for the user.
+  or follow-up there. Use when the session runs in the agenda workspace
+  or must leave a task for the user. Use when the user says "gtd",
+  "Tagesreview", "Retro", "Wochenreview" or "inbox".
 license: MIT
 compatibility: claude-code
-metadata: {stack: org, requires: [git-conventions]}
+metadata: {stack: org, requires: [dev-conventions, git-conventions]}
 ---
 
 # Skill: GTD agenda
@@ -45,7 +45,8 @@ Other writers change the same files: a sync client and open Emacs
 buffers. Uncommitted changes that you did not make can be a stale sync
 or an unsaved buffer.
 
-Commit on `main` as `git-conventions`, "Hard rules", says.
+Commit on `main`. Stage paths by name and write the message as
+`git-conventions` says ("Hard rules", "Commit messages").
 
 ## 2. Capture
 
@@ -69,6 +70,11 @@ the user like this:
    a link to the issue or the commit.
 3. Commit in the agenda repo with `git -C <agenda repo>`.
 
+Autonomous: when `<agenda repo>` is missing or read-only, or `inbox.org`
+has changes you did not make, do not edit it. List the item under
+"Open" in the final report, and in the GitHub issue when
+`dev-conventions` section 2 allows one.
+
 Keep the details in the issue. The inbox item is a pointer.
 
 ## 3. Day review ("Tagesreview")
@@ -77,9 +83,9 @@ The agent shell sends "Tagesreview nach AGENTS.md." as its first message
 when the agenda session starts.
 
 1. Read the last journal entry, especially its field for tomorrow.
-2. Read the calendar for today and the next 14 days, and the mail
-   since the date of the last journal entry (the mail and calendar
-   connector, read only).
+2. Read the calendar for today and the next 14 days. Read the mail
+   since the date of the last journal entry. Use the mail and calendar
+   connector, read only.
 3. Report in at most 30 lines: today's appointments, deadlines and
    scheduled tasks; the `NEXT` tasks; the inbox count; the mail that
    asks for an action.
@@ -126,4 +132,6 @@ apply it, commit, then go to the next project.
 This skill assumes the following prerequisite skills are loaded.
 Use the `skill` tool to load them before using this one:
 
+- **dev-conventions**: asking and acting, blockers, autonomous
+  sessions.
 - **git-conventions**: commit messages and the attribution rule.
