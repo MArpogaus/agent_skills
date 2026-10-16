@@ -10,7 +10,7 @@ description: >
   `references.bib`.
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: ml latex, audience: researchers, requires: [git-conventions]}
+metadata: {stack: ml latex, audience: researchers, requires: [dev-conventions, git-conventions, ml-project, python-dev]}
 ---
 
 # Skill: Paper Writing
@@ -58,16 +58,6 @@ submission. For a revision, use `latex-paper-revision`.
 ├── csv/                      # Data files for PGFPlots (optional)
 └── tikz/                     # TikZ figure sources (optional)
 ```
-
-### Common document classes by venue
-
-| Venue          | Class                           | Options                              |
-|----------------|----------------------------------|--------------------------------------|
-| IEEE           | `IEEEtran`                       | `[journal,dvipsnames]`               |
-| Elsevier       | `elsarticle`                     | `[final,5p,times,twocolumn]`         |
-| UAI            | `uai<year>` (custom class file)  | `[accepted]` or blank                |
-| ICML           | `article` + `icml2021` package   | `[accepted]`, none for review        |
-| arXiv          | same as main class               | remove copyright lines               |
 
 ### Preamble template
 
@@ -153,7 +143,7 @@ the preamble and use the `elsarticle-num` style:
 
 ```latex
 \bibliographystyle{elsarticle-num}
-\bibliography{mybibfile}
+\bibliography{references}
 ```
 
 ### Acronyms (`glossaries.tex`)
@@ -198,18 +188,18 @@ For data-driven plots that should match the document font, use
       width=\columnwidth,
       height=4cm,
       xlabel={Time},
-      ylabel={Load [kW]},
+      ylabel={<quantity> [<unit>]},
       date coordinates in=x,
     ]
       \addplot[color=mpl_blue, line width=0.8pt]
-        table[x=time, y=median, col sep=comma] {csv/forecast.csv};
+        table[x=time, y=median, col sep=comma] {csv/<series>.csv};
       \addplot[fill=mpl_blue, fill opacity=0.25]
-        table[x=time, y=lower, col sep=comma] {csv/forecast.csv}
+        table[x=time, y=lower, col sep=comma] {csv/<series>.csv}
         \closedcycle;
     \end{axis}
   \end{tikzpicture}
-  \caption{Probabilistic forecast with 90\% prediction interval.}
-  \label{fig:forecast}
+  \caption{Median and 90\% interval of <quantity>.}
+  \label{fig:<series>}
 \end{figure}
 ```
 
@@ -343,8 +333,6 @@ mv final.pdf "FINAL_PAPER.PDF"
 - **Build:** `latexmk -pdf` (uses `bibtex` backend, not `biber`)
 - **Front matter:** `\begin{frontmatter}` with `\begin{abstract}`,
   `\begin{keyword}`, `\journal{...}`
-- **Bibliography:** `\bibliographystyle{elsarticle-num}` +
-  `\bibliography{...}`
 - **Source package:** `.tex` + all figures + `.bib` + class file
 
 ### UAI (uai<year>)
@@ -355,10 +343,10 @@ mv final.pdf "FINAL_PAPER.PDF"
 - **License:** signed PMLR license form required
 - **Packaging:** `Paper.pdf` + `Supplementary Material.pdf`
 
-### ICML (icml2021)
+### ICML (icml<year>)
 
 - **Build:** `latexmk -pdf`
-- **Options:** `\usepackage[accepted]{icml2021}` for the camera-ready
+- **Options:** `\usepackage[accepted]{icml<year>}` for the camera-ready
   version. Without an option, the package builds the anonymous review
   version. Check the venue template of the current year.
 - **Opening:** `\twocolumn[` for title block + abstract
@@ -374,7 +362,7 @@ mv final.pdf "FINAL_PAPER.PDF"
 - IEEEtran documentation: https://www.ieee.org/conferences/publishing/templates.html
 - Elsevier elsarticle: https://www.elsevier.com/researcher/author/packages/elsarticle-template.zip
 - UAI style: provided by the conference each year
-- ICML style: https://icml.cc/Conferences/2021/StyleAuthorInstructions
+- ICML style: the author instructions of the current year on https://icml.cc/
 - latexmk: https://mg.readthedocs.io/latexmk.html
 - PGFPlots: https://pgfplots.sourceforge.net/
 - An earlier paper that used the target class is the best reference
@@ -389,5 +377,11 @@ mv final.pdf "FINAL_PAPER.PDF"
 This skill assumes the following prerequisite skills are loaded.
 Use the `skill` tool to load them before using this one:
 
+- **dev-conventions**: design principles, verification, review
+  loop, code and documentation style.
 - **git-conventions**: two-branch flow, conventional commits,
   pre-commit hooks, tagging and releases.
+- **ml-project**: experiment repo layout, DVC pipeline, MLflow
+  tracking, figure scripts.
+- **python-dev**: Python project conventions and matplotlib figure
+  patterns.
