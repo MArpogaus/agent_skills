@@ -16,8 +16,6 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 
 ## Hard rules
 
-- Deploy to the production host only when the user asks for it in this
-  session.
 - Test every change on the test VM first.
 - On the test VM, run commands yourself. On the production host, run
   only read-only commands, except a deploy the user asked for in this
@@ -27,6 +25,7 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 - Roles assume a clean install (`dev-conventions`, "1. Design
   principles"). Give one-off steps for the existing production host to
   the user as manual steps.
+- Never print a secret. Pass tokens through stdin.
 
 ## Platform
 
@@ -130,10 +129,10 @@ with a screenshot.
   connection (`ControlMaster`, `ControlPersist`). Say before each
   command that needs the user's input.
 - Root access opens only as the deployment repo's AGENTS.md says.
-  Assert it is open before a deploy; when it is closed, ask the user
-  (autonomous: record a blocker).
-- "gate open", "key unlocked" or "timer extended" from the user means:
-  continue at once.
+  Assert root access is open before each command that needs root, not
+  only before a deploy. When it is closed, ask the user (autonomous:
+  record a blocker). When the root work is done, tell the user.
+- When the user says that root access is open, continue at once.
 
 ## Releases and CI
 
@@ -144,7 +143,8 @@ with a screenshot.
   defaults) opens image update PRs against `dev`.
 - The agent tags no service repo. The user tags them by hand. A repo
   that packages one upstream application uses the upstream version (for
-  example `<major>`, then `<major>.1`). The others use `v1.0.0`.
+  example `<major>`, then `<major>.1`). The others use `v<semver>`,
+  starting at `v1.0.0`.
 - The production host runs tagged releases only. For a change deployed
   there, ask the user to tag a patch release of each changed service
   repo, so the tags match the host.
@@ -158,7 +158,6 @@ with a screenshot.
 - Give each container the minimum capabilities. Make each remaining gap
   visible in the docs or the functional test.
 - Rotate secrets by hand. Write no rotation automation.
-- Never print a secret. Pass tokens through stdin.
 - If a credential appears in the chat or in tool output, tell the user
   and suggest rotating it.
 
@@ -178,7 +177,7 @@ with a screenshot.
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: design principles, review loop, autonomous
   sessions, code and documentation style.
