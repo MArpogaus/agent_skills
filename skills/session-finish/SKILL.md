@@ -17,7 +17,8 @@ metadata: {stack: meta, requires: [dev-conventions, git-conventions, gtd]}
 # Skill: Finish a session
 
 `<start>` is the oldest commit that this session made in a repo. Find
-it in `git reflog`.
+it with `git reflog --date=iso`: the oldest commit entry after the
+session's first message.
 
 ## Hard rules
 
@@ -35,8 +36,8 @@ it in `git reflog`.
 ## 1. Background work
 
 - List the jobs, monitors and subagents you started. Wait at most 10
-  minutes for the jobs to end. List the jobs still running under "Running". Stop watchers
-  that have no further use.
+  minutes for the jobs to end. List the jobs still running under
+  "Running". Stop watchers that have no further use.
 - A job can have to keep running (a training run, a deploy). Then write
   in the report what it is, how to check it, and where its output goes.
 
@@ -60,8 +61,9 @@ For each repo the session touched:
 ## 3. Review
 
 If anything was committed since the last clean final round, run the
-final round of `dev-conventions`, "4.4 Final round". When the user
-turned reviews off, read your own diff once with the Simplicity view.
+final round of `dev-conventions`, "4.4 Final round". When reviews are
+off (`dev-conventions`, "4. Continuous review"), read your own diff once
+with the Simplicity view.
 
 ## 4. Git state
 
@@ -113,7 +115,7 @@ item:
 ## Required skills
 
 This skill assumes the following prerequisite skills are loaded.
-Use the `skill` tool to load them before using this one:
+Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: review loop, report files and the blocker rule.
 - **git-conventions**: commits and pushes.
