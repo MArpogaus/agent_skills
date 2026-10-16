@@ -16,8 +16,8 @@ metadata: {stack: meta, requires: [dev-conventions]}
 This skill creates a skill: a reusable SKILL.md that agents load on
 demand. The result is generic and contains all the specifics that the
 domain needs. For a change to an existing skill, edit the file in place,
-then do steps 6, 8 and 9. Update its `README.org` row when its scope
-changed.
+then do steps 6, 8 and 9. When its scope changed, update its
+`README.org` row and do the manifest description check of step 10.
 
 ## Hard rules
 
