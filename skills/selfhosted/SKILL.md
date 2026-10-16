@@ -16,12 +16,17 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 
 ## Hard rules
 
-- Deploy to the production host only when the user asks for it in this session.
+- Deploy to the production host only when the user asks for it in this
+  session.
 - Test every change on the test VM first.
-- If the logind session count rises by more than 50 during a deploy, stop and tell the user.
-- Roles assume a clean host (dev-conventions, "1. Design principles"). Give one-off steps for the existing production host to the user as manual steps.
-- Never automate migrations.
-- On the test VM, run commands yourself. On the production host, run only read-only commands, and say before each one that needs a PIN.
+- On the test VM, run commands yourself. On the production host, run
+  only read-only commands, except a deploy the user asked for in this
+  session. Say before each command that needs the user's hardware key.
+- If the logind session count rises by more than 50 during a deploy,
+  stop and tell the user.
+- Roles assume a clean install (dev-conventions, "1. Design
+  principles"). Give one-off steps for the existing production host to
+  the user as manual steps.
 
 ## Platform
 
@@ -40,16 +45,16 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 - `home-server` (public): the generic playbook `site.yml`, the core
   roles, the `test/` VM harness and the `examples/vm` deployment. It
   holds no host specifics and no default inventory.
-- `home-server-<service>` (<service>, bunker, monitoring, ntfy,
-  <service>): self-contained service repos. Each ships its role, its
-  alerts and its dashboards. The monitoring role knows no service.
+- `home-server-<service>` (for example `home-server-monitoring`):
+  self-contained service repos. Each ships its role, its alerts and its
+  dashboards. The monitoring role knows no service.
   `home-server` pins them as submodules under `services/`.
 - `<secrets repo>` (private): one directory per deployment with
   `inventory.yml`, `group_vars/all/vars.yml`, the Vault file
   `vault.yml`, `ssh/known_hosts` and `tasks/pre.yml`.
-- Host and platform specifics (SecureBlue, host specifics)
-  live in the deployment directory and its `host_tasks_pre` hook, never
-  in `home-server`.
+- Host and platform specifics (for example SecureBlue settings) live
+  in the deployment directory and its `host_tasks_pre` hook, never in
+  `home-server`.
 
 ## Service interface
 
@@ -60,7 +65,7 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
   per container, merged over the role defaults.
 - Similar features use one implementation and one variable shape in
   every service. Per-service proxy settings follow the same pattern.
-- No service has a hard dependency on ntfy.
+- No service has a hard dependency on the notification service.
 
 ## Dashboards
 
@@ -82,12 +87,12 @@ with a screenshot.
   `community.general.run0` plugin everywhere. Playbooks and scripts call
   no `run0`, `systemd-run` or `machinectl` directly. No custom become
   plugin and no pipelining.
-- Each `run0` call opens a logind session. Count them before and after a
-  deploy with `loginctl --no-legend list-sessions | wc -l`. Too
-  many sessions wedge polkit, and only a reboot clears them. Never leave
+- Each `run0` call opens a logind session. Count the sessions with
+  `loginctl --no-legend list-sessions | wc -l`. Too many sessions wedge
+  polkit, and only a reboot clears them. Never leave
   a `run0` call in the background.
 
-## Clean host only
+## Deploy commands
 
 - Write no wrapper deploy scripts. Document the exact commands:
 
@@ -121,15 +126,18 @@ with a screenshot.
 
 ## Root gate on the production host
 
-- The SSH key is on the user's hardware key, so each new SSH connection needs
-  the user's PIN. Reuse one connection (`ControlMaster`,
+- The SSH key is on the user's hardware key, so each new SSH connection
+  needs the user's input. Reuse one connection (`ControlMaster`,
   `ControlPersist`).
-- Root needs an open gate. The user runs `open the root gate --no-timer]` as `core` on the host and enters core's password once. A
-  timer closes the gate, or `close the root gate` closes it at once.
-- The deploy stops when the gate is closed. Then ask the user to open it.
-  Autonomous: record it as a blocker (`dev-conventions`, "2. Asking and
-  acting") and work on something else.
-- "gate open", "pin entered" or "timer extended" from the user means:
+- Root needs an open gate. A root gate script that the deployment repo
+  provides controls it. The gate is closed by default. The user opens
+  it as `<admin user>` on the host, with or without a timer.
+- Before a command that needs root, assert that the gate is open. If it
+  is closed, stop and ask the user to open it. Autonomous: record it as
+  a blocker (`dev-conventions`, "2. Asking and acting") and work on
+  something else.
+- The gate closes on its timer, or when the user closes it.
+- "gate open", "key unlocked" or "timer extended" from the user means:
   continue at once.
 - When done, tell the user, who closes the gate.
 
@@ -137,18 +145,19 @@ with a screenshot.
 
 - Pin actions as git-conventions, "CI workflows" says.
 - Dependabot updates actions, and pre-commit hooks follow
-  git-conventions, "Pre-commit hooks". In service repos, Renovate (`.github/renovate.json`, a regex manager over the `*_image`
+  git-conventions, "Pre-commit hooks". In service repos, Renovate
+  (`.github/renovate.json`, a regex manager over the `*_image`
   defaults) opens image update PRs against `dev`.
-- The agent tags no service repo. The user tags them by hand with the upstream version:
-  <service> uses the <service> major (`35`, then `35.1`), bunker the
-  WAF version, the others `v1.0`.
+- The agent tags no service repo. The user tags them by hand. A repo
+  that packages one upstream application uses the upstream version (for
+  example `35`, then `35.1`). The others use `v1.0.0`.
 - The production host runs tagged releases only. For a change deployed
   there, ask the user to tag a patch release of each changed service
   repo, so the tags match the host.
 
 ## Security
 
-- Keep the WAF WAF rules strict. Raise a limit for one path
+- Keep the WAF rules strict. Raise a limit for one path
   instead of adding an exception or disabling a rule.
 - Secrets live in Ansible Vault. Machine secrets are 48 alphanumeric
   characters: `openssl rand -base64 48 | tr -d '/+=' | cut -c1-48`.
@@ -161,8 +170,6 @@ with a screenshot.
 
 ## Debugging
 
-- Verify a claimed root cause before you act on it (dev-conventions,
-  "3. Verification").
 - When something worked before, suspect the most recent change first.
 - No workarounds. Trace the error to its cause. Question a new rule or
   exception that seems necessary all of a sudden.
@@ -171,8 +178,6 @@ with a screenshot.
 - If probes of a device fail 3 times in a row, stop and ask the user.
 - Confirm an upstream defect (for example in SecureBlue) before you
   draft an issue. The user posts it.
-- Deferred items go to the project's tasks in the user's agenda (`gtd`
-  skill), not into READMEs, code or TODO files.
 
 ---
 
