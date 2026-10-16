@@ -9,7 +9,7 @@ description: >
   `params.yaml` or an `mlruns/` directory.
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: ml, audience: researchers, requires: [git-conventions, python-dev]}
+metadata: {stack: ml, audience: researchers, requires: [dev-conventions, git-conventions, python-dev]}
 ---
 
 # Skill: ML Research Projects
@@ -34,7 +34,9 @@ metadata: {stack: ml, audience: researchers, requires: [git-conventions, python-
 
 ```
 <project>/
-├── data/                    # DVC-tracked input data
+├── data/
+│   ├── raw/                 # DVC-tracked input (`dvc add data/raw`)
+│   └── processed/           # pipeline stage outputs
 ├── results/                 # DVC-tracked experiment outputs
 ├── figures/                 # Paper figures (committed)
 ├── logs/                    # Training logs (gitignored)
@@ -47,7 +49,7 @@ metadata: {stack: ml, audience: researchers, requires: [git-conventions, python-
 │   └── hpo.py
 ├── src/
 │   └── <package>/
-│       ├── __init__.py      # one-line docstring + optional monkey-patches
+│       ├── __init__.py      # docstring + monkey-patches
 │       ├── data.py          # Data loading / preprocessing
 │       ├── distributions.py # Custom distribution definitions
 │       ├── models.py        # Model builders
@@ -117,7 +119,7 @@ The per-target values (for example `learning_rate`) live only in
 
 ### dvc.yaml: foreach over targets
 
-Use DVC `foreach` to parallelise across targets or datasets:
+Run each stage per target with DVC `foreach`:
 
 ```yaml
 stages:
@@ -205,9 +207,12 @@ train:
 
 ## Experiment tracking with MLflow
 
-Add `mlruns/` to `.gitignore`. Use `mlflow ui` to inspect runs.
+Add `mlruns/` to `.gitignore`.
 
 ### Logging from a training script
+
+`outdir` is `results/<target>`. The logged artifacts are the stage
+`outs` of `dvc.yaml`.
 
 ```python
 import mlflow
@@ -235,8 +240,7 @@ def train(...) -> dict[str, float]:
         "best_epoch": best_epoch,
     }
     mlflow.log_metrics(metrics)
-    mlflow.log_artifact(f"{outdir}/learning_curve.png")
-    mlflow.log_artifact(f"{outdir}/model_weights")
+    mlflow.log_artifacts(f"{outdir}/model", artifact_path="model")
     return metrics
 ```
 
@@ -272,7 +276,6 @@ loop uses `auto-hpo-studies`.
 - The commit body includes the markdown table from `hpo_study.md`.
 - Delete the outputs of discarded runs (`rm -r results/<target>_v2`).
   Run `dvc gc -w` only after the user agrees.
-- Only the final configs for each phase remain in the repo.
 
 ## Validating research code
 
@@ -282,24 +285,22 @@ reference to be wrong against. Build one.
 ### Simulate with known ground truth
 
 Write the data-generating process yourself, in **numpy only**, with
-no import of the model under test. This independence makes it a
-reference. Ship each frozen dataset with the truth beside it:
+no import of the model under test. Ship each frozen dataset with the truth beside it:
 
 ```
-data/<dgp-name>/
-├── obs.csv        # frozen sample, committed
+data/raw/<dgp-name>/
+├── obs.csv        # frozen sample
 └── truth.json     # the true parameters / effects of the generator
 ```
 
 Give every generator a CLI that regenerates its own folder from a
-fixed seed. Keep a `REGISTRY` dict so that tests and scripts look DGPs
-up by name.
+fixed seed. Tests and scripts look a DGP up by name with
+`getattr(<package>.simulations, name)`.
 
 ### Frozen data is a contract
 
 - Tests assert each CSV regenerates **bit-identically** from its
-  stored seed. Without that, the data silently drifts away from
-  `truth.json` and every number in the paper is unverifiable.
+  stored seed. Else the data drifts away from `truth.json`.
 - A new seed or changed equations means a **new folder**, never an
   in-place edit. Old results keep pointing at old data.
 
@@ -308,10 +309,9 @@ up by name.
 1. **Mathematical identities**: must hold by the maths, with no
    reference implementation: a transform inverts, a likelihood
    decomposes, a distributional claim survives a KS test.
-2. **Equivalence to independent implementations**: the strongest
-   external check. Where a special case of your model *is* a
-   classical model, it must match software written by other people
-   in another language (`statsmodels`, R). Commit the reference
+2. **Equivalence to independent implementations**: when a special
+   case *is* a classical model, it must match software by other
+   authors in another language (`statsmodels`, R). Commit the reference
    output so the suite runs without R installed.
 3. **Known-truth recovery**: the generator's true parameters,
    effects and counterfactuals, which no real dataset exposes.
@@ -336,19 +336,14 @@ A ground-truth bound is for regressions, not for precision claims.
 
 - Experiment configs write every option out (see `dev-conventions`,
   section 1, "Explicit configuration").
-- Add a new config only for a new idea. Existing configs get only
-  hyperparameter changes and fixes.
 - Names follow the notation of the paper.
 
 ### test/README.md
 
-Document what the suite guarantees, not how to run it: the five
-kinds of test, the file-by-file table, and **how each reference
-number was obtained** (by construction, analytically,
-Monte Carlo from the generator, or other software).
-
-Mark anything that trains `@pytest.mark.slow` (see `python-dev`,
-"Tests").
+Document what the suite guarantees, not how to run it. List the
+five kinds of test and a file-by-file table. State **how each
+reference number was obtained**: by construction, analytically,
+by Monte Carlo from the generator, or from other software.
 
 ## Paper-oriented code structure
 
@@ -371,11 +366,6 @@ Summary and BibTeX reference.
   dvc pull
   dvc repro
 #+end_src
-
-** Citation
-#+begin_src bibtex
-  @inproceedings{...}
-#+end_src
 ```
 
 ## Script conventions
@@ -387,6 +377,12 @@ no mode switches (`dev-conventions`, section 1, "Scripts stay
 dumb"). Each variant gets its own config file or `dvc.yaml` entry.
 
 ```python
+import argparse
+from pathlib import Path
+
+from <package>.data import prepare_features
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=True)
@@ -407,6 +403,8 @@ if __name__ == "__main__":
 This skill assumes the following prerequisite skills are loaded.
 Use the `skill` tool to load them before using this one:
 
+- **dev-conventions**: design principles, verification, review
+  loop, code and documentation style.
 - **git-conventions**: two-branch flow, conventional commits,
   pre-commit hooks, tagging and releases.
 - **python-dev**: Python project structure, pyproject.toml, ruff,
