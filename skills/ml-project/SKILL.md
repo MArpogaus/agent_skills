@@ -9,7 +9,7 @@ description: >
   `params.yaml` or an `mlruns/` directory.
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: ml, requires: [dev-conventions, git-conventions, python-dev], audience: researchers}
+metadata: {stack: ml, requires: [dev-conventions, git-conventions, python-dev]}
 ---
 
 # Skill: ML Research Projects
@@ -93,6 +93,9 @@ from <package> import distributions  # noqa: F401
 ```
 
 ## DVC pipeline design
+
+Intermediate pipeline outputs are Feather files
+(`pd.read_feather`, `DataFrame.to_feather`).
 
 ### params.yaml: global configuration
 
@@ -182,11 +185,6 @@ stages:
         - results/${item}/metrics.json:
             cache: false
 ```
-
-### Stage conventions
-
-Intermediate pipeline outputs are Feather files
-(`pd.read_feather`, `DataFrame.to_feather`).
 
 ### Per-target model configs
 
