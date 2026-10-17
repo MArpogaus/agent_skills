@@ -104,7 +104,6 @@ Only for a specialist audience. Needs the code stanza from
 =header-extras.org=. ox-beamer marks the frame fragile by itself.
 
 #+begin_src org
-,** <Frame title>
 ,#+ATTR_LATEX: :options {<Block title>}
 ,#+begin_block
 ,#+begin_src python
@@ -131,6 +130,10 @@ Last heading of the file.
 ,* References :B_ignoreheading:
 :PROPERTIES:
 :BEAMER_env: ignoreheading
+:END:
+,** References
+:PROPERTIES:
+:BEAMER_opt: allowframebreaks
 :END:
 ,#+print_bibliography:
 #+end_src

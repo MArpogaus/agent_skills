@@ -83,6 +83,9 @@ pages too.
 - The headless command uses the `bibtex` backend of biblatex, not
   `biber`. Check the log with the citation check of `SKILL.md`,
   section "4. Verification", step 1.
+- With `backend=bibtex` the final log still says "There were undefined
+  references" and "Please (re)run BibTeX". Ignore both when the
+  citation check prints `0`.
 
 ## Literate deck
 

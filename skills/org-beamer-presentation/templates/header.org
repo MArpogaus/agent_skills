@@ -39,7 +39,7 @@
 # -----------------------------------------------------------------------
 
 #+BEAMER_HEADER: \setbeamertemplate{bibliography item}[text]
-#+BEAMER_HEADER: \graphicspath{{<YYYYMMDDTHHMMSS>--<slug>__<tags>/}}
+#+BEAMER_HEADER: \graphicspath{{<YYYYMMDDTHHMMSS>--<title-slug>__<tag1>_<tag2>/}}
 
 * <Section>
 ** <Frame title>
@@ -51,5 +51,9 @@
 * References :B_ignoreheading:
 :PROPERTIES:
 :BEAMER_env: ignoreheading
+:END:
+** References
+:PROPERTIES:
+:BEAMER_opt: allowframebreaks
 :END:
 #+print_bibliography:

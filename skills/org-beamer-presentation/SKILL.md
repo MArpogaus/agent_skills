@@ -48,8 +48,9 @@ message.
 
 ## 1. Before writing
 
-Read the two newest decks in `<presentations dir>`. When neither is of
-the same talk type, also read the newest deck of that type. Their
+Read the two newest decks in `<presentations dir>`. When neither is for
+the same kind of event (conference, internal, teaching), also read the
+newest deck of that kind. Their
 density is the target: about 20 words per frame, one figure and 1 or 2
 short bullets.
 
@@ -151,11 +152,12 @@ correct deck. Do these steps after each build.
 
 1. Build the PDF.
    `grep -c 'Citation .* undefined' <file>.log` prints `0`.
-2. Count frames, not pages: `grep -c '\\begin{frame}' <file>.tex`.
+2. Count frames, not pages, in the document body only:
+   `sed -n '/\\begin{document}/,$p' <file>.tex | grep -c '\\begin{frame}'`.
    Compare with the budget.
-3. Run `tools/contact-sheet.py <file>.pdf <scratch dir>/sheet` and
-   look at every page. `tools/box-pages.py <file>.log` maps overfull
-   boxes to pages.
+3. Run `tools/contact-sheet.py <file>.pdf <dir>/sheet`, with `<dir>` a
+   directory in the agent's scratch space, and look at every page.
+   `tools/box-pages.py <file>.log` maps overfull boxes to pages.
 4. Check the semantics of each figure. Find its data source by file
    path. Check that axes, sides, labels and colours show what the text
    says.
