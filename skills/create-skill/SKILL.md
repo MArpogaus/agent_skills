@@ -32,8 +32,6 @@ Commit the change with the type `docs(<skill>):`.
 - Every `SKILL.md` over 600 words has `## Hard rules` as its first H2.
   It holds 5 to 10 short imperative bullets: the rules that the agent
   breaks most. The sections below do not restate them.
-- Cover the common case. Leave rare cases out: the agent asks when one
-  comes up.
 - Write only what tools do not enforce. Do not restate what a linter,
   formatter or pre-commit hook already checks.
 - Do not restate a rule that another skill owns. Point to it by skill
