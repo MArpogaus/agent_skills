@@ -36,8 +36,9 @@ or docs configuration.
 - Use setuptools. Do not use hatchling.
 - Do not accept a keyword argument that the function does not use.
   Do not add `**kwargs` "for later".
-- Apply each config change that fits every project (hook revisions,
-  CI, ruff rules) to `<skeleton checkout>` too (section "Project
+- Copy into `<skeleton checkout>` only: hook revisions in
+  `.pre-commit-config.yaml`, CI workflow files and the ruff `select`
+  list. Never project-specific ignores or options (section "Project
   setup").
 
 ## Design
@@ -163,7 +164,6 @@ running kernel.
 
 - Run code and tests with `.venv/bin/python`. Without `.venv`, use
   the system `python3`.
-- A tool for your own use follows `sandbox-env`.
 - Where the edit is part of the task, you may edit the dependency
   list in `pyproject.toml`. `uv lock` and `uv sync` are the user's.
 - `uv.lock` is committed. `.envrc` holds `export VIRTUAL_ENV=.venv`
