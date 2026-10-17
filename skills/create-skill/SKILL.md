@@ -16,8 +16,9 @@ metadata: {stack: meta, requires: [dev-conventions]}
 This skill creates a skill: a reusable SKILL.md that agents load on
 demand. The result is generic and contains all the specifics that the
 domain needs. For a change to an existing skill, edit the file in place,
-then do steps 6, 8 and 9. When its scope changed, update its
-`README.org` row and do the manifest description check of step 10.
+then do steps 6 and 9, and step 8 when the change comes from session
+experience. When its scope changed, update its `README.org` row and do
+the manifest description check of step 10.
 
 ## Hard rules
 
@@ -146,8 +147,8 @@ are relative to the skill directory.
 ### 8. Review against the user's rules
 
 Do this step when you create or change a skill from session experience.
-Run the Coverage view (`dev-conventions`, "4.3 Reviewers") on the
-change:
+Check the change as the Coverage view (`dev-conventions`, "4.3
+Reviewers") does:
 
 1. Read the user's messages of the sessions that led to the change.
 2. Read the memory notes that touch the skill's domain.
