@@ -31,7 +31,8 @@ A plain line, or logos with `\inst{n}` markers on the authors in
 
 * TikZ diagrams
 Only for frames with an inline `tikzpicture`. Load the libraries that
-the picture uses. Use `orange` for fills.
+the picture uses. Use `accent` (block "Link colours") for fills, and
+add that block.
 
 #+begin_src org
 ,#+BEAMER_HEADER: \usepackage{tikz}
@@ -51,7 +52,7 @@ One line each, added when a frame uses it:
 * Link colours
 
 #+begin_src org
-,#+BEAMER_HEADER: \hypersetup{colorlinks, linkcolor=, urlcolor=orange}
+,#+BEAMER_HEADER: \AtBeginDocument{\usebeamercolor{alerted text}\colorlet{accent}{alerted text.fg}\hypersetup{colorlinks, linkcolor=, urlcolor=accent}}
 #+end_src
 
 * Frame number in the footer
@@ -69,7 +70,7 @@ Only for a specialist audience. Stops evaluation on export.
 #+begin_src org
 ,#+PROPERTY: header-args :results silent :eval never-export
 ,#+LATEX_HEADER: \usepackage{listings}
-,#+LATEX_HEADER: \lstset{showstringspaces=false,breaklines=true,basicstyle=\small, keywordstyle=\color{orange},stringstyle=\color{orange},numberstyle=\color{orange},commentstyle=\color{lightgray}}
+,#+LATEX_HEADER: \lstset{showstringspaces=false,breaklines=true,basicstyle=\small, keywordstyle=\color{accent},stringstyle=\color{accent},numberstyle=\color{accent},commentstyle=\color{lightgray}}
 #+end_src
 
 Pin the backend in the local-variables block at the end of the file.

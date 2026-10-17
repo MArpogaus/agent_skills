@@ -137,6 +137,9 @@ emacs -Q --batch -l org -l ox-beamer \
   "<file>.org" -f org-beamer-export-to-pdf
 ```
 
+`<bib file>` is the value of `org-cite-global-bibliography` in
+`<user home>/.emacs.d`.
+
 When the export fails, or before frames with code, tables, math or
 generated figures, read `reference/pitfalls.md`.
 
@@ -147,7 +150,7 @@ relative to this skill's directory. A clean log does not prove a
 correct deck. Do these steps after each build.
 
 1. Build the PDF.
-   `grep -cE 'Citation .* undefined|rerun Biber' <file>.log` prints `0`.
+   `grep -c 'Citation .* undefined' <file>.log` prints `0`.
 2. Count frames, not pages: `grep -c '\\begin{frame}' <file>.tex`.
    Compare with the budget.
 3. Run `tools/contact-sheet.py <file>.pdf <scratch dir>/sheet` and

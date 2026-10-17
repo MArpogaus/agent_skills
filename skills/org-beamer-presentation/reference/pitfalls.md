@@ -81,8 +81,8 @@ pages too.
 - The metropolis title page always reports about 13.8pt of `\vbox`.
   Ignore it.
 - The headless command uses the `bibtex` backend of biblatex, not
-  `biber`. After the build, this prints `0`:
-  `grep -cE 'Citation .* undefined|rerun Biber' <file>.log`.
+  `biber`. Check the log with the citation check of `SKILL.md`,
+  section "4. Verification", step 1.
 
 ## Literate deck
 
@@ -142,7 +142,7 @@ A deck can compute its figures and tables in Python `src` blocks.
 - **Comparable values only.** Do not sum losses over models of
   different size.
 - **Noisy series.** Show the full range in one panel, often on a log
-  axis, and the settled range with a rolling mean in a second panel.
+  axis. Show the settled range with a rolling mean in a second panel.
 - **Explain marks in the figure.** Label what a band or a dot is.
 - Render each generated figure on its own at 120 dpi or more and look
   at it.
