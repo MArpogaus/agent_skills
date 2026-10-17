@@ -17,51 +17,30 @@ New text follows the rule on numbers, results and citations in
 `paper-writing` ("Hard rules"). The build commands are in
 `paper-writing` ("Phase 4: Build and compilation").
 
-## Phase 1: Initial Analysis and Structural Setup
+## 1. Revision
 
-1. **Identify Missing Information:**
-   - Scan the document for placeholders, missing values or incomplete
-     sections (for example "xx", "...", comments like
-     `% Add figure here`).
-   - If the preamble has no `\TODO{}` macro, add the one from
-     `paper-writing` ("TODO macros").
-   - Insert `\TODO{...}` markers for all missing information.
+1. Mark each placeholder, missing value or incomplete section (for
+   example "xx", "...", `% Add figure here`) with `\TODO{...}`. If the
+   preamble has no `\TODO{}` macro, add the one from `paper-writing`
+   ("TODO macros").
+2. Figures, tables, labels and `\Cref` follow `paper-writing`
+   ("Labels and BibTeX keys").
+3. Before you rewrite a section, estimate the share of sentences you
+   will change. Above half, write a new version of the section.
+4. Before hand-back, synchronise Abstract, Research Highlights and
+   Conclusion with the main findings. Remove leftover comments and
+   outdated `\TODO{}` markers. Compile as `paper-writing` ("Hard
+   rules") says.
 
-## Phase 2: Content Generation and Integration
+## 2. Revision cycle
 
-1. **Draft Results Section:**
-   - Insert a new subsection or replace a `\TODO{}` marker.
-
-2. **Integrate Figures and Tables:**
-   - Figures, tables, labels and `\Cref` follow `paper-writing`
-     ("Labels and BibTeX keys").
-
-## Phase 3: Language Polishing and Structural Refinement
-
-1. **Proofread and Polish Language:**
-   - Make targeted edits. Before you rewrite a section, estimate the
-     share of sentences you will change. Above half, write a new
-     version of the section instead.
-
-2. **Enhance Structure and Flow:**
-   - Add subsections or reorder content where the argument needs it.
-
-3. **Final Review and Cleanup:**
-   - Synchronise Abstract, Research Highlights and Conclusion with
-     the main findings.
-   - Remove leftover comments, outdated `\TODO{}` markers and
-     redundant information.
-   - Compile and check the log as `paper-writing` ("Hard rules")
-     says.
-
-## Phase 4: Revision cycle
-
-Use this phase when a revised version goes back to a venue.
+Use this section when a revised version goes back to a venue.
 
 ### latexdiff for change tracking
 
 When the user says the paper is submitted, tag the commit
-`submitted-<venue>-<YYYYMMDD>`. The diff base is the newest such tag.
+with an annotated tag: `git tag -a submitted-<venue>-<YYYYMMDD> -m
+"Submitted to <venue>"`. The diff base is the newest such tag.
 `--flatten` follows the `\input` files of both versions. `<engine>` is
 the build flag of the venue (`-lualatex` or `-pdf`):
 
