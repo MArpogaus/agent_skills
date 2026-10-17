@@ -53,7 +53,7 @@ One line each, added when a frame uses it:
 
 #+begin_src org
 ,#+BEAMER_HEADER: \hypersetup{colorlinks, linkcolor=, citecolor=, urlcolor=accent}
-,#+BEAMER_HEADER: \AtBeginDocument{\usebeamercolor{alerted text}\colorlet{accent}{alerted text.fg}}
+,#+BEAMER_HEADER: \AtBeginDocument{\usebeamercolor{alerted text}\colorlet{accent}{alerted text.fg}\usebeamercolor[fg]{normal text}}
 #+end_src
 
 * Frame number in the footer
