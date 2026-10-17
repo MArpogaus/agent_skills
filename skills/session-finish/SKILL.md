@@ -16,9 +16,8 @@ metadata: {stack: meta, requires: [dev-conventions, git-conventions, gtd]}
 
 # Skill: Finish a Session
 
-`<start>` is the oldest commit that this session made in a repo. It is
-the oldest reflog entry (`git reflog --date=iso`) after the session's
-first message whose hash appears in this session's commit output.
+`<start>` is the oldest commit that this session made in a repo: the
+first commit hash in this session's commit output for that repo.
 
 ## Hard rules
 
