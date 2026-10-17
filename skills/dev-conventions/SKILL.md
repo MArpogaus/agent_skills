@@ -83,9 +83,9 @@ The simplest solution wins, over taste, habit and "best practice".
   user's configuration, not into the library.
 - **Explicit configuration:** experiment configs list every option,
   defaults included. Deployment configs follow `selfhosted`, "Service
-  interface". Duplication between variant configs
-  is accepted. Do not factor it out. Keep the number of variants small.
-  Tune the existing config before you add a new one.
+  interface". Duplication between variant configs is accepted. Do not
+  factor it out. Keep the number of variants small. Tune the existing
+  config before you add a new one.
 - **No backwards compatibility before 1.0.** No obsolete aliases, no
   deprecation warnings, no text about earlier versions. A 1.0 is a clean
   cut.
@@ -208,9 +208,10 @@ the watcher for its `REVIEW_SKIP` value with all repos of that value.
   accumulate. Docs-only changes, including decks in `.org`, wait for
   the final round. In a repo where `.org` files hold code, set
   `REVIEW_SKIP='*.md'`.
-- The monitor keeps the last handed-out commit per repo in `$STATE`
-  (default `~/.cache/review-watch`). Keep this directory when you
-  re-arm a watcher.
+- The monitor keeps the last handed-out commit per repo in `$STATE`.
+  At the first arm in a session, make a new state directory:
+  `STATE=$(mkdir -p ~/.cache/review-watch && mktemp -d ~/.cache/review-watch/XXXXXX)`.
+  Pass the same `STATE` each time you re-arm a watcher in this session.
 
 ### 4.2 Run a round on each event
 
@@ -219,7 +220,8 @@ On a `REVIEW` line:
 1. Continue your own work.
 2. Spawn the reviewers in parallel, one subagent per view.
 3. Verify each finding yourself.
-4. Fix in small commits. The monitor sends them into the next round.
+4. Fix findings in your own commits in small commits; report the
+   others to their owner. The monitor sends the fixes into the next round.
 5. Keep a "checked and rejected" list with reasons.
 
 ### 4.3 Reviewers

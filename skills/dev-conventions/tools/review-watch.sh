@@ -3,10 +3,11 @@
 # range on $BRANCH (default: the current branch of each repo) crosses
 # the threshold, then mark it as handed out. REVIEW_SKIP lists the
 # path patterns that do not count (default: *.md *.org; empty: none).
+# STATE (required) is the directory for the last handed-out commits.
 REVIEW_SKIP=${REVIEW_SKIP-*.md *.org}
 set -f; skip=(); for p in $REVIEW_SKIP; do skip+=(":!$p"); done; set +f
 REVIEW_LINES=${REVIEW_LINES:-100} REVIEW_COMMITS=${REVIEW_COMMITS:-5} EVERY=${EVERY:-300}
-STATE=${STATE:-$HOME/.cache/review-watch}; mkdir -p "$STATE"
+mkdir -p "${STATE:?set STATE, see SKILL.md section 4.1}"
 declare -A skipped
 while true; do
   for r in "$@"; do
@@ -21,7 +22,8 @@ while true; do
     [ -s "$f" ] || { echo "$head" > "$f"; continue; }
     last=$(cat "$f")
     [ "$head" = "$last" ] && continue
-    # stored commit gone (rewritten history, gc): restart from the current head
+    # stored commit not an ancestor (rewritten history, gc): restart from
+    # the merge-base, else from the current head
     git -C "$r" merge-base --is-ancestor "$last" "$head" 2>/dev/null ||
       last=$(git -C "$r" merge-base "$last" "$head" 2>/dev/null) ||
       { echo "$head" > "$f"; continue; }
