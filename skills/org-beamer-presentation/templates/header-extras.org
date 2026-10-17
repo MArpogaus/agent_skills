@@ -31,7 +31,7 @@ A plain line, or logos with `\inst{n}` markers on the authors in
 
 * TikZ diagrams
 Only for frames with an inline `tikzpicture`. Load the libraries that
-the picture uses. Use theme colours (`mLightBrown`, `mDarkTeal`) for fills.
+the picture uses. Use `orange` for fills.
 
 #+begin_src org
 ,#+BEAMER_HEADER: \usepackage{tikz}
@@ -49,10 +49,9 @@ One line each, added when a frame uses it:
 | `xfrac` | inline slanted fractions, `\sfrac{1}{3}` |
 
 * Link colours
-`mLightBrown` exists only under metropolis.
 
 #+begin_src org
-,#+BEAMER_HEADER: \hypersetup{colorlinks, linkcolor=, urlcolor=mLightBrown}
+,#+BEAMER_HEADER: \hypersetup{colorlinks, linkcolor=, urlcolor=orange}
 #+end_src
 
 * Frame number in the footer
@@ -70,12 +69,11 @@ Only for a specialist audience. Stops evaluation on export.
 #+begin_src org
 ,#+PROPERTY: header-args :results silent :eval never-export
 ,#+LATEX_HEADER: \usepackage{listings}
-,#+LATEX_HEADER: \lstset{showstringspaces=false,breaklines=true,basicstyle=\small, keywordstyle=\color{mLightBrown},stringstyle=\color{mLightBrown},numberstyle=\color{mLightBrown},commentstyle=\color{lightgray}}
+,#+LATEX_HEADER: \lstset{showstringspaces=false,breaklines=true,basicstyle=\small, keywordstyle=\color{orange},stringstyle=\color{orange},numberstyle=\color{orange},commentstyle=\color{lightgray}}
 #+end_src
 
-The =\lstset= colours are metropolis names. Pin the backend in the
-local-variables block at the end of the file. A deck has one such
-block:
+Pin the backend in the local-variables block at the end of the file.
+A deck has one such block:
 
 #+begin_src org
 ,# Local Variables:

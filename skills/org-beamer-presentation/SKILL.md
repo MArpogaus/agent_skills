@@ -49,8 +49,9 @@ message.
 ## 1. Before writing
 
 Read the two newest decks in `<presentations dir>`. When neither is of
-the same talk type, also read the newest deck of that type. Their density is the
-target: about 20 words per frame, one figure and 1 or 2 short bullets.
+the same talk type, also read the newest deck of that type. Their
+density is the target: about 20 words per frame, one figure and 1 or 2
+short bullets.
 
 Ask for the talk length and the audience when the request does not
 state them. Autonomous default (see `dev-conventions`, "5. Interactive
@@ -128,6 +129,8 @@ emacs -Q --batch -l org -l ox-beamer \
                 org-latex-packages-alist
                 (quote (("" "xcolor" t)
                         ("AUTO" "polyglossia" t ("xelatex" "lualatex"))))
+                org-cite-biblatex-options "backend=bibtex"
+                org-cite-global-bibliography (list "<bib file>")
                 org-latex-pdf-process
                 (list "latexmk -f -%latex -interaction=nonstopmode \
                        -output-directory=%o %f"))' \
@@ -143,11 +146,13 @@ Run these with the `PATH` of section 3 (`<test rig>`). Tool paths are
 relative to this skill's directory. A clean log does not prove a
 correct deck. Do these steps after each build.
 
-1. Build the PDF. `pdftotext <file>.pdf - | grep -c '??'` prints `0`.
-2. Count frames with `pdfinfo` and compare with the budget.
-3. Run `tools/contact-sheet.py <file>.pdf <scratch>/sheet` and look at
-   every page. `tools/box-pages.py <file>.log` maps overfull boxes to
-   pages.
+1. Build the PDF.
+   `grep -cE 'Citation .* undefined|rerun Biber' <file>.log` prints `0`.
+2. Count frames, not pages: `grep -c '\\begin{frame}' <file>.tex`.
+   Compare with the budget.
+3. Run `tools/contact-sheet.py <file>.pdf <scratch dir>/sheet` and
+   look at every page. `tools/box-pages.py <file>.log` maps overfull
+   boxes to pages.
 4. Check the semantics of each figure. Find its data source by file
    path. Check that axes, sides, labels and colours show what the text
    says.
