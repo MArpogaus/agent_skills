@@ -71,7 +71,8 @@ value in `$STATE/iter`.
 
 1. `git log --grep "<target-id> done:"` finds a commit: report the
    study as finished and stop.
-2. No `hpo_study.md`: ask the user for the definition (step 1).
+2. No `hpo_study.md`: go to step 1. Ask only for the items of step 1
+   that the user did not give.
 3. No state files and no `launched` row, or row `<N>` is `committed`,
    `reverted` or `failed`: go to step 10.
 4. `status` is `running` and a non-zombie process is in the session
