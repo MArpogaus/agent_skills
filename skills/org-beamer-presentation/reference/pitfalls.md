@@ -32,8 +32,6 @@ pages too.
   (`:options {…}`) write `\_`, because that text is raw LaTeX.
 - **A line that starts with a number and a period becomes a list item.**
   Reflow so no wrapped line starts with `2024. The`.
-- **List options.** ox-beamer reads only `:environment`, `:overlay` and
-  `:options` on a list. `:options` does not set spacing.
 - **Frame text after an in-frame block** must not be a child of the
   block heading. Use a `#+begin_block` special block instead of a `***`
   heading.
@@ -41,7 +39,6 @@ pages too.
   example block or `~code~` as fragile by itself. Add `:BEAMER_OPT:
   fragile` only for raw verbatim (`\verb`, `verbatim`, `lstlisting`)
   inside a `#+begin_export latex` block.
-- A `.bbl-SAVE-ERROR` file is an interrupted bibtex run. Delete it.
 
 ## Code frames
 
@@ -110,8 +107,6 @@ rule in `SKILL.md`).
 - Cache the numbers of a long run as CSV or JSON in the sidecar. The
   plotting blocks read only the cache, so the deck rebuilds without the
   run.
-- A column whose name is a pandas attribute (`iat`, `loc`, `T`) is
-  reachable only as `frame["<name>"]`.
 
 ## Figures for the dark 16:9 deck
 

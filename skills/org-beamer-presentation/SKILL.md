@@ -9,7 +9,7 @@ description: >
   `#+LATEX_CLASS: beamer` changes.
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: org-mode latex beamer, requires: [dev-conventions, git-conventions]}
+metadata: {stack: org-mode latex beamer, requires: [dev-conventions, python-dev]}
 ---
 
 # Skill: Org mode Beamer presentations
@@ -91,6 +91,9 @@ figure on the left. Text does not repeat numbers that the figure
 shows. Use `:noexport:` to park a frame. Lines that start with `# `
 inside a frame are the user's speaker prose: do not change them.
 
+**Language.** A deck's language follows the talk's language
+(`#+LANGUAGE:`).
+
 **Scope.** The hard rules apply to every deck. An internal fact deck
 that the user asks for has two exceptions: no time budget, and up to 6
 bullets per frame. Every deck is self-contained with its own sidecar
@@ -144,7 +147,7 @@ emacs -Q --batch -l org -l ox-beamer \
 ```
 
 `<bib file>` is the file that `org-cite-global-bibliography` resolves to
-in the user's Emacs (evaluate it there, or ask the user).
+in the user's Emacs (read it from the user's configuration, or ask).
 
 When the export fails, or before frames with code, tables, math or
 generated figures, read `reference/pitfalls.md`.
@@ -185,4 +188,4 @@ This skill assumes the following prerequisite skills are loaded.
 Use the `Skill` tool (opencode: `skill`) to load them before using this one:
 
 - **dev-conventions**: autonomous defaults and the review loop.
-- **git-conventions**: commits when the deck lives in a tracked repo.
+- **python-dev**: figure rules for the plotting blocks.

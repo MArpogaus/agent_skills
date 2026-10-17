@@ -14,7 +14,7 @@
 #+OPTIONS: TeX:t LaTeX:t H:2 toc:nil date:nil
 #+COLUMNS: %40ITEM %10BEAMER_env(Env) %9BEAMER_envargs(Env Args) %4BEAMER_col(Col) %10BEAMER_extra(Extra)
 
-#+LANGUAGE: en
+#+LANGUAGE: <lang>
 #+LATEX_COMPILER: lualatex
 
 #+LATEX_CLASS: beamer
