@@ -39,6 +39,9 @@ cargo test -p <crate> --locked
 ```
 
 - Always pass `--locked`. `Cargo.lock` is committed.
+- To add a dependency, run `cargo add <crate>` and commit `Cargo.toml`
+  and `Cargo.lock` together. Never run `cargo update` for other
+  dependencies.
 - Before a push, run the workspace form:
   `cargo clippy --workspace --all-targets --locked -- -D warnings`,
   `cargo test --workspace --locked`, `cargo deny check`.
