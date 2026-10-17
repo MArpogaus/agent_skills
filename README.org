@@ -40,26 +40,26 @@ All skills are licensed under MIT: see =LICENSE=.
 
 ** Available skills
 
-| Name                   | Description                                                                                                           |
-|------------------------+-----------------------------------------------------------------------------------------------------------------------|
-| python-dev             | Python conventions: setuptools, ruff, pytest, uv                                                                      |
-| git-conventions        | Git workflow: two-branch, conventional commits                                                                        |
-| create-skill           | Create or change an agent skill in this collection                                                                    |
-| repo-tour              | Guided code tour of an unfamiliar repo: one stop at a time, linked, verified                                          |
-| latex-paper-revision   | LaTeX paper revision and enhancement workflow                                                                         |
-| ml-project             | Research ML project conventions (DVC, MLflow, HPO)                                                                    |
-| auto-hpo-studies       | Autonomous HPO loop: define target, iterate update-config, run, monitor, commit until convergence, with MLflow        |
-| paper-writing          | End-to-end paper writing workflow: figure generation, LaTeX templates (IEEE/Elsevier/UAI), venue submission           |
-| emacs-config           | The literate Emacs configuration: org-only editing, naming, package idioms, git flow                                  |
-| emacs-package          | Emacs Lisp packages: layout, the make check pipeline, ERT, display engine rules, MELPA                                |
-| org-beamer-presentation | Org to Beamer to PDF talks: three designs (metropolis-dark default), figure-first frames, denote naming              |
-| dev-conventions        | Cross-project way of working: simplest solution wins, asking and acting, verification, review loop, autonomy, style   |
-| rust-dev               | Rust conventions: toolchain in the agent home, clippy/fmt/deny pipeline, workspace layout, decision records           |
-| selfhosted             | Self-hosting: Ansible with run0 become, rootless Podman Quadlets, repo split, VM-first tests                          |
-| gtd                    | The Org agenda routine: capture, day review, inbox triage, retro and journal, weekly review                           |
-| session-finish         | End-of-session cleanup: jobs, leftovers, final review, git state, agenda, lessons, report                             |
-| sandbox-env            | Dev tools for the agent in its own home: uv, micromamba with conda-forge, nix when present                            |
-| ntfy-channel           | Agent and user chat over an ntfy topic: resolve server, topic and title, post with a hidden token, watch without echo |
+| Name                    | Description                                                                                                           |
+|-------------------------+-----------------------------------------------------------------------------------------------------------------------|
+| python-dev              | Python conventions: setuptools, ruff, pytest, uv                                                                      |
+| git-conventions         | Git workflow: two-branch, conventional commits                                                                        |
+| create-skill            | Create or change an agent skill in this collection                                                                    |
+| repo-tour               | Guided code tour of an unfamiliar repo: one stop at a time, linked, verified                                          |
+| latex-paper-revision    | LaTeX paper revision and enhancement workflow                                                                         |
+| ml-project              | Research ML project conventions (DVC, MLflow, HPO)                                                                    |
+| auto-hpo-studies        | Autonomous HPO loop: define target, iterate update-config, run, monitor, commit until convergence, with MLflow        |
+| paper-writing           | End-to-end paper writing workflow: figure generation, LaTeX templates (IEEE/Elsevier/UAI), venue submission           |
+| emacs-config            | The literate Emacs configuration: org-only editing, naming, package idioms, git flow                                  |
+| emacs-package           | Emacs Lisp packages: layout, the make check pipeline, ERT, display engine rules, MELPA                                |
+| org-beamer-presentation | Org to Beamer to PDF talks: three designs (metropolis-dark default), figure-first frames, denote naming               |
+| dev-conventions         | Cross-project way of working: simplest solution wins, asking and acting, verification, review loop, autonomy, style   |
+| rust-dev                | Rust conventions: toolchain in the agent home, clippy/fmt/deny pipeline, workspace layout, decision records           |
+| selfhosted              | Self-hosting: Ansible with run0 become, rootless Podman Quadlets, repo split, VM-first tests                          |
+| gtd                     | The Org agenda routine: capture, day review, inbox triage, retro and journal, weekly review                           |
+| session-finish          | End-of-session cleanup: jobs, leftovers, final review, git state, agenda, lessons, report                             |
+| sandbox-env             | Dev tools for the agent in its own home: uv, micromamba with conda-forge, nix when present                            |
+| ntfy-channel            | Agent and user chat over an ntfy topic: resolve server, topic and title, post with a hidden token, watch without echo |
 
 ** Use of LLM Coding Tools
 
