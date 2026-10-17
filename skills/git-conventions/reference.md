@@ -204,8 +204,9 @@ git push --no-verify origin dev-<owner>
 - `git update-ref` also moves a checked-out `main`. Its tree equals the
   old tree, so the working tree and the index still match.
 - Existing release tags keep the old commits reachable.
-- After the rewrite, retarget open pull requests onto `dev-<owner>`,
-  delete merged branches and protect `main`.
+- After the rewrite, retarget open pull requests onto `dev-<owner>`
+  and delete merged branches. With more than one owner, protect
+  `main`.
 - In a repo with one owner, use `dev` in place of `dev-<owner>`. In
   step 3, run `git update-ref refs/heads/dev "$M"` instead of
   `git branch`, because `dev` exists. When `dev` is checked out, first

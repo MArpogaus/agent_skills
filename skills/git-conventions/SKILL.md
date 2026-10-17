@@ -83,7 +83,6 @@ a root commit or rewrite pushed history.
   commit. The root commit contains exactly `.gitignore` (and
   `.pre-commit-config.yaml` if it exists at that point). Its message is
   `chore: init` with no body. A bare `init` fails the commitizen hooks.
-- **`dev`** is the working branch (hard rules).
 
 ## History is append-only once pushed
 
@@ -123,10 +122,13 @@ change does not pass the hooks yet, stash it
 ## Commit messages
 
 ```
-<type>[(<scope>)]: <description, at most 68 characters>
+<type>[(<scope>)]: <description>
 
 [optional body wrapped at 72 characters]
 ```
+
+The whole first line, type and scope included, has at most 68
+characters.
 
 | Type       | Usage                                 |
 |------------|---------------------------------------|
@@ -152,9 +154,11 @@ skill adds its own hooks (for example ruff in `python-dev`).
   nothing. Verify that `ls .git/hooks/` shows `pre-commit`, `commit-msg`
   and `pre-push`. Document the command in `CONTRIBUTING.md`.
 - `commitizen-branch` checks the pushed range. The first push to an
-  empty remote has no range and fails. Run `cz check --rev-range HEAD`,
-  then push that first time with `--no-verify`. Then set `origin/HEAD`
-  once with `git remote set-head origin -a`: later pushes need it.
+  empty remote has no range and fails. Run
+  `uvx --from commitizen cz check --rev-range HEAD`, then push that
+  first time with `--no-verify`. Then run
+  `git remote set-head origin main` once: later pushes need
+  `origin/HEAD`.
 - **Hook revisions.** Run `pre-commit autoupdate` each time you change
   the config. Run `pre-commit migrate-config` when it warns about
   deprecated stage names.
