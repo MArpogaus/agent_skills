@@ -25,25 +25,22 @@ branch, attribution and the report format.
 
 ## Hard rules
 
-- **Justify every addition.** Before you add a file, option, script,
-  dependency, stage or code path, name the simpler alternative: delete,
-  reuse, a config or one line. Use it unless it fails. State it when the
-  choice is not obvious.
+- **Be lazy, think first. Justify every addition.** Write no code
+  before you know the simplest solution. Before you add a file, option,
+  script, dependency, stage or code path, name the simpler alternative:
+  delete, reuse, a config or one line. Use it unless it fails. State it
+  when the choice is not obvious.
 - **Deletion beats addition.** Delete what has no clear reason to exist.
-- **Research before you build.** Before you implement something new,
-  search the repo, the standard library, the platform, the installed
-  dependencies and then online. It often exists already. A
-  reimplementation is a defect.
-- **Be lazy, think first.** Write no line of code before you know the
-  simplest solution that works.
+- **Research before you build** (section 1, "Research order for a new
+  feature"). A reimplementation is a defect.
 - **Blockers stop that part of the work.** Interactive: ask the
   decisions that are the user's. Autonomous: never ask and never wait
   (section 2).
 - **Run it and look at it before you report.** Never report "fixed" on
   reasoning. Screenshot what draws (UI, plots, slides, GIFs) in each
   theme and mode the project supports.
-- **Never touch the user's environment:** no project environment, lock
-  file or package changes. Report a package that the project
+- **Never touch the user's environment:** no project environment,
+  dependency lock file (`uv.lock`) or package changes. Report a package that the project
   environment lacks. Safe commands: the stack skill (`python-dev`,
   "uv and the environment").
 - **The user's uncommitted edits are sacred.** Before a branch switch
@@ -164,8 +161,7 @@ The simplest solution wins, over taste, habit and "best practice".
   theme, data shape). Minimal configurations are for demos only.
 - **Measure pixels** where alignment matters.
 - **Regenerate all committed pictures** after a change to drawing
-  code, at the project's one width and theme. Screenshots that verify a
-  change still cover each theme.
+  code, at the project's one width and theme.
 - **Prove a test red** against the code with the fix removed.
 - **Results against a reference:** see `ml-project`, "Validating
   research code".
@@ -244,13 +240,14 @@ rules in each brief.
 Run a final round before a merge, a release or the end of the session.
 Also run one on "review loop", "cleanup cycle", "polishing round" or
 "loop until clean". Review the whole range from the commit after this
-session's last clean final round. If there is none, start from the
+session's last completed final round. If there is none, start from the
 session's first commit.
 
 1. Spawn all views that apply, with fresh reviewers.
 2. Verify, fix, commit.
-3. Repeat until **two rounds in a row** are clean: no breaks, endangers
-   or simplifies finding survives verification.
+3. Repeat over the same range, with fresh reviewers, until **two rounds
+   in a row** are clean: no breaks, endangers or simplifies finding
+   survives verification. Only then is the final round completed.
 4. Report what changed, what was rejected and why, and what is open.
 
 There is no round limit. When rounds keep finding things, fix the
@@ -278,8 +275,8 @@ Autonomous:
   limits the user stated.
 - **Resume after limits** and relaunch failed subagents with the same
   brief.
-- **Keep monitors armed** for commits and each long job. Restart a
-  process only after you checked it is gone.
+- **Keep monitors armed** for commits (section 4.1) and each long job.
+  Restart a process only after you checked it is gone.
 - **When idle**, clean leftovers, drifted docs and drift between repos.
 
 Always:

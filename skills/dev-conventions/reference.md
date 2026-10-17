@@ -1,9 +1,7 @@
 # dev-conventions: reference
 
-Read "Reviewer brief" when you spawn reviewers.
-Read "findings.md" when the user wants a review written down. Read
-"Commit monitor details" for rewritten history, a detached HEAD or the
-state directory.
+Read "Reviewer brief" when you spawn reviewers. Read "findings.md" for
+a written review. Read "Commit monitor details" for monitor problems.
 
 ## Reviewer brief
 
