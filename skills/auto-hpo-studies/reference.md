@@ -47,11 +47,11 @@ the run ends. When the run ends without an exit code, the watcher
 writes `exit` = `137`.
 
 A stall is no new output in 10 polls in a row (5 minutes). The
-watcher then ends with exit code 2. On a stall, read the log tail and
-the GPU use (`nvidia-smi`). If the log tail or `nvidia-smi` shows
-progress since the stall began, start the watcher again. Else abort
-the process group, then start the watcher again. It sets `status` to
-`failed`:
+watcher then ends with exit code 2. On a stall, start the watcher
+again. Only log growth counts as progress. After 2 restarts of the
+watcher without log growth, abort the run (status `failed`). GPU load
+alone never counts. To abort, kill the process group, then start the
+watcher again. It sets `status` to `failed`:
 
 ```bash
 STATE=~/.cache/hpo/<target-id>; kill -- -"$(cat "$STATE/pid")"

@@ -55,7 +55,7 @@ commit, as `git-conventions` says.
   "Per-target model configs").
 - **Search space**: a table of parameters of `params/<target-id>.yaml`
   with initial value, range, step and group (learning rate and
-  schedule, capacity, regularisation or training budget).
+  schedule, capacity or regularisation).
 - **Diagnosis thresholds** for step 3: `overfit_gap` and
   `healthy_loss`. `overfit_gap` is the largest accepted
   `min_val_loss - min_loss`. `healthy_loss` is the `min_val_loss` that
@@ -111,16 +111,21 @@ to step 10. When the run is not valid, set the row to `failed`, run
 |---|---|---|
 | `gap > overfit_gap` | overfitting | reduce capacity, add regularisation |
 | `min_val_loss > healthy_loss` | underfitting | change the learning rate or schedule, then increase capacity |
+
+Underfitting: increase the learning rate first; after a revert, decrease
+it.
 | `min_val_loss <= healthy_loss` | healthy | increase capacity by one step |
 
 ### 4. Decide the next change
 
 Step 3 picks the row. Inside that row's action, change the first
 parameter that is not settled, in this order: learning rate and
-schedule, capacity, regularisation, training budget. A parameter is
-settled when its last 2 changes were `reverted`, or when the next step
-leaves its range; `failed` rows do not count. Never repeat a change
-that the log shows as `reverted`. When every parameter of the row's
+schedule, capacity, regularisation. Inside a group, take the parameters
+in the order of the search-space table. A parameter is settled when its
+last 2 changes were `reverted`, or when the next step leaves its range.
+A `failed` row counts like `reverted` toward "settled". Never repeat a
+change that the log shows as `reverted` or `failed`, except after a
+config error (step 9). When every parameter of the row's
 action is settled and no stop criterion holds, record a blocker
 (first hard rule).
 
@@ -167,16 +172,14 @@ better).
 - `improvement <= 0`: restore the config and the outputs (command
   below). Set the row status to `reverted`.
 - Failed run: restore the config and the outputs. Set the row status
-  to `failed`, never `reverted`. A `failed` row does not ban the
-  change and does not count for "settled" (step 4) or for
-  "plateau" (step 10). When the log shows a config error, fix the
-  config and launch the same change in a new row. A missing or broken
+  to `failed`, never `reverted`. When the log shows a config error,
+  fix the config and launch the same change in a new row. A missing or broken
   dependency is a blocker (`dev-conventions`, "Hard rules"). Restore
   command:
 
   ```bash
   git checkout -- params/<target-id>.yaml dvc.lock \
-      results/<target-id>/metrics.json && dvc checkout train@<target-id>
+      results/<target-id>/metrics.json && dvc checkout
   ```
 
 ### 10. Check the stopping criteria
