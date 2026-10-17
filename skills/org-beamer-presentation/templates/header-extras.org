@@ -72,7 +72,7 @@ Only for a specialist audience. Stops evaluation on export. Uses
 #+begin_src org
 ,#+PROPERTY: header-args :results silent :eval never-export
 ,#+LATEX_HEADER: \usepackage{listings}
-,#+LATEX_HEADER: \lstset{showstringspaces=false,breaklines=true,basicstyle=\small, keywordstyle=\color{accent},stringstyle=\color{accent},numberstyle=\color{accent},commentstyle=\color{lightgray}}
+,#+LATEX_HEADER: \lstset{showstringspaces=false,breaklines=true,basicstyle=\ttfamily\small,upquote=true, keywordstyle=\color{accent},stringstyle=\color{accent},numberstyle=\color{accent},commentstyle=\color{lightgray}}
 #+end_src
 
 Pin the backend in the local-variables block at the end of the file.

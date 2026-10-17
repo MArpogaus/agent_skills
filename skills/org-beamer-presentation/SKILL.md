@@ -31,8 +31,8 @@ message.
   full width. Never put more than 2 text-only frames in a row.
 - A title has at most 8 words, a plain statement. No marketing, no
   teasers, no punch lines.
-- Colours: theme foreground plus one accent. One colour per meaning:
-  the same dataset has the same colour on every frame.
+- Colours: theme foreground plus one accent. Plot colours follow
+  `python-dev`, "Figures".
 - Show at most 2 examples, the two with the largest contrast.
 - No semicolons, arrow characters in text, one-item lists or version
   history. Show the current state only. No rhetorical bold lead-ins and
