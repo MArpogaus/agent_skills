@@ -143,8 +143,8 @@ emacs -Q --batch -l org -l ox-beamer \
   "<file>.org" -f org-beamer-export-to-pdf
 ```
 
-`<bib file>` is the value of `org-cite-global-bibliography` in
-`<user home>/.emacs.d`.
+`<bib file>` is the file that `org-cite-global-bibliography` resolves to
+in the user's Emacs (evaluate it there, or ask the user).
 
 When the export fails, or before frames with code, tables, math or
 generated figures, read `reference/pitfalls.md`.
@@ -157,6 +157,7 @@ correct deck. Do these steps after each build.
 
 1. Build the PDF.
    `grep -c 'Citation .* undefined' <file>.log` prints `0`.
+   `grep -c '^!' <file>.log` prints `0`.
 2. Count frames, not pages, in the document body only:
    `sed -n '/\\begin{document}/,$p' <file>.tex | grep -c '\\begin{frame}'`.
    The title frame comes from `\maketitle`, so the grep does not count

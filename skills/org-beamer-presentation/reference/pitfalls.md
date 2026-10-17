@@ -93,14 +93,19 @@ A plotting script stays in a Python `src` block next to its figure (hard
 rule in `SKILL.md`).
 
 - Header of the block: `:python <venv>/bin/python :results silent
-  :exports none`. Each block has its own imports. Duplication is
-  accepted.
+  :exports none :eval never-export`. Each block has its own imports.
+  Duplication is accepted.
 - The block saves the figure into the sidecar folder. Write the
   `[[file:<figure>.pdf]]` link by hand below the block.
 - Never use `:results file` for a figure. Org writes the return value
   into the file and replaces the PDF.
-- Run each block with `C-c C-c` after its data changes. A headless run
-  of a block needs `-l ob-python`.
+- Run each block with `C-c C-c` after its data changes. Run all blocks
+  headless with this command:
+
+  ```bash
+  emacs -Q --batch -l org -l ob-python --eval '(setq org-confirm-babel-evaluate nil)' <file>.org -f org-babel-execute-buffer
+  ```
+
 - Cache the numbers of a long run as CSV or JSON in the sidecar. The
   plotting blocks read only the cache, so the deck rebuilds without the
   run.
