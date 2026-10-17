@@ -98,9 +98,9 @@ apply it, commit, then go to the next project.
    cookie.
 2. Carry meeting notes into their Denote notes and new tasks into the
    projects. Triage what is left in the inbox (section 3).
-3. Read today's agent sessions: the transcripts that changed today in
-   `~/.claude/projects/` of the agent home that all of the user's
-   sessions share (opencode: the sessions in
+3. Read today's agent sessions. All of the user's sessions share one
+   agent home. Read the transcripts that changed today in
+   `~/.claude/projects/` of that home (opencode: the sessions in
    `~/.local/share/opencode/opencode.db`). Extract the user's messages
    and look for what went well, what went badly, and decisions.
 4. Write the journal entry in the date tree of `journal.org` with the
