@@ -50,7 +50,7 @@ cargo test -p <crate> --locked
 - `deny.toml` lists the allowed licenses and checks advisories.
 - CI runs clippy and tests with `--locked` in a container of the target
   distribution, and `cargo deny` in a separate job.
-- `.github/dependabot.yml` adds the `cargo` ecosystem (git-conventions,
+- `.github/dependabot.yml` adds the `cargo` ecosystem (`git-conventions`,
   "Dependabot").
 
 ## Workspace layout
