@@ -113,9 +113,9 @@ uv cache and the mamba package cache in their defaults under `$HOME`.
 ## 4. Record the install
 
 After each install, write one entry to the project's agent memory
-(Claude Code: `~/.claude/projects/<project-dir>/memory/`, where the
-`<project-dir>` folder name is the working directory path with each
-character other than a letter or a digit replaced by `-`). Write the tool,
+(Claude Code: `~/.claude/projects/<project-dir>/memory/`). The
+`<project-dir>` folder name is the working directory path, with `-`
+in place of each character other than a letter or a digit. Write the tool,
 the installer, the exact command, the env name or path, and the run
 command, for example `micromamba run -n <project> cargo`. The next
 session reads this entry and reuses the env.
