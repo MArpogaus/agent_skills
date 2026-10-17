@@ -10,7 +10,7 @@ description: >
   `references.bib`.
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: ml latex, audience: researchers, requires: [dev-conventions, git-conventions, ml-project, python-dev]}
+metadata: {stack: ml latex, requires: [dev-conventions, git-conventions, ml-project, python-dev], audience: researchers}
 ---
 
 # Skill: Paper Writing
@@ -162,7 +162,7 @@ Use in text: `\gls{MLE}` (the first use expands the full form),
 
 ## Phase 2: Figure generation
 
-### Python → PDF → LaTeX workflow
+### Python to PDF to LaTeX workflow
 
 Generate publication-quality figures in Python and include the
 resulting PDF in LaTeX. Figure scripts follow `python-dev`
@@ -271,7 +271,9 @@ were used to optimize language and grammar.
 The engine follows the venue (Phase 5): `-lualatex` or `-pdf`.
 
 ```bash
+# IEEE
 latexmk -lualatex -shell-escape main.tex
+# Elsevier, UAI, ICML
 latexmk -pdf main.tex
 ```
 
@@ -367,7 +369,7 @@ mv final.pdf "FINAL_PAPER.PDF"
 - PGFPlots: https://pgfplots.sourceforge.net/
 - An earlier paper that used the target class is the best reference
   for a venue: ask the user for one and copy its setup. Autonomous:
-  use the class defaults without options and record the question
+  take the class options from the venue template and record the question
   (`dev-conventions`, "2. Asking and acting").
 
 ---
