@@ -29,8 +29,8 @@ branch, attribution and the report format.
   before you know the simplest solution. Before you add a file, option,
   script, dependency, stage or code path, name the simpler alternative:
   delete, reuse, a config or one line. Use it unless it fails. State it
-  when the choice is not obvious.
-- **Deletion beats addition.** Delete what has no clear reason to exist.
+  when the choice is not obvious. Delete what has no clear reason to
+  exist.
 - **Research before you build** (section 1, "Research order for a new
   feature"). A reimplementation is a defect.
 - **Blockers stop that part of the work.** Interactive: ask the
@@ -88,8 +88,9 @@ The simplest solution wins, over taste, habit and "best practice".
   its linters apply.
 - **Contain guesses.** Keep inferred data apart from verified data:
   marked, reversible, with an off switch.
-- **Release scope:** when the user prepares a release, fix only bugs,
-  security holes and wrong docs. Do not refactor working code that
+- **Release scope:** when the user prepares a release (the user says
+  "release", "publish" or "tag a version"), fix only bugs, security
+  holes and wrong docs. Do not refactor working code that
   nobody asked about. Put each simplifies finding and each other change
   on a list for after the release. A review loop alone is not a
   release.
