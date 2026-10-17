@@ -28,9 +28,8 @@ first message whose hash appears in this session's commit output.
 - Never delete the user's files. Stashes, pushes and agenda states
   follow the "Hard rules" of `dev-conventions`, `git-conventions` and
   `gtd`.
-- Never commit report and plan files: see `dev-conventions`,
-  "2. Asking and acting" (`HANDOFF.md`), and its reference.md,
-  "findings.md".
+- Report and plan files follow `dev-conventions`, "2. Asking and
+  acting", and its reference.md, "findings.md".
 - Step 6 proposes skill changes. Edit a skill there only when the user
   agrees.
 
@@ -71,9 +70,6 @@ with the Simplicity view.
 - Commit everything that belongs in history, as `git-conventions`
   requires. Report unpushed commits with the command in
   `dev-conventions`, "Hard rules".
-- Never delete a report or plan file without the user's agreement;
-  list it under "Open". For open work, see the hard rules
-  (`HANDOFF.md`).
 
 ## 5. Agenda
 
