@@ -67,7 +67,8 @@ commit, as `git-conventions` says.
   `min_delta` are optional. `min_delta` is relative: 1% of the last
   kept `min_val_loss` (default). Take the absolute value of
   `min_val_loss`, because a loss can be negative.
-- **Run command**: for example `dvc repro train@<target-id>`. For a
+- **Run command**: for example
+  `PATH=$PWD/.venv/bin:$PATH dvc repro train@<target-id>`. For a
   pipeline with more than one stage, use the command that runs all
   stages.
 
