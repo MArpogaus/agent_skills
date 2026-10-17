@@ -122,17 +122,19 @@ work commit. For each changed package:
    clone has uncommitted edits, the block stops: ask the user.
 
    ```bash
-   src=<user home>/.emacs.d/elpaca/sources/<pkg>
+   src="<user home>/.emacs.d/elpaca/sources/<pkg>"
    [ -z "$(git -C "$src" status --short)" ] || { echo "uncommitted edits in $src"; exit 1; }
-   git -C "$src" fetch <user home>/.emacs.d/packages/<pkg> dev
+   git -C "$src" fetch "<user home>/.emacs.d/packages/<pkg>" dev
    git -C "$src" checkout FETCH_HEAD
    ```
 
-3. Delete `<user home>/.emacs.d/elpaca/builds/<pkg>` and the package's
-   files in `<user home>/.emacs.d/eln-cache`, so that elpaca rebuilds
-   it.
+3. Run `rm -rf "<user home>/.emacs.d/elpaca/builds/<pkg>"`, so that
+   elpaca rebuilds it.
 4. If the configuration changed too and the user allowed it, tangle.
 5. Tell the user what to restart and what to look for.
+6. When the fix is on the branch that elpaca follows, run
+   `git -C "$src" checkout -` so that the clone follows its branch
+   again.
 
 ## Debugging etiquette
 
