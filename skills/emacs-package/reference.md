@@ -151,7 +151,7 @@ Test redisplay claims in a graphical frame, not from the manual. In the
 sandbox, use `<test rig>/rig gui` (its `README.md` explains it).
 Elsewhere:
 
-    Xvfb :99 -screen 0 1280x900x24 & DISPLAY=:99 emacs -Q -l probe.el
+    Xvfb :99 -screen 0 1280x900x24 & sleep 1; DISPLAY=:99 emacs -Q -l probe.el
 
 - `emacs --batch` opens no display and answers nil to
   `display-images-p`.

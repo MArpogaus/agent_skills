@@ -30,7 +30,8 @@ metadata: {stack: emacs, requires: [git-conventions]}
 
 Read [reference.md](reference.md) before you build or debug overlays,
 display properties, margins, fringes, header lines, scrolling over tall
-blocks, pixel tests or demo GIFs.
+blocks, pixel tests or demo GIFs, and before you review a package that
+comes from a configuration.
 
 ## Start from the template
 
@@ -41,7 +42,7 @@ follows. Create a repository from it and rename the placeholder:
 name=your-package
 git mv my-package.el "$name.el"
 git mv test/my-package-test.el "test/$name-test.el"
-grep -rl my-package . --exclude-dir=.git | xargs sed -i "s/my-package/$name/g"
+grep -rl my-package . --exclude-dir=.git | xargs -r sed -i "s/my-package/$name/g"
 make
 ```
 
@@ -53,14 +54,15 @@ Layout, identical in every package:
 .github/workflows/test.yml  CI, one job per supported Emacs version
 .gitignore
 COPYING                     GPLv3
-Makefile                    compile, checkdoc, lint, test
+Makefile                    compile, lint, relint, test
 README.org                  Best-README-Template style, org
 docs/implementation.org     mechanism, measurements, test notes
 <package>.el
 test/<package>-test.el
 ```
 
-`.dir-locals.el` does not set `sentence-end-double-space`.
+`.dir-locals.el` sets `sentence-end-double-space` to `t` for
+`emacs-lisp-mode`, because checkdoc requires two spaces in docstrings.
 
 A multi-file package adds one companion per optional integration next to
 the main file (`<package>-<topic>.el`). Each companion needs its own
@@ -116,20 +118,24 @@ Every file, companions and test files included:
 
 ## The check pipeline
 
-`make` runs the same four steps as CI. It bootstraps its tools into
-`.sandbox/`, so a fresh checkout needs only Emacs:
+The pipeline has five steps. CI runs `make` and the pre-commit hooks.
+`make` runs the four targets. The pre-commit hook `elisp-checkdoc` of
+`MArpogaus/emacs-pre-commit-hooks` runs checkdoc. `make` bootstraps its
+tools into `.sandbox/`, so a fresh checkout needs only Emacs:
 
-| Target | What it enforces |
+| Step | What it enforces |
 |---|---|
 | `compile` | byte-compile with `byte-compile-error-on-warn t` |
-| `checkdoc` | any output fails the target |
+| checkdoc (hook) | any output fails the hook |
 | `lint` | `package-lint`, the rules MELPA applies |
+| `relint` | regexps, and `\=` escapes that checkdoc misses |
 | `test` | ERT suite in `test/` |
 
 - Put Elisp programs into make variables, not into recipe lines. Inside
   a quoted recipe line the backslash reaches Emacs literally and breaks
   the form.
-- `compile`, `lint` and `test` depend on `$(SANDBOX)`, and `BATCH` calls
+- `compile`, `lint`, `relint` and `test` depend on `$(STAMP)`, a file
+  that the sandbox bootstrap writes last, and `BATCH` calls
   `package-initialize`. Otherwise the dependencies are missing from the
   load path.
 - CI matrix: the oldest supported release first, then the current
@@ -216,10 +222,6 @@ the suite runnable in batch without a window system. Two Elisp traps:
 5. Replace configuration shortcuts by package-grade equivalents, for
    example a dependency by a subprocess call.
 6. Point the configuration at the package.
-
-When you review a package that comes from a configuration, read
-"Recurring defects in code grown in a configuration" in
-[reference.md](reference.md).
 
 ---
 
