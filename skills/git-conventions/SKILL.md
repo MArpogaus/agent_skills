@@ -49,9 +49,9 @@ rewrite pushed history.
 
 ## Rules for agents
 
-- **README section.** A public repo carries one README section with
-  the heading "Use of LLM Coding Tools". Its text is: "This project
-  was developed with the help of LLM coding assistants. The authors
+- **README section.** When you write or update the README of a public
+  repo and it lacks the section, add one section with the heading
+  "Use of LLM Coding Tools". Its text is: "This project was developed with the help of LLM coding assistants. The authors
   reviewed and take responsibility for all content." It names no
   vendor or model.
 - **Repos with only `main`.** If the repo has no `dev` branch, read
