@@ -81,8 +81,7 @@ Goal: improve the language and make the formatting consistent.
    - Remove leftover comments, outdated `\TODO{}` markers and
      redundant information.
    - Compile and check the log as `paper-writing` ("Hard rules")
-     says. Then check that `pdftotext main.pdf - | grep -c '??'`
-     prints 0.
+     says.
 
 ## Phase 4: Revision cycle
 
