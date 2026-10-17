@@ -151,9 +151,10 @@ skill adds its own hooks (for example ruff in `python-dev`).
   `pre-commit install --install-hooks`. The config alone installs
   nothing. Verify that `ls .git/hooks/` shows `pre-commit`, `commit-msg`
   and `pre-push`. Document the command in `CONTRIBUTING.md`.
-- `commitizen-branch` checks the messages in `origin/HEAD..HEAD`. A
-  repo created locally and pushed later has no `origin/HEAD`. Set it
-  once with `git remote set-head origin -a`.
+- `commitizen-branch` checks the pushed range. The first push to an
+  empty remote has no range and fails. Run `cz check --rev-range HEAD`,
+  then push that first time with `--no-verify`. Then set `origin/HEAD`
+  once with `git remote set-head origin -a`: later pushes need it.
 - **Hook revisions.** Run `pre-commit autoupdate` each time you change
   the config. Run `pre-commit migrate-config` when it warns about
   deprecated stage names.
@@ -187,10 +188,6 @@ stack skill adds its package ecosystem.
   documents its own scheme. Ask when unsure.
 - Tags are annotated, with a message that summarises the release
   (commitizen: `annotated_tag = true`).
-- The `commitizen-branch` pre-push hook fails on a push of a tag alone
-  ("No commit found with range"). The branch push already checked the
-  commits, so push the tag with
-  `git push --no-verify origin refs/tags/<tag>`.
 - **Release:** run `cz bump` on `dev`, then `git merge --no-ff dev`
   into `main`. Push `dev` and `main` before the tag. A request to
   release is the request to push `dev`, `main` and the tag.
