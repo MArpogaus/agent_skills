@@ -112,8 +112,6 @@ Create `skills/<name>/SKILL.md` with:
 - the H1 `# Skill: <Title>`,
 - clear sections (phases, steps, conventions, references),
 - placeholders as the hard rule "The repo is public" says,
-- code examples that use the agent's tools (Claude Code: Read, Edit,
-  Write, Bash),
 - a **Required skills** section at the end when `metadata.requires` is
   not empty, after a `---` line. It tells the agent to load each listed
   skill with the skill tool (Claude Code: `Skill`). Copy the format from
