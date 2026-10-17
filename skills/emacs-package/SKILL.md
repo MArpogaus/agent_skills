@@ -106,8 +106,6 @@ Every file, companions and test files included:
 - `<tool name>`: use the value that the package's other files use. In a
   new package, use the harness name (for example `Claude Code`), never a
   model name.
-- The email can be ROT13 obfuscated. Keep the form the existing files
-  use.
 - `Package-Requires` in the main file decides what MELPA installs.
   Nothing installs a companion's requirements, so a companion that needs
   a newer Emacs forces the main file up too.
@@ -159,12 +157,9 @@ the author's configuration covers by accident:
 - Pure helpers: parsing, formatting, string surgery.
 
 Stub with `cl-letf`, use `with-temp-buffer` for buffer logic, and keep
-the suite runnable in batch without a window system. Two Elisp traps:
-
-- A stub that records where the real function would act (a tab switch
-  that notes the buffer) proves nothing.
-- `quit-window` kills the buffer of the selected window. A test that
-  works in a buffer it never displayed can kill the next test's buffer.
+the suite runnable in batch without a window system. A stub that
+records where the real function would act (a tab switch that notes the
+buffer) proves nothing.
 
 ## Dependencies and user options
 
@@ -173,9 +168,6 @@ the suite runnable in batch without a window system. Two Elisp traps:
   subprocess is `call-process-region`.
 - For a built-in loaded on demand, use `declare-function` and `defvar`,
   not `require`.
-- Call a subprocess once for all items, joined by a marker paragraph.
-  Count the pieces that come back. If the count is wrong, fall back to
-  one call per item.
 - A map that is active only in the package's own temporary buffers
   (`C-c C-c` in an edit buffer) is the exception to the no-key-bindings
   rule.

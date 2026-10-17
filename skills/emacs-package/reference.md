@@ -69,8 +69,6 @@ a demo recording.
   until the builder runs again. Do not measure a window that does not
   show the buffer. With no window, leave the string whole. Pass
   `'visible` as ALL-FRAMES to `get-buffer-window-list`.
-- A face `:box` with `(:line-width (1 . 0))` loses its right end to a
-  trailing stretch glyph.
 
 ## Faces, fringes, margins, header lines
 
@@ -82,17 +80,13 @@ a demo recording.
   `(:inherit the-face :inverse-video t)` to turn the remapped foreground
   into a background.
 - For a row a few pixels high, use a stretch space with `:height (N)` in
-  the display spec. A face `:height` below one in a mode line of a side
-  window whose header line calls `string-pixel-width` recurses until a
-  stack overflow.
+  the display spec.
 - An overline is always one pixel. Draw every edge of a box one pixel
   wide.
 - A terminal has no overline. An edge attached to an existing line is
   graphic only. A terminal needs a row of its own.
 - Margins draw only along lines of text. Fringes run the full window
   height, in graphic frames only.
-- A scroll bar sits outside the fringe, so a fringe border never reaches
-  the window's outer edge.
 - A header or mode line row reaches past fringes and margins. Close that
   row with a glyph at each end.
 - The window parameters `tab-line-format`, `header-line-format` and
@@ -105,9 +99,6 @@ a demo recording.
   plain-text fallback. Nerd font glyphs always need this.
 - Icons in one row have the same weight and size. Prefer thin, unfilled
   glyphs. Give each icon its own plain-text fallback.
-- `fringe-bitmap-p` is in fringe.el: `(require 'fringe)`. A build
-  without fringes still defines `define-fringe-bitmap`, so a test guard
-  asks `(fringe-bitmap-p 'left-arrow)`.
 - A theme applies through `enable-theme`. Hook `enable-theme-functions`,
   not advice on `load-theme`.
 
@@ -183,9 +174,6 @@ Elsewhere:
   gifsicle -O3 --lossy=80 raw.gif -o img/demo.gif
   ```
 
-- For one-pixel line art, encode at the frames' own size with
-  `paletteuse=dither=none` and no `--lossy`. Scaling turns one line into
-  two grey lines.
 - Decode the GIF back to PNGs and compare a frame against its source, at
   the border columns.
 - `gifsicle -O3` merges identical consecutive frames. Count states, not
@@ -214,8 +202,6 @@ Check every package that comes from a configuration for these:
   `(advice-add sym :around fn '((name . my-advice)))`.
 - **`(funcall orig-fun args)`** where `(apply orig-fun args)` is
   correct.
-- **Doubled quoting** in a defcustom default: `'(("k" . '(:a 1)))` puts
-  `(quote (:a 1))` where a plist belongs.
 - **Symbols outside the package prefix**, and typos in the prefix.
   package-lint catches both, byte-compile does not.
 - **`plist-put` on user data** mutates the user's customization. Return
@@ -227,19 +213,8 @@ Check every package that comes from a configuration for these:
   the public entry. When there is none, say so in a comment at the call.
 - **Docstrings copied from a sibling mode.** Read every docstring once
   as a user.
-- **`copy-marker` on a number** marks the current buffer. Make markers
-  before `with-current-buffer` changes it.
-- **`comint-last-prompt` during output** points inside the output. Copy
-  to the end of the buffer and strip the prompt from the text.
 - **A declaration between `;;;###autoload` and its definition** takes
   the cookie. Check the generated autoloads file.
 - **A buffer-local minor mode dies with the major mode**
   (`kill-all-local-variables`). Mark it `permanent-local` and re-apply
   its setup from `after-change-major-mode-hook`.
-- **A new window inherits the fringes and margins of its parent
-  window.** To restore a window, read the values from the frame or the
-  buffer. Do not read them from the window.
-- **A rule that reads the window reads the package's own values.** Ask
-  the buffer as well.
-- **`(setq some-mode 1)` in documentation** does not run the mode body.
-  Document the mode function call.
