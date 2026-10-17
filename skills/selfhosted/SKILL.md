@@ -4,9 +4,10 @@ description: >
   Conventions for the user's self-hosted home server: an image-based
   host OS, rootless Podman Quadlets deployed by Ansible, the repo
   layout, the uniform service interface, the VM-first test cycle, the
-  root gate, releases, security and debugging. Use in `home-server` or
-  `home-server-*` repos. Use when Ansible, Quadlet, Butane, root-gate or
-  SSH work targets the test VM or the production host.
+  root gate, releases, security and debugging. Use in `home-server`,
+  `home-server-*` or `<secrets repo>` repos. Use when Ansible, Quadlet,
+  Butane, root gate or SSH work targets the test VM or the production
+  host.
 license: MIT
 compatibility: claude-code opencode
 metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conventions]}
@@ -129,7 +130,8 @@ with a screenshot.
 - Each new SSH connection can need the user's input. Reuse one
   connection (`ControlMaster`, `ControlPersist`). Say before each
   command that needs the user's input.
-- Root access opens only as the deployment repo's AGENTS.md says.
+- Root access opens only through the root gate that the deployment
+  repo's AGENTS.md describes.
   Assert root access is open before each command that needs root, not
   only before a deploy. When it is closed, ask the user (autonomous:
   record a blocker). When the root work is done, tell the user.
