@@ -51,9 +51,9 @@ commit, as `git-conventions` says.
 - **Target ID**: a label for commits and MLflow tags. Use the DVC
   `foreach` item of the target (see `ml-project`, "dvc.yaml: foreach
   over targets").
-- **Config file**: `params/<target>.yaml` (see `ml-project`,
+- **Config file**: `params/<target-id>.yaml` (see `ml-project`,
   "Per-target model configs").
-- **Search space**: a table of parameters of `params/<target>.yaml`
+- **Search space**: a table of parameters of `params/<target-id>.yaml`
   with initial value, range and step.
 - **Diagnosis thresholds** for step 3: `overfit_gap` and
   `healthy_loss`. `overfit_gap` is the largest accepted
@@ -62,7 +62,7 @@ commit, as `git-conventions` says.
 - **Stopping criteria** for step 10: `target_loss` and `max_iter`.
   `patience` (iterations without improvement, default 5) and
   `min_delta` (default 0.1) are optional.
-- **Run command**: for example `dvc repro train@<target>`. For a
+- **Run command**: for example `dvc repro train@<target-id>`. For a
   pipeline with more than one stage, use the command that runs all
   stages.
 
@@ -94,10 +94,10 @@ If no run exists, this is iteration 0. Iteration 0: skip steps 3 to
 5. Launch the unchanged config with `change` = `baseline` and row
 `0`. When step 8 finds the run valid, tag it as kept with the step 9
 call (`set_tag(run_id, "kept", "1")`). Then set the row to `committed`
-and commit `dvc.lock`, `results/<target>/metrics.json` and
-`hpo_study.md` as `feat(hpo): <target-id> iter 0: baseline`. When the
-run is not valid, set the row to `failed`, run `rm -rf "$STATE"`, stop
-and report.
+and commit `dvc.lock`, `results/<target-id>/metrics.json` and
+`hpo_study.md` as `feat(hpo): <target-id> iter 0: baseline`. Then go
+to step 10. When the run is not valid, set the row to `failed`, run
+`STATE=~/.cache/hpo/<target-id>; rm -rf "$STATE"`, stop and report.
 
 ### 3. Diagnose the training state
 
@@ -154,8 +154,8 @@ step 2 says for iteration 0 instead of step 9.
 better).
 
 - `improvement > 0`: keep the config and fill in the row with status
-  `committed`. Commit `params/<target>.yaml`, `dvc.lock`,
-  `results/<target>/metrics.json` and `hpo_study.md` as
+  `committed`. Commit `params/<target-id>.yaml`, `dvc.lock`,
+  `results/<target-id>/metrics.json` and `hpo_study.md` as
   `feat(hpo): <target-id> iter <N>: <param> <old>-><new>`. The body
   gives `min_val_loss <old>-><new>` and the diagnosis. Tag the run as
   kept: `mlflow.MlflowClient().set_tag(run_id, "kept", "1")`.
@@ -170,8 +170,8 @@ better).
   command:
 
   ```bash
-  git checkout -- params/<target>.yaml dvc.lock \
-      results/<target>/metrics.json && dvc checkout train@<target>
+  git checkout -- params/<target-id>.yaml dvc.lock \
+      results/<target-id>/metrics.json && dvc checkout train@<target-id>
   ```
 
 ### 10. Check the stopping criteria
@@ -189,7 +189,8 @@ Stop when one of these is true:
    row. Mark this model unstable for this target in the study log.
 
 When a criterion is true, write the best config, the best metric and
-the history to the study log. Run `rm -rf "$STATE"`. Commit
+the history to the study log. Run
+`STATE=~/.cache/hpo/<target-id>; rm -rf "$STATE"`. Commit
 `feat(hpo): <target-id> done: best min_val_loss <best>` and report to
 the user. Else remove the state files and go to step 2.
 

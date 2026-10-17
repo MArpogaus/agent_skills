@@ -8,10 +8,10 @@ Step 6 runs this block. Replace `<target-id>`, `<N>`, `<change>` and
 `<run-command>`:
 
 ```bash
-STATE=~/.cache/hpo/<target-id>; mkdir -p "$STATE" logs
+STATE=~/.cache/hpo/<target-id>; mkdir -p "$STATE" logs; rm -f "$STATE/exit"
 echo running > "$STATE/status"; echo <N> > "$STATE/iter"
 echo "<change>" > "$STATE/change"
-nohup setsid sh -c '<run-command> > logs/iter<N>_<target-id>.log 2>&1
+nohup setsid sh -c '{ <run-command>; } > logs/iter<N>_<target-id>.log 2>&1
                     echo $? > '"$STATE"'/exit' > /dev/null 2>&1 &
 echo $! > "$STATE/pid"
 ```
@@ -54,7 +54,7 @@ the process group, then start the watcher again. It sets `status` to
 `failed`:
 
 ```bash
-kill -- -"$(cat "$STATE/pid")"
+STATE=~/.cache/hpo/<target-id>; kill -- -"$(cat "$STATE/pid")"
 ```
 
 ## Resume
@@ -62,6 +62,8 @@ kill -- -"$(cat "$STATE/pid")"
 When the skill loads, check in this order before step 1. `<N>` is the
 value in `$STATE/iter`.
 
+0. If `git log --grep "<target-id> done:"` finds a commit, report the
+   study as finished and stop.
 1. No `hpo_study.md`: ask the user for the definition (step 1).
 2. State files exist and row `<N>` is `committed`: if
    `git log --grep "<target-id> iter <N>:"` finds nothing, make the
