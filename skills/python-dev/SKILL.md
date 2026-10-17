@@ -238,9 +238,9 @@ branch to `gh-pages`.
 
 ## README.org
 
-- `README.org` is the source. Export `README.md` with Emacs and
-  commit both in the same commit. `pyproject.toml` reads
-  `README.md`.
+- `README.org` is the source. Export `README.md` with Emacs: with
+  `ox-gfm` when it is installed, else `ox-md`. Commit both in the same
+  commit. `pyproject.toml` reads `README.md`.
 - Structure, after the Best-README-Template: badges, title, local
   TOC, About The Project, Getting Started (Installation, Usage),
   Contributing, License, Contact. Then add "Use of LLM Coding Tools"
