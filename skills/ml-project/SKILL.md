@@ -274,7 +274,7 @@ Document hyperparameter optimisation as a structured log in
 - The commit body includes the markdown table from `hpo_study.md`.
 - Delete the outputs of discarded runs (`rm -r results/<target>_v2`).
   Their `dvc.yaml` entry and config file stay (hard rules).
-  Run `dvc gc -w` only after the user agrees.
+  Run `PATH=$PWD/.venv/bin:$PATH dvc gc -w` only after the user agrees.
 
 ## Validating research code
 
