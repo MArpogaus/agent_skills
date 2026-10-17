@@ -13,9 +13,8 @@ metadata: {stack: meta, requires: []}
 
 # Skill: Repo Tour
 
-Tour a codebase that the reader does not know. The reader reads **one
-place at a time**. The agent picks that place well and leaves the rest
-for later stops.
+The reader reads **one place at a time**. The agent picks that place
+well and leaves the rest for later stops.
 
 ## Phase 1: orient (silent, cheap)
 
