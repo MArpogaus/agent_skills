@@ -61,8 +61,9 @@ docs/implementation.org     mechanism, measurements, test notes
 test/<package>-test.el
 ```
 
-`.dir-locals.el` sets `sentence-end-double-space` to `t` for
-`emacs-lisp-mode`, because checkdoc requires two spaces in docstrings.
+`.dir-locals.el` does not set `sentence-end-double-space`. Docstrings
+and the `;;; Commentary:` section use two spaces after a sentence,
+because checkdoc requires them. All other text uses one.
 
 A multi-file package adds one companion per optional integration next to
 the main file (`<package>-<topic>.el`). Each companion needs its own
@@ -71,7 +72,8 @@ name: `foo-project.el` may only define `foo-project-*`.
 
 README.org sections, in order: About The Project, Getting Started,
 Usage, Customization, Known Limits, Comparison with Other Packages, How
-It Works, Development, Contributions, License, Contact. Mechanism,
+It Works, Development, Contributions, License, Contact, then "Use of
+LLM Coding Tools" (`git-conventions`, "Rules for agents"). Mechanism,
 measurements and test notes go to `docs/implementation.org`.
 
 ## File headers
@@ -102,6 +104,7 @@ Every file, companions and test files included:
 ;;; foo.el ends here
 ```
 
+- `cz bump` updates `;; Version:` with the tag (`version_files`).
 - `<tool name>`: use the value that the package's other files use. In a
   new package, use the harness name (for example `Claude Code`), never a
   model name.
