@@ -259,9 +259,9 @@ stack skill loaded for the range in each brief.
 
 Run a final round before a merge, a release or the end of the session.
 Also run one on "review loop", "cleanup cycle", "polishing round" or
-"loop until clean". Review the whole range from the commit after this
-session's last completed final round. If there is none, start from the
-session's first commit. When the range holds commits of another
+"loop until clean". Review the range `<last>..HEAD`, where `<last>` is the head that this
+session's last completed final round reviewed. If there is none,
+review `<start>^..HEAD` (`session-finish`, `<start>`). When the range holds commits of another
 agent, fix only findings in your own commits. Report the others to
 their owner (channel or chat).
 
