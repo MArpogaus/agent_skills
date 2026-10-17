@@ -29,9 +29,9 @@ metadata: {stack: emacs, requires: [git-conventions]}
   exists ("File headers").
 
 Read [reference.md](reference.md) before you build or debug overlays,
-display properties, margins, fringes, header lines, scrolling over tall
-blocks, pixel tests or demo GIFs, and before you review a package that
-comes from a configuration.
+display properties, margins, fringes, header lines or scrolling over tall
+blocks. Also read it before pixel tests, before demo GIFs, and before you
+review a package that comes from a configuration.
 
 ## Start from the template
 
@@ -61,9 +61,7 @@ docs/implementation.org     mechanism, measurements, test notes
 test/<package>-test.el
 ```
 
-`.dir-locals.el` does not set `sentence-end-double-space`. Docstrings
-and the `;;; Commentary:` section use two spaces after a sentence,
-because checkdoc requires them. All other text uses one.
+`.dir-locals.el` does not set `sentence-end-double-space`.
 
 A multi-file package adds one companion per optional integration next to
 the main file (`<package>-<topic>.el`). Each companion needs its own
@@ -72,7 +70,7 @@ name: `foo-project.el` may only define `foo-project-*`.
 
 README.org sections, in order: About The Project, Getting Started,
 Usage, Customization, Known Limits, Comparison with Other Packages, How
-It Works, Development, Contributions, License, Contact, then "Use of
+It Works. Then Development, Contributions, License, Contact, and "Use of
 LLM Coding Tools" (`git-conventions`, "Rules for agents"). Mechanism,
 measurements and test notes go to `docs/implementation.org`.
 
@@ -146,16 +144,6 @@ tools into `.sandbox/`, so a fresh checkout needs only Emacs:
   `purcell/setup-emacs`. Each job sets `timeout-minutes: 20`.
 
 ## Docstrings
-
-checkdoc and package-lint enforce:
-
-- The first line is a complete sentence that ends in a period.
-- Sentences end with two spaces.
-- Arguments appear in upper case. `_name` is exempt.
-- Quote symbols `` `like-this' ``, never `` `like-this` ``.
-- A parenthesis at column zero needs `\(`.
-- Key sequences use `\\[command]`, not a literal `mouse-1`.
-- Ambiguous names need ``the variable `exec-path'``.
 
 Write no `\=` before a closing quote or an apostrophe. Use `\=` only
 before a quote that opens a quoted form in an example.

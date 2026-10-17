@@ -199,8 +199,7 @@ Elsewhere:
 
 ## Recurring defects in code grown in a configuration
 
-Check every package that comes from a configuration for these. Run every
-path with `emacs -Q` values:
+Check every package that comes from a configuration for these:
 
 - **Undeclared buffer-local variables.** `setq-local` on an undeclared
   symbol compiles silently. Declare it with `defvar-local`. Then
