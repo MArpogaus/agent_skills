@@ -118,7 +118,7 @@ theme:
   name: material
 plugins:
   - search
-  - bibtex: {bib_file: docs/references.bib}
+  - bibtex: {bib_file: docs/references.bib, csl_file: docs/apa.csl}
   - mkdocstrings:
       handlers:
         python:

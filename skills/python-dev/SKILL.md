@@ -69,7 +69,7 @@ Make each skeleton change (hard rules) a separate commit in
 Layout:
 
 ```
-.github/workflows/   test, pre-commit, docs, release (+ example)
+.github/workflows/   test, pre-commit, docs, release
 src/<package>/       __init__.py has a one-line docstring
 test/                conftest.py, test_<module>.py
 docs/                index.md, api/<module>.md
@@ -174,10 +174,8 @@ running kernel.
 Every public module, class, function and method gets a NumPy
 docstring. Ruff `D` checks presence and form.
 
-- The summary line is one sentence that ends with a period.
 - Sections, in this order when needed: `Parameters`, `Returns`,
   `Raises`, `Attributes`, `References`, `Notes`.
-- An underline of dashes has the same length as its header.
 - A parameter entry is `name : type`. For an optional parameter,
   write `type, optional` and end with `by default <value>.`
 - Write mathematics in LaTeX: `:math:` inline, `.. math::` for a
@@ -232,8 +230,8 @@ branch to `gh-pages`.
 - Set GitHub Pages to branch `gh-pages`, path `/ (root)`. A `/docs`
   path fails the build.
 - Keep one `.bib` file, `docs/references.bib`, rendered by
-  `mkdocs-bibtex`. Use `apa.csl` from citation-style-language/styles
-  as `csl_file`.
+  `mkdocs-bibtex`. Save `apa.csl` from citation-style-language/styles
+  as `docs/apa.csl` and set it as `csl_file`.
   Cite in a docstring only when the function implements that
   reference. Put no citations in configs. Background and references
   go to the guide pages in `docs/`.
