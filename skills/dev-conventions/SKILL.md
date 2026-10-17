@@ -261,9 +261,7 @@ Run a final round before a merge, a release or the end of the session.
 Also run one on "review loop", "cleanup cycle", "polishing round" or
 "loop until clean". Review the range `<last>..HEAD`, where `<last>` is the head that this
 session's last completed final round reviewed. If there is none,
-review `<start>^..HEAD` (`session-finish`, `<start>`). When the range holds commits of another
-agent, fix only findings in your own commits. Report the others to
-their owner (channel or chat).
+review `<start>^..HEAD` (`session-finish`, `<start>`).
 
 1. Spawn all views that apply, with fresh reviewers.
 2. Verify, fix, commit.
@@ -294,7 +292,7 @@ Autonomous:
 - **Report on your own:** post one line in the chat when a background
   job ends or a milestone lands. Do not wait for "status?".
 - **Notification channel.** When the user named a notification
-  channel, post there too and poll it for replies (`ntfy-channel`,
+  channel, post there too and watch it for replies (`ntfy-channel`,
   "3. Watch").
 - **Run independent work in parallel** by default, within the resource
   limits the user stated.
