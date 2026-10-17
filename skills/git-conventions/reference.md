@@ -77,16 +77,15 @@ With more than one owner, give each owner a long-lived dev branch
 instead of a shared `dev`:
 
 ```
-feat/<topic>  ->  PR  ->  dev-<name>  ->  PR  ->  main
+feat/<topic>  ->  PR  ->  dev-<owner>  ->  PR  ->  main
 ```
 
-- `dev-<name>` is the integration branch of that owner, who owns it
+- `dev-<owner>` is the integration branch of that owner, who owns it
   and can push to it directly.
 - `main` is protected: pull requests only, no direct push, no
-  force-push. It holds only `chore: init` and merge commits.
-- The one exception to append-only history is a rebase of the user's
-  `dev-<name>` onto `main` when the user asks for it. Never rewrite the
-  branch of another owner.
+  force-push. It holds only `chore: init`, merge commits and, after a
+  rewrite, the one import snapshot.
+- Never rewrite the branch of another owner.
 
 ## Repos you do not own
 
@@ -125,13 +124,14 @@ git commit -m "chore: init"
 ## Adopt this flow on an existing repo
 
 **Default: adopt the flow from now on, and do not change the
-history.** For each contributor, branch `dev-<name>` off the current
-tip. Protect `main` and route all changes through pull requests. This
-needs no rewrite and no force-push:
+history.** For each contributor, branch `dev-<owner>` off the current
+tip. In a repo with one owner, branch `dev` instead. Protect `main`
+and route all changes through pull requests. This needs no rewrite and
+no force-push:
 
 ```bash
-git switch -c dev-<yourname> main
-git push -u origin dev-<yourname>
+git switch -c dev-<owner> main
+git push -u origin dev-<owner>
 ```
 
 The clean-`main` rule then applies to all commits after the switch.

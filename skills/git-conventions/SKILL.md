@@ -15,9 +15,9 @@ metadata: {stack: git, requires: []}
 
 Read [reference.md](reference.md) when you write a pre-commit config
 or a workflow, or set up a repo with more than one owner. Also read it
-before you contribute to a repo of another owner or adopt this flow on
-an existing repo. Read it before you redo a root commit or rewrite
-pushed history.
+before you contribute to a repo of another owner ("Repos you do not
+own") or adopt this flow on an existing repo. Read it before you redo
+a root commit or rewrite pushed history.
 
 ## Hard rules
 
@@ -27,7 +27,7 @@ pushed history.
   pull requests and issues. A file header that `emacs-package` ("File
   headers") requires stays.
 - **Stay on `dev`** (in a repo with more than one owner, on the user's
-  `dev-<name>`). Make no feature branches or pull requests unless the
+  `dev-<owner>`). Make no feature branches or pull requests unless the
   user asks or the repo's flow needs them ([reference.md](reference.md),
   "Shared repos: one dev branch per contributor").
 - **Commit locally, push on request.** Push only when the user says
@@ -59,10 +59,9 @@ pushed history.
   branch only when one of them allows it. Otherwise ask (autonomous:
   use the current branch and report it). Never create `dev` unasked.
 - **Untested work.** When the user asks to save untested work, commit
-  it on `dev` (shared repo: the user's `dev-<name>`). Use a normal type
+  it on `dev` (shared repo: the user's `dev-<owner>`). Use a normal type
   and put `WIP, untested` in the body. It is the only exception to the rule
-  that each commit passes the hooks and the tests. It still passes the
-  hooks.
+  that each commit passes the tests. It still passes the hooks.
 - **SSH to GitHub fails in the sandbox.** Fetch and push over HTTPS
   with `gh auth git-credential` as credential helper. Fetch before you
   trust an `origin/*` ref.
@@ -75,8 +74,6 @@ pushed history.
   and why).
 - **Use the `gh` CLI** for repos, pull requests, issues, releases and
   CI.
-- **Repos of another owner.** Before the first change, read
-  [reference.md](reference.md) ("Repos you do not own").
 
 ## Two-branch flow
 
@@ -92,7 +89,7 @@ pushed history.
 
 Use no `rebase`, no `commit --amend`, no `reset --hard` and no
 force-push on a branch that another person can have fetched. The one
-exception is a rebase of the user's `dev-<name>` onto `main` when the
+exception is a rebase of the user's `dev-<owner>` onto `main` when the
 user asks for it. Correct a pushed mistake with a new commit
 (`git revert`, or a `fix:` commit on top). Before the first push, clean
 up local commits with `commit --amend`, or with `commit --fixup` plus
