@@ -10,7 +10,7 @@ description: >
   beenden", "done for today"). Use before the last message of an
   autonomous session.
 license: MIT
-compatibility: claude-code
+compatibility: claude-code opencode
 metadata: {stack: meta, requires: [dev-conventions, git-conventions, gtd]}
 ---
 
