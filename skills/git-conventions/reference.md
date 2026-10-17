@@ -7,36 +7,36 @@ Rare procedures for the rules in [SKILL.md](SKILL.md).
 ```yaml
 default_install_hook_types: [pre-commit, commit-msg, pre-push]
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: check-added-large-files
-      - id: check-executables-have-shebangs
-      - id: check-merge-conflict
-      - id: check-shebang-scripts-are-executable
-      - id: check-toml
-      - id: check-yaml
-      - id: end-of-file-fixer
-      - id: mixed-line-ending
-      - id: trailing-whitespace
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: check-added-large-files
+  - id: check-executables-have-shebangs
+  - id: check-merge-conflict
+  - id: check-shebang-scripts-are-executable
+  - id: check-toml
+  - id: check-yaml
+  - id: end-of-file-fixer
+  - id: mixed-line-ending
+  - id: trailing-whitespace
 
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.14.0
-    hooks:
-      - id: pretty-format-yaml
-        args: [--autofix, --indent, "2"]
-      - id: pretty-format-toml
-        args: [--autofix]
-      - id: pretty-format-ini
-        args: [--autofix]
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.14.0
+  hooks:
+  - id: pretty-format-yaml
+    args: [--autofix, --indent, '2']
+  - id: pretty-format-toml
+    args: [--autofix]
+  - id: pretty-format-ini
+    args: [--autofix]
 
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.7.2
-    hooks:
-      - id: commitizen
-        stages: [commit-msg]
-      - id: commitizen-branch
-        stages: [pre-push]
+- repo: https://github.com/commitizen-tools/commitizen
+  rev: v4.7.2
+  hooks:
+  - id: commitizen
+    stages: [commit-msg]
+  - id: commitizen-branch
+    stages: [pre-push]
 ```
 
 ## pre-commit workflow
@@ -51,9 +51,9 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-      - uses: pre-commit/action@v3.0.1
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+    - uses: pre-commit/action@v3.0.1
 ```
 
 ## Dependabot
@@ -64,11 +64,11 @@ skill adds its package ecosystem (for example `cargo` in `rust-dev`):
 ```yaml
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    target-branch: "dev"
+- package-ecosystem: github-actions
+  directory: /
+  schedule:
+    interval: weekly
+  target-branch: dev
 ```
 
 ## Shared repos: one dev branch per contributor
