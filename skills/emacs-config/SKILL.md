@@ -85,7 +85,7 @@ and CI (see the `emacs-package` skill):
 
 | Package | What the configuration keeps |
 |---|---|
-| `pycell` | inline results for `# %%` cells; the config sets the hook and the interpreter |
+| `overblock` (`overblock-pycell`, `-md`, `-run`, `-pydoc`, `-rmd`) | inline results for `# %%` cells; the config sets the hooks and the interpreter |
 | `auto-side-windows` | which buffers go to which side |
 | `auto-tab-groups` | which commands open a tab group |
 | `window-box` | a box around the windows the config chooses |
@@ -118,22 +118,21 @@ rules"). The running Emacs loads packages from
 work commit. For each changed package:
 
 1. Commit the fix on the package's `dev` branch.
-2. Set `src=<user home>/.emacs.d/elpaca/sources/<pkg>`. Run
-   `git -C "$src" status --short`. If it shows uncommitted edits, stop
-   and ask the user.
-3. Fetch and check out the fix:
+2. Fetch and check out the fix in the elpaca source clone. When the
+   clone has uncommitted edits, the block stops: ask the user.
 
    ```bash
    src=<user home>/.emacs.d/elpaca/sources/<pkg>
+   [ -z "$(git -C "$src" status --short)" ] || { echo "uncommitted edits in $src"; exit 1; }
    git -C "$src" fetch <user home>/.emacs.d/packages/<pkg> dev
    git -C "$src" checkout FETCH_HEAD
    ```
 
-4. Delete `<user home>/.emacs.d/elpaca/builds/<pkg>` and the package's
+3. Delete `<user home>/.emacs.d/elpaca/builds/<pkg>` and the package's
    files in `<user home>/.emacs.d/eln-cache`, so that elpaca rebuilds
    it.
-5. If the configuration changed too and the user allowed it, tangle.
-6. Tell the user what to restart and what to look for.
+4. If the configuration changed too and the user allowed it, tangle.
+5. Tell the user what to restart and what to look for.
 
 ## Debugging etiquette
 
