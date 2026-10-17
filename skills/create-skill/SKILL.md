@@ -15,9 +15,8 @@ metadata: {stack: meta, requires: [dev-conventions]}
 
 This skill creates a skill: a reusable SKILL.md that agents load on
 demand. The result is generic and contains all the specifics that the
-domain needs. For a change to an existing skill, edit the file in place,
-then do steps 6 and 9, and step 8 when the change comes from session
-experience. When its scope changed, update its `README.org` row and do
+domain needs. For a change to an existing skill, edit the file in place.
+Then do steps 6, 8 and 9. When its scope changed, update its `README.org` row and do
 the manifest description check of step 10.
 
 ## Hard rules
@@ -36,7 +35,7 @@ the manifest description check of step 10.
   formatter or pre-commit hook already checks.
 - Do not restate a rule that another skill owns. Point to it by skill
   name and section heading, and check that the heading exists.
-- State what is. No history, no incident stories.
+- History and anecdotes: `dev-conventions`, "7. Style".
 - The repo is public. No private paths, hosts, names or project names:
   use the workspace placeholders of `dev-conventions` section 6.
 
@@ -104,8 +103,6 @@ metadata: {stack: <words>, requires: [<skill>, ...]}
   `org-mode latex beamer`, `meta`).
 - `metadata.requires`: the skills this one depends on, as a flow list
   (`requires: [git-conventions, python-dev]`), or `[]`.
-- `metadata.audience` (optional): the readers of the output, for example
-  `researchers`. Set it only when the skill writes for a fixed audience.
 
 ### 5. Generate the skill
 
