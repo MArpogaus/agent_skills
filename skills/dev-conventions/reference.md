@@ -16,8 +16,9 @@ Rules: do not read agent memory or handoff files unless your view says
 so; question every decision in the range. Change no file; run no git
 command that changes state; contact no host; run no deploy. Report each
 finding with file:line, severity (breaks / endangers / simplifies / nit)
-and how to reproduce or what to delete. If you find nothing that
-matters, answer "clean".
+and how to reproduce or what to delete. Do not report rare cases
+that the code does not cover: the agent asks the user on those. If you
+find nothing that matters, answer "clean".
 ```
 
 The brief contains no findings of yours, no session history and no
