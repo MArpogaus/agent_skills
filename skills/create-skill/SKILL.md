@@ -32,6 +32,8 @@ Commit the change with the type `docs(<skill>):`.
 - Every `SKILL.md` over 600 words has `## Hard rules` as its first H2.
   It holds 5 to 10 short imperative bullets: the rules that the agent
   breaks most. The sections below do not restate them.
+- Cover the common case. Leave rare cases out: the agent asks when one
+  comes up.
 - Write only what tools do not enforce. Do not restate what a linter,
   formatter or pre-commit hook already checks.
 - Do not restate a rule that another skill owns. Point to it by skill
@@ -101,7 +103,9 @@ metadata: {stack: <words>, requires: [<skill>, ...]}
   after the skill loaded there.
 - `metadata.stack`: space-separated words for the domain (`python`,
   `org-mode latex beamer`, `meta`).
-- `metadata.requires`: the skills this one depends on, as a flow list
+- `metadata.requires`: the skills whose rules this skill follows; a
+  pointer that only gives an example does not count. `dev-conventions`
+  lists only `git-conventions`. Write a flow list
   (`requires: [git-conventions, python-dev]`), or `[]`.
 
 ### 5. Generate the skill
@@ -161,8 +165,11 @@ After writing, check that the hard rules and steps 1 to 5 hold:
   `description` (ending with the trigger sentence), `license: MIT`,
   `compatibility` and `metadata` with `stack` and `requires`.
 - `grep -n '^# Skill: ' skills/<name>/SKILL.md` finds the H1.
-- Each skill in `requires` has a line in the **Required skills**
-  section. When the text cites `dev-conventions`, it is in `requires`.
+- `metadata.requires` lists the skills whose rules this skill follows;
+  a pointer that only gives an example does not count.
+  `dev-conventions` lists only `git-conventions`. Each skill in
+  `requires` has a line in the **Required skills** section, and no
+  other skill has one.
 
 ### 10. Register in repo
 
