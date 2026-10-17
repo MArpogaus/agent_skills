@@ -2,8 +2,8 @@
 # review-watch.sh REPO...: print one REVIEW line when the unreviewed
 # range on $BRANCH (default: the current branch of each repo) crosses
 # the threshold, then mark it as handed out. REVIEW_SKIP lists the
-# path patterns that do not count (default: *.md *.org).
-REVIEW_SKIP=${REVIEW_SKIP:-*.md *.org}
+# path patterns that do not count (default: *.md *.org; empty: none).
+REVIEW_SKIP=${REVIEW_SKIP-*.md *.org}
 set -f; skip=(); for p in $REVIEW_SKIP; do skip+=(":!$p"); done; set +f
 REVIEW_LINES=${REVIEW_LINES:-100} REVIEW_COMMITS=${REVIEW_COMMITS:-5} EVERY=${EVERY:-300}
 STATE=${STATE:-$HOME/.cache/review-watch}; mkdir -p "$STATE"
