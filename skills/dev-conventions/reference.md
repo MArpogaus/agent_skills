@@ -2,7 +2,7 @@
 
 Read "Reviewer brief" when you spawn reviewers.
 Read "findings.md" when the user wants a review written down. Read
-"Commit monitor details" for rewritten history, pushed work or the
+"Commit monitor details" for rewritten history, a detached HEAD or the
 state directory.
 
 ## Reviewer brief
@@ -47,9 +47,9 @@ time with the question tool.
   the range to the merge base. The monitor then reviews the rewritten
   commits again. When the stored commit no longer exists, the monitor
   restarts from the current head.
-- **Pushed work in several repos:** the same loop can read the remote.
-  Use `gh api repos/OWNER/REPO/commits/BRANCH -q .sha` for the tip and
-  `gh api repos/OWNER/REPO/compare/OLD...NEW` for the files and lines.
+- **Detached HEAD:** without `BRANCH`, the monitor prints
+  `SKIP <repo>: detached HEAD` once and skips that repo until a branch is
+  checked out.
 - **State:** the monitor keeps the last handed-out commit per repo in
   `$STATE` (default `~/.cache/review-watch`). Keep this directory when
   you re-arm the monitor, so that no range is lost or reviewed twice.

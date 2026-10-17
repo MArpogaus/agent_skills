@@ -30,9 +30,12 @@ branch, attribution and the report format.
   reuse, a config or one line. Use it unless it fails. State it when the
   choice is not obvious.
 - **Deletion beats addition.** Delete what has no clear reason to exist.
-- **Do not reinvent.** Look in the repo, the standard library, the
-  platform, upstream and the installed dependencies first. A
+- **Research before you build.** Before you implement something new,
+  search the repo, the standard library, the platform, the installed
+  dependencies and then online. It often exists already. A
   reimplementation is a defect.
+- **Be lazy, think first.** Write no line of code before you know the
+  simplest solution that works.
 - **Blockers stop that part of the work.** Interactive: ask the
   decisions that are the user's. Autonomous: never ask and never wait
   (section 2).
@@ -52,11 +55,22 @@ branch, attribution and the report format.
 
 The simplest solution wins, over taste, habit and "best practice".
 
+- **Research order for a new feature:**
+  1. The repo, the standard library and the platform (systemd, the
+     editor, the framework).
+  2. The installed dependencies.
+  3. Online: an existing tool or a library that is maintained (recent
+     releases, active issues). Use it when it does the job.
+  4. Only archived or abandoned code exists: do not depend on it. Read
+     it for ideas, then write the simplest version yourself.
+
+  Name what you found, with links, before you write code.
+
 - **No special treatments.** No registries, mixins, plugins, frameworks
   or wrappers for one use. No class where a function does. No generator
   for a file you can write by hand.
-- **Scripts stay dumb.** One task, explicit arguments, no mode switches:
-  one config or script per variant.
+- **Scripts stay dumb.** One task, self-contained, explicit paths and
+  arguments, no mode switches: one config or script per variant.
 - **No code for rare edge cases,** no re-validation of library
   arguments, no magic, no hacks. Discuss machinery for a rare case with
   the user first.
@@ -124,7 +138,8 @@ The simplest solution wins, over taste, habit and "best practice".
 - **Outward text is a draft.** Show issue replies, posts, emails and
   pull request texts to the user before you send them. No emojis, no
   marketing. Exception: an issue in a repo that the user owns needs no
-  draft when it records a blocker or the user asked for it.
+  draft when it records a blocker or the user asked for it. Posts to a
+  notification channel that the user named (section 5) need no draft.
 - **Plain text deliverables:** reports and analyses are Markdown in the
   chat. Make no HTML page, artifact or chart unless the user asks for
   one.
@@ -181,7 +196,7 @@ monitor with all repos.
   accumulate. Docs-only changes, including decks in `.org`, wait for
   the final round. In a repo where `.org` files hold code, set
   `REVIEW_SKIP='*.md'`.
-- For rewritten history, pushed work and the state directory, read
+- For rewritten history, a detached HEAD and the state directory, read
   `reference.md`, "Commit monitor details".
 
 ### 4.2 Run a round on each event
@@ -315,8 +330,7 @@ Always:
   before/after numbers.
 - **Docs over comments.** Move long comments into the docstring or the
   docs.
-- **Same things look the same:** one code path, one naming scheme.
-- **Self-contained scripts** with explicit paths and arguments.
+- **Same things look the same:** one code path.
 - **Complexity limits** come from hooks. Split a function instead of
   raising the limit.
 - **The README is for a person:** what it is, how to install and run it,
