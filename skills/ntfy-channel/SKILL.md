@@ -74,6 +74,9 @@ the location of the scripts of each agent.
 
 Put the token header in a curl config file and give it to curl with
 `-K`. Then the token is not in the process table or in the transcript.
+Run the post script outside the sandbox (Claude Code:
+`dangerouslyDisableSandbox`), as the poll in section 3. An error from
+the sandbox is not an answer from the server.
 
 ```bash
 #!/bin/bash
