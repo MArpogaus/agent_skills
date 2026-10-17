@@ -142,8 +142,10 @@ Include the preamble as a separate file (`preamble.tex`) and
 ### Bibliography
 
 The preamble loads `biblatex` with `biber`. Print with
-`\printbibliography`. Elsevier uses `bibtex`: remove the `biblatex`
-block from the preamble and use the `elsarticle-num` style:
+`\printbibliography`. When the venue template ships its own `.bst`
+(Elsevier, UAI, ICML), use `\bibliography` with it, not `biblatex`.
+Then remove the `biblatex` block from the preamble. Example for
+Elsevier:
 
 ```latex
 \bibliographystyle{elsarticle-num}
@@ -222,7 +224,7 @@ starts with its heading and label, for example
 `tex/01_introduction.tex`:
 
 ```latex
-\documentclass[journal]{IEEEtran}
+\documentclass[journal]{IEEEtran} % example: options from the venue template
 \input{preamble.tex}
 
 \begin{document}
@@ -268,7 +270,8 @@ were used to optimize language and grammar.
 
 ### Primary build command
 
-The engine follows the venue (Phase 5): `-lualatex` or `-pdf`.
+The engine follows the venue (Phase 5): `-lualatex` or `-pdf`. For a
+venue not listed, use the engine the template documents, else `-pdf`.
 
 ```bash
 # IEEE
