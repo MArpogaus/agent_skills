@@ -60,7 +60,7 @@ For each repo the session touched:
 
 ## 3. Review
 
-If anything was committed since the last clean final round, run the
+If anything was committed since the last completed final round, run the
 final round of `dev-conventions`, "4.4 Final round". When reviews are
 off (`dev-conventions`, "4. Continuous review"), read your own diff once
 with the Simplicity view.
