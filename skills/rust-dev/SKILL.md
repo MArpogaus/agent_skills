@@ -8,7 +8,7 @@ description: >
   Rust edits.
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: rust, requires: [dev-conventions, git-conventions]}
+metadata: {stack: rust, requires: [dev-conventions, git-conventions, sandbox-env]}
 ---
 
 # Skill: Rust Development
@@ -96,3 +96,4 @@ Use the `Skill` tool (opencode: `skill`) to load them before using this one:
   code and documentation style.
 - **git-conventions**: two-branch flow, conventional commits, pre-commit
   hooks, tagging and releases.
+- **sandbox-env**: how to install the toolchain in the agent's home.
