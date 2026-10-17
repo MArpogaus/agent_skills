@@ -124,14 +124,23 @@ git commit -m "chore: init"
 ## Adopt this flow on an existing repo
 
 **Default: adopt the flow from now on, and do not change the
-history.** For each contributor, branch `dev-<owner>` off the current
-tip. In a repo with one owner, branch `dev` instead. Protect `main`
-and route all changes through pull requests. This needs no rewrite and
-no force-push:
+history.** With more than one owner, branch `dev-<owner>` for each
+contributor, protect `main` and route all changes through pull
+requests. With one owner, branch `dev` and merge it as SKILL.md,
+"Two-branch flow", says. This needs no rewrite and no force-push.
+
+More than one owner:
 
 ```bash
 git switch -c dev-<owner> main
 git push -u origin dev-<owner>
+```
+
+One owner:
+
+```bash
+git switch -c dev main
+git push -u origin dev
 ```
 
 The clean-`main` rule then applies to all commits after the switch.
@@ -160,11 +169,12 @@ snapshot is the unchanged prior state.
 Count the unmerged branches first
 (`git rev-list --count main..<branch>` for each branch). If more than
 two branches carry work, or outside forks exist, tell the user that
-the rewrite costs more than it gives.
+the rewrite costs more than it gives. Then wait for the user to
+confirm the rewrite (autonomous: record a blocker).
 
-When a `dev` branch exists (`git rev-parse -q --verify dev`), merge it
-into `main` first, or stop when `git rev-list --count main..dev` is
-not 0. The procedure never touches the working tree or the index,
+When `dev` exists (`git rev-parse -q --verify dev`), merge it into
+`main` with `git merge --no-ff dev`. Continue only when
+`git rev-list --count main..dev` prints 0. The procedure never touches the working tree or the index,
 except the one-owner `--ff-only` step. Uncommitted edits of the user or
 other agents stay. It builds the commits with `git commit-tree` and
 moves the branches with `git update-ref`.
