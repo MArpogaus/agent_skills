@@ -8,7 +8,8 @@ Step 6 runs this block. Replace `<target-id>`, `<N>`, `<change>` and
 `<run-command>`:
 
 ```bash
-STATE=~/.cache/hpo/<target-id>; mkdir -p "$STATE" logs; rm -f "$STATE/exit"
+STATE=~/.cache/hpo/<target-id>; mkdir -p "$STATE" logs
+rm -f "$STATE/exit" "$STATE/stalls" "$STATE/stall_size"
 echo running > "$STATE/status"; echo <N> > "$STATE/iter"
 echo "<change>" > "$STATE/change"
 nohup setsid sh -c '{ <run-command>; } > logs/iter<N>_<target-id>.log 2>&1
@@ -34,7 +35,12 @@ until [ -f "$STATE/exit" ]; do
     alive || { [ -f "$STATE/exit" ] || echo 137 > "$STATE/exit"; break; }
     now=$(size)
     if [ "$now" = "$last" ]; then still=$((still + 1)); else still=0; fi
-    [ "$still" -ge 10 ] && { echo "STALL: no new output for 10 polls"; exit 2; }
+    if [ "$still" -ge 10 ]; then
+        n=1; [ "$now" = "$(cat "$STATE/stall_size" 2>/dev/null)" ] \
+            && n=$(($(cat "$STATE/stalls") + 1))
+        echo "$now" > "$STATE/stall_size"; echo "$n" > "$STATE/stalls"
+        echo "STALL $n: no new output for 10 polls"; exit 2
+    fi
     last=$now
 done
 [ "$(cat "$STATE/exit")" = 0 ] && echo completed > "$STATE/status" \
@@ -47,11 +53,15 @@ the run ends. When the run ends without an exit code, the watcher
 writes `exit` = `137`.
 
 A stall is no new output in 10 polls in a row (5 minutes). The
-watcher then ends with exit code 2. On a stall, start the watcher
-again. Only log growth counts as progress. After 2 restarts of the
-watcher without log growth, abort the run (status `failed`). GPU load
-alone never counts. To abort, kill the process group, then start the
-watcher again. It sets `status` to `failed`:
+watcher then ends with exit code 2. It writes the `wc -c` size of the
+log to `$STATE/stall_size`. It writes the count of stall ends at that
+size to `$STATE/stalls`, so the count survives a resume. On a stall,
+start the watcher again. Only log growth counts as progress. GPU load
+alone never counts. When the watcher ends with a stall 3 times in a row
+and `wc -c` of the log did not change between those ends, abort the run
+(status `failed`). The third such end prints `STALL 3`. To abort, kill
+the process group, then start the watcher again. It sets `status` to
+`failed`:
 
 ```bash
 STATE=~/.cache/hpo/<target-id>; kill -- -"$(cat "$STATE/pid")"

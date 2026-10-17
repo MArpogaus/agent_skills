@@ -111,10 +111,10 @@ to step 10. When the run is not valid, set the row to `failed`, run
 |---|---|---|
 | `gap > overfit_gap` | overfitting | reduce capacity, add regularisation |
 | `min_val_loss > healthy_loss` | underfitting | change the learning rate or schedule, then increase capacity |
+| `min_val_loss <= healthy_loss` | healthy | increase capacity by one step |
 
 Underfitting: increase the learning rate first; after a revert, decrease
 it.
-| `min_val_loss <= healthy_loss` | healthy | increase capacity by one step |
 
 ### 4. Decide the next change
 
