@@ -64,7 +64,6 @@ Use the first row that fits.
 - CLI tool: `uv tool install <pkg>`. Add plugins with `--with <dep>`.
   The binary goes to `~/.local/bin`, the env to
   `~/.local/share/uv/tools/<pkg>`.
-- Upgrade or repair: `uv tool install --reinstall <pkg> --with <dep>`.
 - Throwaway Python env: `uv venv -q ~/.local/venvs/<name>`, then
   `uv pip install -q --python ~/.local/venvs/<name>/bin/python <pkg>`.
   Never create the venv inside the user's repository.
@@ -88,8 +87,7 @@ Use the first row that fits.
 - Use nix only when `command -v nix` finds it or `~/.nix-profile`
   exists.
 - One command: `nix shell nixpkgs#<pkg> -c <command>`. A tool for
-  more than one session: `nix profile add nixpkgs#<pkg>` (older nix:
-  `nix profile install`).
+  more than one session: `nix profile add nixpkgs#<pkg>`.
 
 ### Downloaded binary or tarball
 
@@ -100,9 +98,7 @@ Use the first row that fits.
 
 ## 3. Network
 
-- conda-forge and PyPI are reachable from the sandbox. Test with
-  `micromamba search -c conda-forge <pkg>` or
-  `uv pip compile - <<<'<pkg>'`.
+- conda-forge and PyPI are reachable from the sandbox.
 - When a download fails with a DNS or connection error, retry that one
   command once with the sandbox disabled (Claude Code:
   `dangerouslyDisableSandbox`). When it fails again, report it.
