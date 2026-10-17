@@ -105,6 +105,9 @@ gh api -X PUT repos/<owner>/<repo>/pages \
   -f 'source[branch]=gh-pages' -f 'source[path]=/'
 ```
 
+If the first command returns 404, create the site with
+`gh api -X POST repos/<owner>/<repo>/pages -f 'source[branch]=gh-pages' -f 'source[path]=/'`.
+
 ## mkdocs.yml
 
 ```yaml

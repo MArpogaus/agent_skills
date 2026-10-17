@@ -62,8 +62,8 @@ When the skeleton and this skill disagree, this skill is correct.
 3. Adapt the metadata, the package directory and the dependencies.
    Commit on `dev`.
 
-When a project change also applies to the skeleton, apply the change in
-`<skeleton checkout>` as a separate commit, with a message such as
+Make each skeleton change (hard rules) a separate commit in
+`<skeleton checkout>`, with a message such as
 `chore: bump pre-commit ruff rev`.
 
 Layout:
@@ -116,7 +116,7 @@ convention = "numpy"
 [tool.pytest.ini_options]
 addopts = ["-v", "--tb=short", "-n", "auto", "--dist=loadfile"]
 testpaths = ["test"]
-markers = ["slow: trains or fits; runs nightly only"]
+markers = ["slow: trains or fits; CI runs it nightly only"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -164,7 +164,9 @@ running kernel.
 - Run code and tests with `.venv/bin/python`. Without `.venv`, use
   the system `python3`.
 - A tool for your own use follows `sandbox-env`.
-- `uv.lock` is committed. `.envrc` holds `layout python` for direnv.
+- `uv.lock` is committed. `.envrc` holds `source .venv/bin/activate`,
+  so direnv activates the uv `.venv`. Do not use `layout python`: the
+  released direnv creates a second venv in `.direnv/`.
 
 ## Docstrings
 
@@ -192,8 +194,8 @@ A notebook with a Colab badge is the one exception. Track its
 
 ## Tests
 
-- Tests live in `test/`, one `test_<module>.py` for each module, one
-  `class Test<Unit>` for each function or logical unit.
+- Tests live in `test/`, one `test_<module>.py` for each module.
+  Each function or logical unit gets one `class Test<Unit>`.
 - pytest-xdist runs the suite in parallel (`-n auto`). Tests must
   not depend on order or shared state.
 - Use `pytest.raises(..., match=...)`, `np.testing.assert_allclose`
@@ -241,7 +243,9 @@ branch to `gh-pages`.
   `README.md`.
 - Structure, after the Best-README-Template: badges, title, local
   TOC, About The Project, Getting Started (Installation, Usage),
-  Contributing, License, Contact.
+  Contributing, License, Contact. Then add "Use of LLM Coding Tools" (`git-conventions`,
+  "Rules for agents").
+- Usage holds no code. It links to the demo notebook.
 
 ## Figures
 
