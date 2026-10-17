@@ -10,7 +10,7 @@ description: >
   `references.bib`.
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: ml latex, requires: [dev-conventions, git-conventions, ml-project, python-dev], audience: researchers}
+metadata: {stack: ml latex, requires: [dev-conventions, git-conventions, ml-project, python-dev]}
 ---
 
 # Skill: Paper Writing
@@ -41,7 +41,7 @@ submission. For a revision, use `latex-paper-revision`.
 <paper>/
 ├── main.tex                  # Root document
 ├── references.bib            # Bibliography
-├── compile.sh                # Build / submission script (optional)
+├── compile.sh                # Flat-upload build (when the venue needs one)
 ├── latexmkrc                 # latexmk config (optional)
 ├── preamble.tex              # Packages, macros, operators (\input'ed)
 ├── glossaries.tex            # \newacronym definitions (\input'ed)
@@ -279,7 +279,7 @@ latexmk -pdf main.tex
 
 ### Compile script template
 
-Create `compile.sh` for one-command camera-ready build:
+Create `compile.sh` when the venue needs a flat upload:
 
 ```bash
 #!/bin/bash
