@@ -103,8 +103,8 @@ Intermediate pipeline outputs are Feather files
 targets: [<target-a>, <target-b>]
 
 data:
-  raw_path: "data/raw"
-  processed_path: "data/processed"
+  raw_path: data/raw
+  processed_path: data/processed
 
 split:
   train_ratio: 0.7
@@ -134,12 +134,12 @@ stages:
         python scripts/prepare_features.py --target ${item}
         --input ${data.raw_path} --output ${data.processed_path}/${item}
       deps:
-        - ${data.raw_path}
-        - scripts/prepare_features.py
+      - ${data.raw_path}
+      - scripts/prepare_features.py
       params:
-        - data
+      - data
       outs:
-        - ${data.processed_path}/${item}/features.feather
+      - ${data.processed_path}/${item}/features.feather
 
   split_data:
     foreach: ${targets}
@@ -151,14 +151,14 @@ stages:
         --train-ratio ${split.train_ratio} --val-ratio ${split.val_ratio}
         --test-ratio ${split.test_ratio} --seed ${split.seed}
       deps:
-        - ${data.processed_path}/${item}/features.feather
-        - scripts/split_data.py
+      - ${data.processed_path}/${item}/features.feather
+      - scripts/split_data.py
       params:
-        - split
+      - split
       outs:
-        - ${data.processed_path}/${item}/train.feather
-        - ${data.processed_path}/${item}/val.feather
-        - ${data.processed_path}/${item}/test.feather
+      - ${data.processed_path}/${item}/train.feather
+      - ${data.processed_path}/${item}/val.feather
+      - ${data.processed_path}/${item}/test.feather
 
   train:
     foreach: ${targets}
@@ -172,18 +172,18 @@ stages:
         --batch-size ${train.batch_size}
         --outdir results/${item}
       deps:
-        - ${data.processed_path}/${item}/train.feather
-        - ${data.processed_path}/${item}/val.feather
-        - scripts/train.py
-        - src/<package>/models.py
+      - ${data.processed_path}/${item}/train.feather
+      - ${data.processed_path}/${item}/val.feather
+      - scripts/train.py
+      - src/<package>/models.py
       params:
-        - train
-        - params/${item}.yaml:
+      - train
+      - params/${item}.yaml:
       outs:
-        - results/${item}/model
+      - results/${item}/model
       metrics:
-        - results/${item}/metrics.json:
-            cache: false
+      - results/${item}/metrics.json:
+          cache: false
 ```
 
 ### Per-target model configs
@@ -192,16 +192,16 @@ Place dataset-specific hyperparameters in `params/<target>.yaml`:
 
 ```yaml
 model:
-  architecture: "mlp"
+  architecture: mlp
   n_layers: 4
   hidden_units: [64, 64]
-  activation: "relu"
+  activation: relu
   dropout_rate: 0.1
 
 train:
   learning_rate: 0.001
-  lr_schedule: "cosine_decay"
-  optimizer: "adam"
+  lr_schedule: cosine_decay
+  optimizer: adam
 ```
 
 ## Experiment tracking with MLflow
