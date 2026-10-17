@@ -30,8 +30,6 @@ structural improvements.
      it includes.
    - Assess the overall structure, argumentation flow and
      completeness.
-   - Identify the main sections: Abstract, Introduction, Methodology,
-     Results, Discussion, Conclusion.
 
 2. **Identify Missing Information:**
    - Scan the document for placeholders, missing values or incomplete
@@ -45,33 +43,24 @@ structural improvements.
 
 Goal: turn raw data and results into clear, scientifically sound text.
 
-1. **Interpret Data and Results:**
-   - Analyse the trends, comparisons and significant findings in the
-     data the user provided (tables of metrics, numerical outputs).
-
-2. **Draft Results Section:**
+1. **Draft Results Section:**
    - Insert a new subsection or replace a `\TODO{}` marker.
-   - Write concise, objective descriptions. Refer to tables and
-     figures with `\Cref{}`.
+   - Write concise, objective descriptions.
 
-3. **Integrate Figures and Tables:**
-   - Use the standard LaTeX environments (`figure`, `table`).
-   - Give each a descriptive `\caption{}` and a unique `\label{}`.
-   - Use `booktabs` for tables.
+2. **Integrate Figures and Tables:**
+   - Figures, tables, labels and `\Cref` follow `paper-writing`
+     ("Labels and BibTeX keys").
 
 ## Phase 3: Language Polishing and Structural Refinement
 
 Goal: improve the language and make the formatting consistent.
 
 1. **Proofread and Polish Language:**
-   - Review each section for clarity, conciseness, scientific tone
-     and grammar.
    - Make targeted edits. Before you rewrite a section, estimate the
      share of sentences you will change. Above half, write a new
      version of the section instead.
 
 2. **Enhance Structure and Flow:**
-   - Assess the transitions between sections.
    - Add subsections or reorder content where the argument needs it.
    - Keep terminology and notation consistent.
 
@@ -96,7 +85,7 @@ files of both versions. `<engine>` is the build flag of the venue
 
 ```bash
 latexdiff-vc --git --flatten -r <tag> main.tex   # writes main-diff<tag>.tex
-latexmk <engine> main-diff<tag>.tex
+latexmk <engine> -shell-escape main-diff<tag>.tex
 ```
 
 The output shows additions in blue underline and deletions in red
