@@ -59,7 +59,7 @@ jobs:
 ## Dependabot
 
 `.github/dependabot.yml` keeps the action pins current. The stack
-skill adds its package ecosystem (for example `pip` in `python-dev`):
+skill adds its package ecosystem (for example `cargo` in `rust-dev`):
 
 ```yaml
 version: 2
@@ -117,7 +117,7 @@ branched or pushed yet:
 git update-ref -d HEAD        # remove the root commit
 git rm -r --cached -q .       # empty the index
 git add .gitignore
-[ -f .pre-commit-config.yaml ] && git add .pre-commit-config.yaml
+if [ -f .pre-commit-config.yaml ]; then git add .pre-commit-config.yaml; fi
 git commit -m "chore: init"
 ```
 
@@ -172,12 +172,12 @@ two branches carry work, or outside forks exist, tell the user that
 the rewrite costs more than it gives. Then wait for the user to
 confirm the rewrite (autonomous: record a blocker).
 
-When `dev` exists (`git rev-parse -q --verify dev`), merge it into
-`main` with `git merge --no-ff dev`. Continue only when
-`git rev-list --count main..dev` prints 0. The procedure never touches the working tree or the index,
-except the one-owner `--ff-only` step. Uncommitted edits of the user or
-other agents stay. It builds the commits with `git commit-tree` and
-moves the branches with `git update-ref`.
+When `dev` exists (`git rev-parse -q --verify dev`), commit or stash
+uncommitted edits, then run `git switch main && git merge --no-ff dev`.
+Continue only when `git rev-list --count main..dev` prints 0. After
+that, the procedure changes neither the working tree nor the index,
+except in the one-owner `--ff-only` step. It builds the commits with
+`git commit-tree` and moves the branches with `git update-ref`.
 
 ```bash
 OLD=$(git rev-parse main)
@@ -204,12 +204,20 @@ S=$(git commit-tree "$OLD^{tree}" -p "$I" -m "chore: import <project> <version> 
 M=$(git commit-tree "$OLD^{tree}" -p "$OLD" -p "$S" -m "chore: adopt the new main root")
 git branch dev-<owner> "$M"
 
-# 4. publish
+# 4. publish; until main contains $M, each range holds the old messages
 git update-ref refs/heads/main "$S" "$OLD"
-git push --force-with-lease origin main
-#    the range holds the old messages, which fail commitizen-branch
+uvx --from commitizen cz check --rev-range "$OLD..$M"
+git push --no-verify --force-with-lease origin main
 git push --no-verify origin dev-<owner>
+
+# 5. merge dev-<owner> into main at once
+git merge --no-ff dev-<owner>
+uvx --from commitizen cz check --rev-range "$OLD..HEAD"
+git push --no-verify origin main
 ```
+
+Run step 5 at once after step 4. Push the merge with `--no-verify`
+only after `cz check --rev-range "$OLD..HEAD"` passes.
 
 - `git update-ref` also moves a checked-out `main`. Its tree equals the
   old tree, so the working tree and the index still match.

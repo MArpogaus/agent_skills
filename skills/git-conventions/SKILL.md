@@ -62,8 +62,8 @@ a root commit or rewrite pushed history.
   it on `dev` (shared repo: the user's `dev-<owner>`). Use a normal type
   and put `WIP, untested` in the body. It is the only exception to the rule
   that each commit passes the tests. It still passes the hooks.
-- **SSH to GitHub fails in the sandbox.** Fetch and push over HTTPS
-  with `gh auth git-credential` as credential helper. Fetch before you
+- **SSH to GitHub fails in the sandbox.** Run `gh auth setup-git` once
+  and use an `https://github.com/...` remote URL. Fetch before you
   trust an `origin/*` ref.
 - **Other agents can work in the same repo.** Run `git status -sb`
   before each commit. Stop and tell the user when HEAD is detached or
@@ -184,14 +184,15 @@ Every repo runs its hooks in CI with
 
 Every repo with a workflow has `.github/dependabot.yml` from
 [reference.md](reference.md) ("Dependabot"). It targets `dev`. The
-stack skill adds its package ecosystem.
+stack skill adds its package ecosystem (for example `cargo` in
+`rust-dev`).
 
 ## Tagging and releases
 
 - **Tags** use `v<semver>` (for example `v0.1.0`), unless the repo
   documents its own scheme. Ask when unsure.
-- Tags are annotated, with a message that summarises the release
-  (commitizen: `annotated_tag = true`).
+- Tags are annotated, with a message that summarises the release. Run
+  `cz bump --annotated-tag-message "<summary>"`.
 - **Release:** run `cz bump` on `dev`, then `git merge --no-ff dev`
   into `main`. Push `dev` and `main` before the tag. A request to
   release is the request to push `dev`, `main` and the tag.
