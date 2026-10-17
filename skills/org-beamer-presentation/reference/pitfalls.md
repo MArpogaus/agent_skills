@@ -41,7 +41,7 @@ pages too.
   example block or `~code~` as fragile by itself. Add `:BEAMER_OPT:
   fragile` only for raw verbatim (`\verb`, `verbatim`, `lstlisting`)
   inside a `#+begin_export latex` block.
-- A `.bbl-SAVE-ERROR` file is an interrupted biber run. Delete it.
+- A `.bbl-SAVE-ERROR` file is an interrupted bibtex run. Delete it.
 
 ## Code frames
 
@@ -92,8 +92,9 @@ pages too.
 A plotting script stays in a Python `src` block next to its figure (hard
 rule in `SKILL.md`).
 
-- Header of the block: `:python <venv>/bin/python :results silent
-  :exports none :eval never-export`. Each block has its own imports.
+- Header of the block: `:python <project>/.venv/bin/python :results
+  silent :exports none :eval never-export`. `<project>/.venv` is the
+  project's `.venv`, used read-only. Each block has its own imports.
   Duplication is accepted.
 - The block saves the figure into the sidecar folder. Write the
   `[[file:<figure>.pdf]]` link by hand below the block.

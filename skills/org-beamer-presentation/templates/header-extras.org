@@ -65,7 +65,8 @@ For themes without a frame counter (Szeged, SimplePlus).
 #+end_src
 
 * Code frames
-Only for a specialist audience. Stops evaluation on export.
+Only for a specialist audience. Stops evaluation on export. Uses
+`accent`, so add the block "Link colours" too.
 
 #+begin_src org
 ,#+PROPERTY: header-args :results silent :eval never-export

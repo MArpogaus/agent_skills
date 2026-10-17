@@ -24,8 +24,8 @@ message.
 - Budget: at most one frame per minute of talk. A talk of 15 minutes or
   less has no section, TOC or agenda frames. A longer talk may use the
   section TOC stanza from `templates/header-extras.org`. One closing
-  frame is allowed. The title frame and the closing frame do not count
-  toward the budget. No appendix unless the user asks for one.
+  frame is allowed. The title frame, the closing frame and the References frame
+  do not count toward the budget. No appendix unless the user asks for one.
 - Figure first. A figure frame has at most 2 lines, each at most 12
   words. A text frame has at most 3 bullets, each at most 2 lines at
   full width. Never put more than 2 text-only frames in a row.
@@ -54,8 +54,8 @@ message.
 ## 1. Before writing
 
 Read the two newest decks in `<presentations dir>`. When neither is for
-the same kind of event (conference, internal, teaching), also read the
-newest deck of that kind. Their
+the same kind of event (its `#+filetags:`, for example conference,
+internal or teaching), also read the newest deck of that kind. Their
 density is the target: about 20 words per frame, one figure and 1 or 2
 short bullets.
 
