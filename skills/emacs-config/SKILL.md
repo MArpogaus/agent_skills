@@ -4,7 +4,7 @@ description: >
   Conventions and architecture of the user's literate Emacs
   configuration (MArpogaus/emacs.d): the org-only editing workflow,
   naming schemes, package idioms, header-line buttons, the features
-  that became packages, the hand-off of a fix through elpaca, and the
+  in their own packages, the hand-off of a fix through elpaca, and the
   repo's git flow. Use in the `<user home>/.emacs.d` repository or
   when editing emacs.org.
 license: MIT
@@ -78,7 +78,7 @@ Display engine rules (overlays, display properties, scrolling): read
 `emacs-package` [reference.md](../emacs-package/reference.md) before you
 change rendering code.
 
-## Features that became packages
+## Features in their own packages
 
 These features live in their own repositories, each with README, tests
 and CI (see the `emacs-package` skill):
