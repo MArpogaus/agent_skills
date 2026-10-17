@@ -16,11 +16,11 @@ metadata: {stack: emacs, requires: [dev-conventions, emacs-package, git-conventi
 
 ## Hard rules
 
-- **`emacs.org` is the single source of truth and holds the code**
-  (`dev-conventions`, "4.1 Arm the commit monitor"). `lisp/*.el`, `init.el`
-  and `early-init.el` are tangled artifacts: never edit them. Tangle
-  only when the user asks for it ("retangle", "you may tangle").
-  Otherwise the user tangles.
+- **`emacs.org` is the single source of truth and holds the code:**
+  set `REVIEW_SKIP='*.md'` (`dev-conventions`, "4.1 Arm the commit
+  monitor"). `lisp/*.el`, `init.el` and `early-init.el` are tangled
+  artifacts: never edit them. Tangle only when the user asks for it
+  ("retangle", "you may tangle"). Otherwise the user tangles.
 - **No test files in this repository.** Do not create `test/` or ERT
   suites here. A package under `packages/<name>` follows
   `emacs-package`.
@@ -63,7 +63,7 @@ metadata: {stack: emacs, requires: [dev-conventions, emacs-package, git-conventi
 - Modal editing is **meow**. Normal state shadows plain single-key
   bindings in mode maps, so never define speed keys. Use modified keys
   (the `<return>` family, `C-<up>/<down>`) and repeat-maps under the
-  leader (`my/leader-map`, for example `SPC j` →
+  leader (`my/leader-map`, for example `SPC j` to
   `my/code-cells-repeat-map`), as in `my/debug-map`. Do not add `C-c`
   prefix bindings.
 - Side windows come from the user's `auto-side-windows` package:
