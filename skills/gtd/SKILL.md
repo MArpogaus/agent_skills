@@ -27,25 +27,20 @@ repo's `main`.
 ## Hard rules
 
 - Read `AGENTS.md` before the first edit in a session.
-- Run `git -C <agenda repo> status --short` before each edit. Never
-  revert or overwrite changes that you did not make. When a file you
-  want to change has such changes, stop and tell the user.
+- Run `git -C <agenda repo> status --short` before each edit. A sync
+  client and open Emacs buffers also write these files. Never revert
+  or overwrite changes that you did not make. When a file you want to
+  change has such changes, stop and tell the user.
 - Ask before you set `DONE` or `KILL` and before you delete text. "X is
   done" from the user is the consent. Do not ask again. Autonomous:
   skip the edit and list the item under "Open" in the final report.
-- Archiving (section 6) is a move and needs no question.
+- Archiving (section 5) is a move and needs no question.
 - Never send mail. Mail drafts go into a code block for the user to
   copy.
 - The agenda links to a note. It never copies the content of the note.
 - Write entries in the language of the entries around them.
 
-## 1. Safe edits
-
-Other writers change the same files: a sync client and open Emacs
-buffers. Uncommitted changes that you did not make can be a stale sync
-or an unsaved buffer.
-
-## 2. Capture
+## 1. Capture
 
 - **`gtd: <text>`** adds an inbox item to `inbox.org`.
 - In the agenda workspace, **`<project>: <text>`** adds a task or a
@@ -61,7 +56,7 @@ or an unsaved buffer.
 An agent in another workspace records a blocker or a follow-up for
 the user like this:
 
-1. Check the agenda state as the hard rules and section 1 say.
+1. Check the agenda state as the hard rules say.
 2. Add `* TODO <project>: <one-line summary>` to `inbox.org` with the
    `/Entered on/` line. Below it, one or two lines: what blocks, and
    a link to the issue or the commit.
@@ -74,7 +69,7 @@ has changes you did not make, do not edit it. List the item under
 
 Keep the details in the issue. The inbox item is a pointer.
 
-## 3. Day review ("Tagesreview")
+## 2. Day review ("Tagesreview")
 
 The agent shell sends "Tagesreview nach AGENTS.md." as its first message
 when the agenda session starts.
@@ -88,7 +83,7 @@ when the agenda session starts.
    asks for an action.
 4. Propose at most three tasks for the day.
 
-## 4. Inbox triage
+## 3. Inbox triage
 
 Group the inbox items by the `<project>:` prefix in the title. Items
 without one come last. Go through the groups one project at a time.
@@ -97,12 +92,12 @@ each. A proposal is one of: move to the project, single task, `WAIT`,
 `KILL`, or a note in the Denote silo. Wait for the user's decision,
 apply it, commit, then go to the next project.
 
-## 5. Retro ("Retro")
+## 4. Retro ("Retro")
 
 1. Ask what is done and set it `DONE`, with `CLOSED` and the project
    cookie.
 2. Carry meeting notes into their Denote notes and new tasks into the
-   projects. Triage what is left in the inbox (section 4).
+   projects. Triage what is left in the inbox (section 3).
 3. Read today's agent sessions: the transcripts that changed today in
    the harness's transcript location (Claude Code:
    `~/.claude/projects/`). Extract the user's messages and look for
@@ -112,7 +107,7 @@ apply it, commit, then go to the next project.
    what went well, what went badly, decisions and tomorrow.
 5. Commit.
 
-## 6. Weekly review ("Wochenreview")
+## 5. Weekly review ("Wochenreview")
 
 1. List projects without a `NEXT` task. A project with "Das Projekt
    ruht seit DATUM." under `Notes` is resting, not stuck.
