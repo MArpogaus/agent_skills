@@ -72,7 +72,7 @@ commit, as `git-conventions` says.
   pipeline with more than one stage, use the command that runs all
   stages.
 
-Write this as the header of `hpo_study.md` at the repo root. The log
+Write this as the header of a `## <target-id>` section of `hpo_study.md` at the repo root. "The log" and "log row" mean that section and its rows. The log
 uses the row format below, not the manual study format of
 `ml-project`.
 
@@ -184,7 +184,7 @@ better).
 
   ```bash
   git checkout -- params/<target-id>.yaml dvc.lock \
-      results/<target-id>/metrics.json && dvc checkout
+      results/<target-id>/metrics.json && PATH=$PWD/.venv/bin:$PATH dvc checkout
   ```
 
 ### 10. Check the stopping criteria
