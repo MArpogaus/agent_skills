@@ -99,14 +99,11 @@ Use the first row that fits.
 - Link the executable into `~/.local/bin`:
   `ln -sfn ~/.local/opt/<tool>-<version>/<tool> ~/.local/bin/<tool>`.
 
-## 3. Caches and build output
+## 3. Caches
 
 - Keep tool caches in the agent's home: `CARGO_HOME=$HOME/.cargo`,
   the uv cache and the mamba package cache in their defaults under
   `$HOME`.
-- Build a binary that the user runs where the user runs it, for
-  example the repository's `target/`. See `rust-dev`, "Toolchain and
-  environment".
 
 ## 4. Network
 
