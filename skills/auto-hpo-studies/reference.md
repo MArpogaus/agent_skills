@@ -65,7 +65,7 @@ value in `$STATE/iter`.
 0. If `git log --grep "<target-id> done:"` finds a commit, report the
    study as finished and stop.
 1. No `hpo_study.md`: ask the user for the definition (step 1).
-2. State files exist and row `<N>` is `committed`: if
+2. State files exist and row `<N>` is `committed`. If
    `git log --grep "<target-id> iter <N>:"` finds nothing, make the
    commit of step 9, or of step 2 in iteration 0. If the run has no
    `kept` = `1` tag, tag it as kept with the step 9 call
@@ -75,11 +75,13 @@ value in `$STATE/iter`.
    of `pid`: start the watcher again (step 7).
 5. `status` is `running` and no non-zombie process is in the session
    of `pid`: read `exit`. `0`: go to step 8. Non-zero or missing:
-   treat the run as failed (step 9).
+   write `failed` to `status` and follow item 7.
 6. `status` is `completed`: go to step 8.
-7. `status` is `failed`: go to step 9 (failed run).
-8. A `launched` row without state files: set it to `failed`, restore
-   `params/`, go to step 2.
-9. No state files and `git diff params/` shows a change: the config
-   was edited but not launched. Restore it and go to step 2.
+7. `status` is `failed`: in iteration 0, follow the iteration 0 rule
+   of step 2. Else go to step 9 (failed run).
+8. A `launched` row without state files: set it to `failed`, stash
+   `params/` with a message (`dev-conventions`, "Hard rules"), go to
+   step 2.
+9. No state files and `git diff params/` shows a change: stash it
+   with a message and go to step 2.
 10. No state files and no diff: go to step 10, then step 2.

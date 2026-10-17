@@ -54,7 +54,8 @@ commit, as `git-conventions` says.
 - **Config file**: `params/<target-id>.yaml` (see `ml-project`,
   "Per-target model configs").
 - **Search space**: a table of parameters of `params/<target-id>.yaml`
-  with initial value, range and step.
+  with initial value, range, step and group (learning rate and
+  schedule, capacity, regularisation or training budget).
 - **Diagnosis thresholds** for step 3: `overfit_gap` and
   `healthy_loss`. `overfit_gap` is the largest accepted
   `min_val_loss - min_loss`. `healthy_loss` is the `min_val_loss` that
@@ -81,16 +82,19 @@ runs = mlflow.search_runs(
     order_by=["start_time DESC"],
     max_results=1,
 )
-row = runs.iloc[0]
-min_val_loss = row["metrics.min_val_loss"]
-min_loss = row["metrics.min_loss"]
-best_epoch = row["metrics.best_epoch"]
+if runs.empty:
+    print("no kept run: iteration 0")
+else:
+    row = runs.iloc[0]
+    min_val_loss = row["metrics.min_val_loss"]
+    min_loss = row["metrics.min_loss"]
+    best_epoch = row["metrics.best_epoch"]
 ```
 
 The training script of `ml-project` ("Logging from a training
 script") sets `tags.target`.
 
-If no run exists, this is iteration 0. Iteration 0: skip steps 3 to
+If `runs` is empty, this is iteration 0. Iteration 0: skip steps 3 to
 5. Launch the unchanged config with `change` = `baseline` and row
 `0`. When step 8 finds the run valid, tag it as kept with the step 9
 call (`set_tag(run_id, "kept", "1")`). Then set the row to `committed`
@@ -137,16 +141,17 @@ Continue when it ends. On a stall, follow the same section.
 
 ### 8. Read the new metrics
 
-If `status` is `failed`, go to step 9 (failed run). Else read the new
-run with the step 2 query without the `kept` filter. The run is valid
+If `status` is `failed`, go to step 9 (failed run), in iteration 0 to
+the iteration 0 rule of step 2. Else read the new run with the
+step 2 query without the `kept` filter. The run is valid
 when all are true:
 
 - `min_val_loss` is not NaN.
 - `best_epoch` is more than 5 and less than `max_epochs - 1`, with
   `max_epochs` = `train.max_epochs` in `params.yaml`.
 
-Else write `failed` to `$STATE/status`. In iteration 0, do what
-step 2 says for iteration 0 instead of step 9.
+Else write `failed` to `$STATE/status` and apply the first sentence
+of this step.
 
 ### 9. Compare
 
