@@ -19,7 +19,7 @@ for later stops.
 
 ## Phase 1: orient (silent, cheap)
 
-Never start from `main()`. Spend one cheap call to learn the shape:
+Never start from `main()`. Learn the shape in one cheap call:
 
 ```bash
 cd <project> && ls && git ls-files -z | xargs -0 wc -l | grep -v ' total$' | sort -n | tail
