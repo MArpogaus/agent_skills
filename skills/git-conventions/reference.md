@@ -108,19 +108,6 @@ In a repo of another owner, these conventions are not a mandate.
 - Before a change to more than 10 files, check for open branches and
   pull requests, and say in the pull request what needs a rebase.
 
-## Redo the root commit
-
-Use this when the root commit holds the wrong files and nothing is
-branched or pushed yet:
-
-```bash
-git update-ref -d HEAD        # remove the root commit
-git rm -r --cached -q .       # empty the index
-git add .gitignore
-if [ -f .pre-commit-config.yaml ]; then git add .pre-commit-config.yaml; fi
-git commit -m "chore: init"
-```
-
 ## Adopt this flow on an existing repo
 
 **Default: adopt the flow from now on, and do not change the
@@ -166,18 +153,14 @@ The procedure below replaces `main` with a `chore: init` commit plus
 one squashed snapshot. Do it before any cleanup commits, so that the
 snapshot is the unchanged prior state.
 
-Count the unmerged branches first
-(`git rev-list --count main..<branch>` for each branch). If more than
-two branches carry work, or outside forks exist, tell the user that
-the rewrite costs more than it gives. Then wait for the user to
-confirm the rewrite (autonomous: record a blocker).
-
-When `dev` exists (`git rev-parse -q --verify dev`), commit or stash
-uncommitted edits, then run `git switch main && git merge --no-ff dev`.
-Continue only when `git rev-list --count main..dev` prints 0. After
-that, the procedure changes neither the working tree nor the index,
-except in the one-owner `--ff-only` step. It builds the commits with
-`git commit-tree` and moves the branches with `git update-ref`.
+Stash uncommitted edits with a message
+(`git stash push -m "rewrite main"`). Check out `main`
+(`git switch main`). When `dev` exists
+(`git rev-parse -q --verify dev`), run `git merge --no-ff dev`, and
+continue only when `git rev-list --count main..dev` prints 0. After
+that, the procedure changes neither the working tree nor the index. It
+builds the commits with `git commit-tree` and moves the branches with
+`git update-ref`.
 
 ```bash
 OLD=$(git rev-parse main)
@@ -225,8 +208,8 @@ only after `cz check --rev-range "$OLD..HEAD"` passes.
 - After the rewrite, retarget open pull requests onto `dev-<owner>`
   and delete merged branches. With more than one owner, protect
   `main`.
-- In a repo with one owner, use `dev` in place of `dev-<owner>`. In
-  step 3, run `git update-ref refs/heads/dev "$M"` instead of
-  `git branch`, because `dev` exists. When `dev` is checked out, first
-  run `git merge --ff-only main` on `dev`. Then `git rev-parse dev`
-  prints `$OLD`.
+- In a repo with one owner, use `dev` in place of `dev-<owner>`. When
+  `dev` exists, run `git update-ref refs/heads/dev "$M"` in step 3
+  instead of `git branch`.
+- Last step: switch back to `dev` (or `dev-<owner>`), and run
+  `git stash pop` when you stashed.

@@ -16,8 +16,8 @@ metadata: {stack: git, requires: []}
 Read [reference.md](reference.md) when you write a pre-commit config
 or a workflow, or set up a repo with more than one owner. Also read it
 before you contribute to a repo of another owner ("Repos you do not
-own") or adopt this flow on an existing repo. Read it before you redo
-a root commit or rewrite pushed history.
+own") or adopt this flow on an existing repo. Read it before you
+rewrite pushed history.
 
 ## Hard rules
 
