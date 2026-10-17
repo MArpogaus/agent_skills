@@ -13,25 +13,13 @@ metadata: {stack: latex, requires: [paper-writing]}
 
 # Skill: LaTeX Paper Revision and Enhancement
 
-A structured workflow to revise, polish and enhance academic papers
-or reports written in LaTeX.
-
 New text follows the rule on numbers, results and citations in
 `paper-writing` ("Hard rules"). The build commands are in
 `paper-writing` ("Phase 4: Build and compilation").
 
 ## Phase 1: Initial Analysis and Structural Setup
 
-Goal: understand the scope of the paper and find high-level
-structural improvements.
-
-1. **Full Document Read:**
-   - Read the main `.tex` file (for example `main.tex`) and each file
-     it includes.
-   - Assess the overall structure, argumentation flow and
-     completeness.
-
-2. **Identify Missing Information:**
+1. **Identify Missing Information:**
    - Scan the document for placeholders, missing values or incomplete
      sections (for example "xx", "...", comments like
      `% Add figure here`).
@@ -41,19 +29,14 @@ structural improvements.
 
 ## Phase 2: Content Generation and Integration
 
-Goal: turn raw data and results into clear, scientifically sound text.
-
 1. **Draft Results Section:**
    - Insert a new subsection or replace a `\TODO{}` marker.
-   - Write concise, objective descriptions.
 
 2. **Integrate Figures and Tables:**
    - Figures, tables, labels and `\Cref` follow `paper-writing`
      ("Labels and BibTeX keys").
 
 ## Phase 3: Language Polishing and Structural Refinement
-
-Goal: improve the language and make the formatting consistent.
 
 1. **Proofread and Polish Language:**
    - Make targeted edits. Before you rewrite a section, estimate the
@@ -62,7 +45,6 @@ Goal: improve the language and make the formatting consistent.
 
 2. **Enhance Structure and Flow:**
    - Add subsections or reorder content where the argument needs it.
-   - Keep terminology and notation consistent.
 
 3. **Final Review and Cleanup:**
    - Synchronise Abstract, Research Highlights and Conclusion with
@@ -80,8 +62,8 @@ Use this phase when a revised version goes back to a venue.
 
 When the user says the paper is submitted, tag the commit
 `submitted-<venue>-<YYYYMMDD>`. The diff base is the newest such tag.
-`--flatten` follows the `\input` files of both versions. `<engine>` is the build flag of the venue
-(`-lualatex` or `-pdf`):
+`--flatten` follows the `\input` files of both versions. `<engine>` is
+the build flag of the venue (`-lualatex` or `-pdf`):
 
 ```bash
 latexdiff-vc --git --flatten -r <tag> main.tex   # writes main-diff<tag>.tex
