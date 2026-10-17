@@ -147,8 +147,8 @@ with a screenshot.
   `git-conventions`, "Pre-commit hooks". In service repos, Renovate
   (`.github/renovate.json`, a regex manager over the `*_image`
   defaults) opens image update PRs against `dev`.
-- The user tags every repo by hand. The agent tags none.
-  `home-server` uses semver tags from `cz bump`.
+- The user runs `cz bump` and tags every repo by hand. The agent runs
+  neither. `home-server` uses semver tags from `cz bump`.
 - A service repo that packages one upstream application uses the
   upstream version (for example `<major>`, then `<major>.1`). The other
   service repos use `v<semver>`, starting at `v1.0.0`.
