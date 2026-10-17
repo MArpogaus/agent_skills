@@ -16,9 +16,9 @@ metadata: {stack: org, requires: [dev-conventions, git-conventions]}
 # Skill: GTD Agenda
 
 The agenda is a git repository of Org files at `<agenda repo>`. Its
-`AGENTS.md` holds the data model (the files, the heading template, the
-keywords, the sort order, the day frame and the Org bookkeeping), and
-this skill holds the procedures.
+`AGENTS.md` holds the data model: the files, the heading template, the
+keywords, the sort order, the day frame and the Org bookkeeping. This
+skill holds the procedures.
 
 Notes live in the Denote silos under `<notes dir>`: the notes silos the
 `AGENTS.md` names. This skill gives permission to commit on the agenda
