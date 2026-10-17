@@ -17,9 +17,8 @@ metadata: {stack: sandbox conda uv nix, requires: [dev-conventions]}
 ## Hard rules
 
 - Install tools for the agent only under `$HOME`, also in a Python
-  project. Never install into the user's home or the system.
-- The project environment (`.venv`, a project conda env,
-  `node_modules`) belongs to the user (`dev-conventions`, "Hard rules").
+  project. Never install into the user's home, the system or the
+  project environment (`.venv`, a project conda env, `node_modules`).
 - This skill applies only when `$HOME` differs from `<user home>`
   (resolve it as `dev-conventions`, "6. Sandbox and environment safety",
   says). When they are equal, install nothing and report the missing
@@ -99,13 +98,10 @@ Use the first row that fits.
 - Link the executable into `~/.local/bin`:
   `ln -sfn ~/.local/opt/<tool>-<version>/<tool> ~/.local/bin/<tool>`.
 
-## 3. Caches
+Keep tool caches in the agent's home: `CARGO_HOME=$HOME/.cargo`, the
+uv cache and the mamba package cache in their defaults under `$HOME`.
 
-- Keep tool caches in the agent's home: `CARGO_HOME=$HOME/.cargo`,
-  the uv cache and the mamba package cache in their defaults under
-  `$HOME`.
-
-## 4. Network
+## 3. Network
 
 - conda-forge and PyPI are reachable from the sandbox. Test with
   `micromamba search -c conda-forge <pkg>` or
@@ -114,10 +110,12 @@ Use the first row that fits.
   command once with the sandbox disabled (Claude Code:
   `dangerouslyDisableSandbox`). When it fails again, report it.
 
-## 5. Record the install
+## 4. Record the install
 
 After each install, write one entry to the project's agent memory
-(Claude Code: `~/.claude/projects/<project>/memory/`). Write the tool,
+(Claude Code: `~/.claude/projects/<project-dir>/memory/`, where the
+`<project-dir>` folder name is the working directory path with each
+character other than a letter or a digit replaced by `-`). Write the tool,
 the installer, the exact command, the env name or path, and the run
 command, for example `micromamba run -n <project> cargo`. The next
 session reads this entry and reuses the env.
