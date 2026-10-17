@@ -98,9 +98,6 @@ Use the first row that fits.
 - Link the executable into `~/.local/bin`:
   `ln -sfn ~/.local/opt/<tool>-<version>/<tool> ~/.local/bin/<tool>`.
 
-Keep tool caches in the agent's home: `CARGO_HOME=$HOME/.cargo`, the
-uv cache and the mamba package cache in their defaults under `$HOME`.
-
 ## 3. Network
 
 - conda-forge and PyPI are reachable from the sandbox. Test with
@@ -113,9 +110,7 @@ uv cache and the mamba package cache in their defaults under `$HOME`.
 ## 4. Record the install
 
 After each install, write one entry to the project's agent memory
-(Claude Code: `~/.claude/projects/<project-dir>/memory/`). The
-`<project-dir>` folder name is the working directory path, with `-`
-in place of each character other than a letter or a digit. Write the tool,
+(Claude Code: `~/.claude/projects/<project-dir>/memory/`). Write the tool,
 the installer, the exact command, the env name or path, and the run
 command, for example `micromamba run -n <project> cargo`. The next
 session reads this entry and reuses the env.
