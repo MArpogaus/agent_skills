@@ -368,9 +368,10 @@ mv final.pdf "FINAL_PAPER.PDF"
 - latexmk: https://mg.readthedocs.io/latexmk.html
 - PGFPlots: https://pgfplots.sourceforge.net/
 - An earlier paper that used the target class is the best reference
-  for a venue: ask the user for one and copy its setup. Autonomous:
-  take the class options from the venue template and record the question
-  (`dev-conventions`, "2. Asking and acting").
+  for a venue: ask the user for one and copy its setup, except the
+  class options (hard rules). Autonomous: take the class options from
+  the venue template and record the question (`dev-conventions`,
+  "2. Asking and acting").
 
 ---
 
