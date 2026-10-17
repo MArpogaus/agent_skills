@@ -87,29 +87,25 @@ pages too.
   references" and "Please (re)run BibTeX". Ignore both when the
   citation check prints `0`.
 
-## Literate deck
+## Plotting scripts
 
-A deck can compute its figures and tables in Python `src` blocks.
+A plotting script stays in a Python `src` block next to its figure (hard
+rule in `SKILL.md`).
 
-- Run example code with org-babel and export `#+RESULTS:`. Never paste
-  output by hand.
-- Header: `#+PROPERTY: header-args:python :python <venv>/bin/python
-  :eval never-export :exports results :results output drawer :noweb yes`.
-  Shared imports go in a `#+name: setup` block with `:eval no`, pulled
-  in with `<<setup>>`. Run `org-babel-execute-buffer` before the export.
-- A headless run needs `-l ob-python`.
+- Header of the block: `:python <venv>/bin/python :results silent
+  :exports none`. Each block has its own imports. Duplication is
+  accepted.
+- The block saves the figure into the sidecar folder. Write the
+  `[[file:<figure>.pdf]]` link by hand below the block.
 - Never use `:results file` for a figure. Org writes the return value
-  into the file and replaces the PDF. Print the link instead:
-  `print("[[file:<path>]]")`. Tables work the same way.
-- A failed block leaves a half-filled drawer. Look for `code 1` and for
-  a table header with no rows.
-- A block must never print an Org heading. The heading ends the drawer,
-  and the next run appends a second copy. Print `\begin{columns}` export
-  blocks instead.
+  into the file and replaces the PDF.
+- Run each block with `C-c C-c` after its data changes. A headless run
+  of a block needs `-l ob-python`.
+- Cache the numbers of a long run as CSV or JSON in the sidecar. The
+  plotting blocks read only the cache, so the deck rebuilds without the
+  run.
 - A column whose name is a pandas attribute (`iat`, `loc`, `T`) is
   reachable only as `frame["<name>"]`.
-- Cache the run's numbers as CSV or JSON in the sidecar. All other
-  blocks read only the cache, so the deck rebuilds without the run.
 
 ## Figures for the dark 16:9 deck
 

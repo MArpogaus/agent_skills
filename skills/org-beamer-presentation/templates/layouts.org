@@ -124,7 +124,9 @@ Exports to =\note{}= and does not show on the slide.
 #+end_src
 
 * Bibliography
-Last heading of the file.
+Last heading of the file. Add `:BEAMER_opt: allowframebreaks` to the
+References frame only when the list runs past one page. On one page it
+adds a roman numeral to the title.
 
 #+begin_src org
 ,* References :B_ignoreheading:
@@ -132,8 +134,5 @@ Last heading of the file.
 :BEAMER_env: ignoreheading
 :END:
 ,** References
-:PROPERTIES:
-:BEAMER_opt: allowframebreaks
-:END:
 ,#+print_bibliography:
 #+end_src

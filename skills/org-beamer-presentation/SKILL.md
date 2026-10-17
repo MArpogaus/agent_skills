@@ -24,7 +24,8 @@ message.
 - Budget: at most one frame per minute of talk. A talk of 15 minutes or
   less has no section, TOC or agenda frames. A longer talk may use the
   section TOC stanza from `templates/header-extras.org`. One closing
-  frame is allowed. No appendix unless the user asks for one.
+  frame is allowed. The title frame and the closing frame do not count
+  toward the budget. No appendix unless the user asks for one.
 - Figure first. A figure frame has at most 2 lines, each at most 12
   words. A text frame has at most 3 bullets, each at most 2 lines at
   full width. Never put more than 2 text-only frames in a row.
@@ -34,12 +35,16 @@ message.
   the same dataset has the same colour on every frame.
 - Show at most 2 examples, the two with the largest contrast.
 - No semicolons, arrow characters in text, one-item lists or version
-  history. Show the current state only.
+  history. Show the current state only. No rhetorical bold lead-ins and
+  no bold on conclusions. Field labels in an entity grid (`*Idea:*`,
+  `*Status:*`) keep their emphasis.
 - No overlay reveals of text or punch lines. A step-by-step build of one
   figure with its math (`\multiinclude`, `<2->`) is allowed when the user
   asks for an animation.
-- No rhetorical bold lead-ins and no bold on conclusions. Field labels
-  in an entity grid (`*Idea:*`, `*Status:*`) keep their emphasis.
+- The Org file stays editable and readable by hand. Use few macros and
+  little code; accept duplication and some manual work. A plotting
+  script stays inline, in a src block next to its figure, where
+  possible.
 - Never invent content. Mark schematic numbers as schematic on the
   slide. No code or math for a non-specialist audience. Spell out
   jargon.
@@ -107,10 +112,10 @@ figures in the sidecar folder as vector PDF where possible, and set
 Use the global `org-cite-global-bibliography` only, never a per-talk
 `.bib`. A figure from a paper names its source in the caption.
 
-**Numbers from data.** Read numbers from a data file in the sidecar with
-a `#+MACRO` (stanza in `header-extras.org`) and write
-`{{{num(model.auc)}}}` in the text. Never generate an Org file from
-another Org file.
+**Numbers from data.** Use a `#+MACRO` only for a number read from a
+data file in the sidecar (stanza in `header-extras.org`), written as
+`{{{num(model.auc)}}}`. Write every other number as plain text. Never
+generate an Org file from another Org file.
 
 **Export in the agent sandbox.** `emacs` and `lualatex` are not on
 `PATH`. Use `<test rig>`. Put TeX first, so that its `kpsewhich`
@@ -154,7 +159,9 @@ correct deck. Do these steps after each build.
    `grep -c 'Citation .* undefined' <file>.log` prints `0`.
 2. Count frames, not pages, in the document body only:
    `sed -n '/\\begin{document}/,$p' <file>.tex | grep -c '\\begin{frame}'`.
-   Compare with the budget.
+   The title frame comes from `\maketitle`, so the grep does not count
+   it. Subtract the closing frame and the References frame, then
+   compare with the budget.
 3. Run `tools/contact-sheet.py <file>.pdf <dir>/sheet`, with `<dir>` a
    directory in the agent's scratch space, and look at every page.
    `tools/box-pages.py <file>.log` maps overfull boxes to pages.

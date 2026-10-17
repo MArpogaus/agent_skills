@@ -53,7 +53,4 @@
 :BEAMER_env: ignoreheading
 :END:
 ** References
-:PROPERTIES:
-:BEAMER_opt: allowframebreaks
-:END:
 #+print_bibliography:
