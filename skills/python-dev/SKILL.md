@@ -36,10 +36,10 @@ or docs configuration.
 - Use setuptools. Do not use hatchling.
 - Do not accept a keyword argument that the function does not use.
   Do not add `**kwargs` "for later".
-- Copy into `<skeleton checkout>` only: hook revisions in
-  `.pre-commit-config.yaml`, CI workflow files and the ruff `select`
-  list. Never project-specific ignores or options (section "Project
-  setup").
+- After a change to one of these in a Python project, copy it into
+  `<skeleton checkout>`: hook revisions in `.pre-commit-config.yaml`,
+  CI workflow files and the ruff `select` list. Never project-specific
+  ignores or options (section "Project setup").
 
 ## Design
 
