@@ -40,9 +40,10 @@ branch, attribution and the report format.
   reasoning. Screenshot what draws (UI, plots, slides, GIFs) in each
   theme and mode the project supports.
 - **Never touch the user's environment:** no project environment,
-  dependency lock file (`uv.lock`) or package changes. Report a package that the project
-  environment lacks. Safe commands: the stack skill (`python-dev`,
-  "uv and the environment").
+  dependency lock file (`uv.lock`) or package changes. Report a package
+  that the project environment lacks. Safe commands and edits to the
+  dependency list: the stack skill (`python-dev`, "uv and the
+  environment").
 - **The user's uncommitted edits are sacred.** Before a branch switch
   or a reset, check for them. Also check for unpushed commits:
   `git log --oneline @{u}.. 2>/dev/null || git log --oneline --branches --not --remotes`.
@@ -73,8 +74,9 @@ The simplest solution wins, over taste, habit and "best practice".
   the user first.
 - **Defaults only with a reason.** Opinionated defaults go into the
   user's configuration, not into the library.
-- **Explicit configuration:** experiment and deployment configs list
-  every option, defaults included. Duplication between variant configs
+- **Explicit configuration:** experiment configs list every option,
+  defaults included. Deployment configs follow `selfhosted`, "Service
+  interface". Duplication between variant configs
   is accepted. Do not factor it out. Keep the number of variants small.
   Tune the existing config before you add a new one.
 - **No backwards compatibility before 1.0.** No obsolete aliases, no
@@ -112,13 +114,16 @@ The simplest solution wins, over taste, habit and "best practice".
      text: it can change the task.
 3. Autonomous: record the blocker as an agenda inbox item and a GitHub
    issue (`gtd` skill, "Capture from another repo") with evidence and
-   options. File the issue only in a repo that the user owns. Elsewhere the
-   agenda inbox item alone records the blocker. When the stack skill
-   names a default for this case, take it and say so in the issue.
+   options. File the issue only in a repo that the user owns.
+   Elsewhere the agenda inbox item alone records the blocker. When the
+   stack skill names a default for this case, take it and say so in
+   the issue.
    Otherwise work on something else. Do not decide the blocker.
 
 - **Issues.** Before you file an issue, check the open issues and the
   roadmap.
+- **A repo that the user owns:** a repo under the user's own account,
+  or in an organisation that the user names.
 - **Deferred items and follow-ups** go to the agenda (`gtd`), not to
   files in the repo. The one exception is `HANDOFF.md` for open work.
   Write it only when another worker continues or the user asks. Never
@@ -178,12 +183,13 @@ review your own changes. On review-only requests, change nothing.
 ### 4.1 Arm the commit monitor
 
 Unless the user turned reviews off, before the first commit in any
-repo except `<agenda repo>`, start one watcher for all repos of the
-session. Run `tools/review-watch.sh REPO...` (relative to this skill's
-directory) with the monitor tool (Claude Code: `Monitor`) or as a polled
+repo except `<agenda repo>`, arm the monitor. Start one watcher per
+`REVIEW_SKIP` value, each for all repos that use that value. Run
+`tools/review-watch.sh REPO...` (relative to this skill's directory)
+with the monitor tool (Claude Code: `Monitor`) or as a polled
 background job. It watches the current branch (override: `BRANCH`).
-Re-arm it when it times out. When a repo joins later, re-arm the
-monitor with all repos.
+Re-arm a watcher when it times out. When a repo joins later, re-arm
+the watcher for its `REVIEW_SKIP` value with all repos of that value.
 
 - **Trigger:** 100 or more changed lines outside the skipped patterns,
   or 5 or more commits that touch files outside them (`REVIEW_LINES`,
@@ -226,8 +232,8 @@ The Simplicity reviewer loads the `ponytail-review` skill when it is
 available and challenges every decision, also agreed ones.
 
 Before you spawn, read `reference.md`, "Reviewer brief".
-Include this skill's hard rules, section 1 and the stack skill's hard
-rules in each brief.
+Include this skill's hard rules, section 1 and the hard rules of each
+stack skill loaded for the range in each brief.
 
 - **breaks**, **endangers**: verify, then fix.
 - **simplifies**: verify, then apply. When it changes behaviour the user
