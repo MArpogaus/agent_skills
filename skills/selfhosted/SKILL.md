@@ -66,6 +66,9 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
 - Similar features use one implementation and one variable shape in
   every service. Per-service proxy settings follow the same pattern.
 - No service has a hard dependency on the notification service.
+- The deployment repo lists only overrides. Role defaults stay in the
+  role. This is the exception to `dev-conventions`, "1. Design
+  principles", "Explicit configuration".
 
 ## Dashboards
 
@@ -111,9 +114,9 @@ with a screenshot.
 ## Test cycle
 
 1. `test/start_vm.py --fresh` builds a new VM; `--platform <butane
-   file>` adds the platform config. After the first boot, the user shuts
-   the VM down and runs `--save-base`. `--restore` resets the disk to that
-   base.
+   file>` adds the platform config. After the first boot, the user
+   shuts the VM down and runs `--save-base`. `--restore` resets the
+   disk to that base.
 2. The agent cannot start the VM. Ask the user for `--restore` or
    `--fresh`, and wait until the user says the VM is up. Autonomous:
    record it as a blocker (`dev-conventions`, "2. Asking and acting")
@@ -144,10 +147,12 @@ with a screenshot.
   `git-conventions`, "Pre-commit hooks". In service repos, Renovate
   (`.github/renovate.json`, a regex manager over the `*_image`
   defaults) opens image update PRs against `dev`.
-- The agent tags no service repo. The user tags them by hand. A repo
-  that packages one upstream application uses the upstream version (for
-  example `<major>`, then `<major>.1`). The others use `v<semver>`,
-  starting at `v1.0.0`.
+- The agent tags no service repo. The user tags them by hand.
+- The `home-server` core repo uses semver tags from `cz bump`; the user
+  tags it, like the service repos.
+- A service repo that packages one upstream application uses the
+  upstream version (for example `<major>`, then `<major>.1`). The other
+  service repos use `v<semver>`, starting at `v1.0.0`.
 - The production host runs tagged releases only. For a change deployed
   there, ask the user to tag a patch release of each changed service
   repo, so the tags match the host.
