@@ -5,8 +5,8 @@ description: >
   space, then iterate update-config run monitor log commit until
   convergence. Uses MLflow for tracking and a background watcher for
   long runs. Use when the user asks to tune hyperparameters
-  autonomously or to resume an HPO loop, or in a repo whose
-  `hpo_study.md` has a row with status `launched`.
+  autonomously or to resume an HPO loop, or when `hpo_study.md` has
+  a row with status `launched`.
 license: MIT
 compatibility: claude-code opencode
 metadata: {stack: ml, requires: [dev-conventions, ml-project, git-conventions]}
@@ -53,8 +53,8 @@ commit, as `git-conventions` says.
   over targets").
 - **Config file**: `params/<target>.yaml` (see `ml-project`,
   "Per-target model configs").
-- **Search space**: a table of parameters with initial value, range
-  and step.
+- **Search space**: a table of parameters of `params/<target>.yaml`
+  with initial value, range and step.
 - **Diagnosis thresholds** for step 3: `overfit_gap` and
   `healthy_loss`. `overfit_gap` is the largest accepted
   `min_val_loss - min_loss`. `healthy_loss` is the `min_val_loss` that
@@ -92,10 +92,12 @@ script") sets `tags.target`.
 
 If no run exists, this is iteration 0. Iteration 0: skip steps 3 to
 5. Launch the unchanged config with `change` = `baseline` and row
-`0`. When step 8 finds the run valid, tag it `kept`, set the row to
-`committed` and commit `dvc.lock`, `results/<target>/metrics.json`
-and `hpo_study.md` as `feat(hpo): <target-id> iter 0: baseline`. When it
-is not valid, set the row to `failed`, stop and report.
+`0`. When step 8 finds the run valid, tag it as kept with the step 9
+call (`set_tag(run_id, "kept", "1")`). Then set the row to `committed`
+and commit `dvc.lock`, `results/<target>/metrics.json` and
+`hpo_study.md` as `feat(hpo): <target-id> iter 0: baseline`. When the
+run is not valid, set the row to `failed`, run `rm -rf "$STATE"`, stop
+and report.
 
 ### 3. Diagnose the training state
 
@@ -103,7 +105,7 @@ is not valid, set the row to `failed`, stop and report.
 
 | Pattern | Conclusion | Action |
 |---|---|---|
-| `gap > overfit_gap` | overfitting | add regularisation, reduce capacity, increase `train.patience` |
+| `gap > overfit_gap` | overfitting | reduce capacity, add regularisation |
 | `min_val_loss > healthy_loss` | underfitting | change the learning rate or schedule, then increase capacity |
 | `min_val_loss <= healthy_loss` | healthy | increase capacity by one step |
 
@@ -112,9 +114,11 @@ is not valid, set the row to `failed`, stop and report.
 Step 3 picks the row. Inside that row's action, change the first
 parameter that is not settled, in this order: learning rate and
 schedule, capacity, regularisation, training budget. A parameter is
-settled when its last 2 changes were `reverted`; `failed` rows do not
-count. Never repeat a change
-that the log shows as `reverted`.
+settled when its last 2 changes were `reverted`, or when the next step
+leaves its range; `failed` rows do not count. Never repeat a change
+that the log shows as `reverted`. When every parameter of the row's
+action is settled and no stop criterion holds, record a blocker
+(first hard rule).
 
 ### 5. Apply the change
 
@@ -123,56 +127,19 @@ Edit the config file. `ml-project` defines its fields.
 ### 6. Launch the run
 
 Take `<N>` as the number of the last log row plus 1 (0 in iteration
-0). The new row has status `launched`. Then run:
+0). Write the row with status `launched`, then run the launch script
+in `reference.md`, "Launch".
 
-```bash
-STATE=~/.cache/hpo/<target-id>; mkdir -p "$STATE" logs
-echo running > "$STATE/status"; echo <N> > "$STATE/iter"
-echo "<change>" > "$STATE/change"
-nohup setsid sh -c '<run-command> > logs/iter<N>_<target-id>.log 2>&1
-                    echo $? > '"$STATE"'/exit' > /dev/null 2>&1 &
-echo $! > "$STATE/pid"
-```
+### 7. Watch the run
 
-Each shell call of an agent is a new shell. The state files carry
-the state between calls. If the run command contains a `'`, put it
-into a script and call that.
-
-### 7. Watch the run in the background
-
-Start this watcher. Continue when it ends:
-
-```bash
-STATE=~/.cache/hpo/<target-id>; log=logs/iter<N>_<target-id>.log
-last=-1; still=0
-until [ -f "$STATE/exit" ]; do
-    sleep 30
-    kill -0 "$(cat "$STATE/pid")" 2>/dev/null ||
-        { [ -f "$STATE/exit" ] || echo 137 > "$STATE/exit"; break; }
-    size=$(wc -c < "$log" 2>/dev/null || echo 0)
-    if [ "$size" = "$last" ]; then still=$((still + 1)); else still=0; fi
-    [ "$still" -ge 10 ] && { echo "STALL: no new output for 10 intervals"; exit 2; }
-    last=$size
-done
-[ "$(cat "$STATE/exit")" = 0 ] && echo completed > "$STATE/status" \
-    || echo failed > "$STATE/status"
-```
-
-The watcher polls every 30 seconds. It ends when the run ends, also
-when the run is killed without an exit code (`exit` = `137`). A
-stall is no new output for 10 polls (5 minutes): the watcher then
-ends with exit code 2. On a stall, read the log tail and the GPU use
-(`nvidia-smi`). If the run continues, start the watcher again. If
-the run hangs, abort the process group:
-
-```bash
-kill -- -"$(cat "$STATE/pid")"; echo 143 > "$STATE/exit"
-```
+Start the watcher in `reference.md`, "Watcher", in the background.
+Continue when it ends. On a stall, follow the same section.
 
 ### 8. Read the new metrics
 
-If `status` is `failed`, go to step 9 (failed run). Else read the new run with the step 2 query without the `kept` filter.
-The run is valid when all are true:
+If `status` is `failed`, go to step 9 (failed run). Else read the new
+run with the step 2 query without the `kept` filter. The run is valid
+when all are true:
 
 - `min_val_loss` is not NaN.
 - `best_epoch` is more than 5 and less than `max_epochs - 1`, with
@@ -197,7 +164,10 @@ better).
 - Failed run: restore the config and the outputs. Set the row status
   to `failed`, never `reverted`. A `failed` row does not ban the
   change and does not count for "settled" (step 4) or for
-  "plateau" (step 10). Restore command:
+  "plateau" (step 10). When the log shows a config error, fix the
+  config and launch the same change in a new row. A missing or broken
+  dependency is a blocker (`dev-conventions`, "Hard rules"). Restore
+  command:
 
   ```bash
   git checkout -- params/<target>.yaml dvc.lock \
@@ -214,7 +184,7 @@ Stop when one of these is true:
 3. **Max iterations**: the number of the last log row reaches
    `max_iter`.
 4. **Search space exhausted**: all search-space parameters are
-   settled or at their bounds.
+   settled.
 5. **Unstable**: `min_val_loss` is NaN after 3 different changes in a
    row. Mark this model unstable for this target in the study log.
 
@@ -233,35 +203,11 @@ the user. Else remove the state files and go to step 2.
 
 `Δ min_val_loss` is the `improvement` of step 9. Status is
 `launched`, `committed`, `reverted` or `failed`. Find the commit of
-row `<N>` with `git log --grep "iter <N>:"`.
+row `<N>` with `git log --grep "<target-id> iter <N>:"`.
 
 ## Resume after interruption
 
-When the skill loads, check in this order:
-
-1. No `hpo_study.md`: ask the user for the definition (step 1).
-2. State files exist and the row of `iter` is `committed`: if
-   `git log --grep "iter <N>:"` finds nothing, do the step 9 commit.
-   If the run has no `kept` tag, tag it. Then go to step 10.
-3. State files exist and the log row of `iter` is not `launched`:
-   go to step 10.
-4. `status` is `running` and the process in `pid` is alive: start
-   the watcher again (step 7).
-5. `status` is `running`, the process is gone: read `exit`. `0`: go
-   to step 8. Non-zero or missing: treat the run as failed (step 9).
-6. `status` is `completed`: go to step 8.
-7. `status` is `failed`: go to step 9 (failed run).
-8. A `launched` row without state files: set it to `failed`, restore
-   `params/`, go to step 2.
-9. No state files and `git diff params/` shows a change: the config
-   was edited but not launched. Restore it and go to step 2.
-10. No state files and no diff: go to step 10, then step 2.
-
-## Common patterns
-
-| Situation | Response |
-|---|---|
-| The run crashes at launch | Check the config format, the dependencies and the GPU memory. Fix the cause and launch the same change in a new row. |
+On load, follow `reference.md`, "Resume", before step 1.
 
 ---
 
