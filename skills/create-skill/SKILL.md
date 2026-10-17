@@ -36,7 +36,6 @@ Commit the change with the type `docs(<skill>):`.
   formatter or pre-commit hook already checks.
 - Do not restate a rule that another skill owns. Point to it by skill
   name and section heading, and check that the heading exists.
-- History and anecdotes: `dev-conventions`, "7. Style".
 - The repo is public. No private paths, hosts, names or project names:
   use the workspace placeholders of `dev-conventions` section 6.
 
