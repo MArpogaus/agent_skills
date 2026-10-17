@@ -1,7 +1,7 @@
 # dev-conventions: reference
 
 Read "Reviewer brief" when you spawn reviewers. Read "findings.md" for
-a written review. Read "Commit monitor details" for monitor problems.
+a written review.
 
 ## Reviewer brief
 
@@ -38,16 +38,3 @@ the repo root. It is a report file, not a plan that waits for approval:
 Commits that fix a finding can cite it ("findings.md, section A"). When
 the user says "read the findings and ask me", go through them one at a
 time with the question tool.
-
-## Commit monitor details
-
-- **Rewritten history** (an amend or a rebase of local commits) resets
-  the range to the merge base. The monitor then reviews the rewritten
-  commits again. When the stored commit no longer exists, the monitor
-  restarts from the current head.
-- **Detached HEAD:** without `BRANCH`, the monitor prints
-  `SKIP <repo>: detached HEAD` once and skips that repo until a branch is
-  checked out.
-- **State:** the monitor keeps the last handed-out commit per repo in
-  `$STATE` (default `~/.cache/review-watch`). Keep this directory when
-  you re-arm the monitor, so that no range is lost or reviewed twice.
