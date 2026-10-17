@@ -9,7 +9,7 @@ description: >
   `params.yaml` or an `mlruns/` directory.
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: ml, audience: researchers, requires: [dev-conventions, git-conventions, python-dev]}
+metadata: {stack: ml, requires: [dev-conventions, git-conventions, python-dev], audience: researchers}
 ---
 
 # Skill: ML Research Projects
