@@ -164,9 +164,10 @@ running kernel.
 - Run code and tests with `.venv/bin/python`. Without `.venv`, use
   the system `python3`.
 - A tool for your own use follows `sandbox-env`.
-- `uv.lock` is committed. `.envrc` holds `source .venv/bin/activate`,
-  so direnv activates the uv `.venv`. Do not use `layout python`: the
-  released direnv creates a second venv in `.direnv/`.
+- Where the edit is part of the task, you may edit the dependency
+  list in `pyproject.toml`. `uv lock` and `uv sync` are the user's.
+- `uv.lock` is committed. `.envrc` holds `export VIRTUAL_ENV=.venv`
+  and `layout python`, so direnv activates the uv `.venv`.
 
 ## Docstrings
 
@@ -231,7 +232,8 @@ branch to `gh-pages`.
 - Set GitHub Pages to branch `gh-pages`, path `/ (root)`. A `/docs`
   path fails the build.
 - Keep one `.bib` file, `docs/references.bib`, rendered by
-  `mkdocs-bibtex`. Its `csl_file` option takes an author-year CSL style.
+  `mkdocs-bibtex`. Use `apa.csl` from citation-style-language/styles
+  as `csl_file`.
   Cite in a docstring only when the function implements that
   reference. Put no citations in configs. Background and references
   go to the guide pages in `docs/`.
@@ -243,9 +245,9 @@ branch to `gh-pages`.
   `README.md`.
 - Structure, after the Best-README-Template: badges, title, local
   TOC, About The Project, Getting Started (Installation, Usage),
-  Contributing, License, Contact. Then add "Use of LLM Coding Tools" (`git-conventions`,
-  "Rules for agents").
-- Usage holds no code. It links to the demo notebook.
+  Contributing, License, Contact. Then add "Use of LLM Coding Tools"
+  (`git-conventions`, "Rules for agents").
+- Usage links to the demo notebook.
 
 ## Figures
 
