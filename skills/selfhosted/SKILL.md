@@ -24,8 +24,7 @@ metadata: {stack: ansible podman systemd, requires: [dev-conventions, git-conven
   playbook run. If the count is more than 50 above the first count,
   stop the deploy and tell the user.
 - Roles assume a clean install (`dev-conventions`, "1. Design
-  principles"). Give one-off steps for the existing production host to
-  the user as manual steps.
+  principles").
 - Never print a secret. Pass tokens through stdin.
 
 ## Platform
