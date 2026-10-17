@@ -9,7 +9,7 @@ description: >
   or must leave a task for the user. Use when the user says "gtd",
   "Tagesreview", "Retro", "Wochenreview" or "inbox".
 license: MIT
-compatibility: claude-code
+compatibility: claude-code opencode
 metadata: {stack: org, requires: [dev-conventions, git-conventions]}
 ---
 
@@ -99,9 +99,10 @@ apply it, commit, then go to the next project.
 2. Carry meeting notes into their Denote notes and new tasks into the
    projects. Triage what is left in the inbox (section 3).
 3. Read today's agent sessions: the transcripts that changed today in
-   the harness's transcript location (Claude Code:
-   `~/.claude/projects/`). Extract the user's messages and look for
-   what went well, what went badly, and decisions.
+   `~/.claude/projects/` of the agent home that all of the user's
+   sessions share (opencode: the sessions in
+   `~/.local/share/opencode/opencode.db`). Extract the user's messages
+   and look for what went well, what went badly, and decisions.
 4. Write the journal entry in the date tree of `journal.org` with the
    fields `AGENTS.md` names, one line each. They cover what is done,
    what went well, what went badly, decisions and tomorrow.
