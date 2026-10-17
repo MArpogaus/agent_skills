@@ -127,7 +127,7 @@ work commit. For each changed package:
      echo "uncommitted edits in $src"; false
    else
      git -C "$src" fetch "<user home>/.emacs.d/packages/<pkg>" dev &&
-       git -C "$src" checkout FETCH_HEAD
+       git -C "$src" -c advice.detachedHead=false checkout FETCH_HEAD
    fi
    ```
 
@@ -136,7 +136,9 @@ work commit. For each changed package:
 4. If the configuration changed too and the user allowed it, tangle.
 5. Tell the user what to restart and what to look for.
 6. When the fix is on the branch that elpaca follows, run
-   `git -C "<user home>/.emacs.d/elpaca/sources/<pkg>" checkout -`.
+   `git -C "<user home>/.emacs.d/elpaca/sources/<pkg>" checkout <branch>`,
+   where `<branch>` is the one local branch that `git -C … branch`
+   lists.
    Then ask the user to run `elpaca-update` for `<pkg>`, so that the
    clone and the build include the fix. Until then, list this step under
    "Open" in the final report.
