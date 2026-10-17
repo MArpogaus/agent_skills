@@ -92,7 +92,7 @@ description: >
   <description>
 license: MIT
 compatibility: claude-code opencode
-metadata: {stack: <words>, requires: [<skill>, ...]}
+metadata: {stack: <words>, requires: [<skill-a>, <skill-b>]}
 ```
 
 - `license: MIT`
@@ -163,11 +163,8 @@ After writing, check that the hard rules and steps 1 to 5 hold:
   `description` (ending with the trigger sentence), `license: MIT`,
   `compatibility` and `metadata` with `stack` and `requires`.
 - `grep -n '^# Skill: ' skills/<name>/SKILL.md` finds the H1.
-- `metadata.requires` lists the skills whose rules this skill follows;
-  a pointer that only gives an example does not count.
-  `dev-conventions` lists only `git-conventions`. Each skill in
-  `requires` has a line in the **Required skills** section, and no
-  other skill has one.
+- `metadata.requires` follows step 4. Each skill in `requires` has a
+  line in the **Required skills** section, and no other skill has one.
 
 ### 10. Register in repo
 
