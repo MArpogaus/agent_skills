@@ -75,7 +75,7 @@ with the Simplicity view.
 
 ## 5. Agenda
 
-Follow the `gtd` skill, "Hard rules" and "1. Safe edits".
+Follow the `gtd` skill, "Hard rules".
 
 - Find the agenda project of each repo: its name, or the repo link
   under `Information`.
