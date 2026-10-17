@@ -78,9 +78,9 @@ Use this phase when a revised version goes back to a venue.
 
 ### latexdiff for change tracking
 
-Compare the revised version against the submitted version (its git
-tag, for example `submitted-v1`). `--flatten` follows the `\input`
-files of both versions. `<engine>` is the build flag of the venue
+When the user says the paper is submitted, tag the commit
+`submitted-<venue>-<YYYYMMDD>`. The diff base is the newest such tag.
+`--flatten` follows the `\input` files of both versions. `<engine>` is the build flag of the venue
 (`-lualatex` or `-pdf`):
 
 ```bash
