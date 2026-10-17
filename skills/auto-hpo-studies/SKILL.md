@@ -43,6 +43,8 @@ commit, as `git-conventions` says.
 | `change` | `<param>:<old>-><new>`, or `baseline` in iteration 0 |
 | `pid` | process group of the run |
 | `exit` | exit code of the run |
+| `stalls` | count of watcher stalls at the same log size |
+| `stall_size` | log size in bytes at the last stall |
 
 ## Step by step
 
@@ -62,7 +64,9 @@ commit, as `git-conventions` says.
   counts as a good fit.
 - **Stopping criteria** for step 10: `target_loss` and `max_iter`.
   `patience` (iterations without improvement, default 5) and
-  `min_delta` (default 0.1) are optional.
+  `min_delta` are optional. `min_delta` is relative: 1% of the last
+  kept `min_val_loss` (default). Take the absolute value of
+  `min_val_loss`, because a loss can be negative.
 - **Run command**: for example `dvc repro train@<target-id>`. For a
   pipeline with more than one stage, use the command that runs all
   stages.
@@ -188,7 +192,8 @@ Stop when one of these is true:
 
 1. **Target reached**: `min_val_loss <= target_loss`.
 2. **Plateau**: the last `patience` iterations each gave
-   `improvement < min_delta`. Skip `failed` rows in this count.
+   `improvement < min_delta`, with `min_delta` computed from the last
+   kept `min_val_loss` before that iteration. Skip `failed` rows in this count.
 3. **Max iterations**: the number of the last log row reaches
    `max_iter`.
 4. **Search space exhausted**: all search-space parameters are

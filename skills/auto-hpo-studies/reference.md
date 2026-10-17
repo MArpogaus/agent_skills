@@ -1,6 +1,7 @@
 # Auto HPO studies: reference
 
-Read the section that a step of `SKILL.md` names.
+Read the section that a step of `SKILL.md` names. Run each snippet
+from the repo root.
 
 ## Launch
 
@@ -9,17 +10,17 @@ Step 6 runs this block. Replace `<target-id>`, `<N>`, `<change>` and
 
 ```bash
 STATE=~/.cache/hpo/<target-id>; mkdir -p "$STATE" logs
-rm -f "$STATE/exit" "$STATE/stalls" "$STATE/stall_size"
+rm -f "$STATE/exit" "$STATE/pid" "$STATE/stalls" "$STATE/stall_size"
 echo running > "$STATE/status"; echo <N> > "$STATE/iter"
 echo "<change>" > "$STATE/change"
-nohup setsid sh -c '{ <run-command>; } > logs/iter<N>_<target-id>.log 2>&1
+nohup setsid sh -c 'echo $$ > '"$STATE"'/pid
+                    { <run-command>; } > logs/iter<N>_<target-id>.log 2>&1
                     echo $? > '"$STATE"'/exit' > /dev/null 2>&1 &
-echo $! > "$STATE/pid"
 ```
 
 Each shell call of an agent is a new shell. The state files carry the
-state between calls. If the run command contains a `'`, put it into a
-script and call that.
+state between calls. The run writes its own process group to `pid`.
+If the run command contains a `'`, put it into a script and call that.
 
 ## Watcher
 
@@ -39,6 +40,7 @@ until [ -f "$STATE/exit" ]; do
         n=1; [ "$now" = "$(cat "$STATE/stall_size" 2>/dev/null)" ] \
             && n=$(($(cat "$STATE/stalls") + 1))
         echo "$now" > "$STATE/stall_size"; echo "$n" > "$STATE/stalls"
+        [ "$n" -ge 3 ] && { kill -- -"$(cat "$STATE/pid")"; continue; }
         echo "STALL $n: no new output for 10 polls"; exit 2
     fi
     last=$now
@@ -52,20 +54,15 @@ non-zombie process is in the session of `pid`. The watcher ends when
 the run ends. When the run ends without an exit code, the watcher
 writes `exit` = `137`.
 
-A stall is no new output in 10 polls in a row (5 minutes). The
-watcher then ends with exit code 2. It writes the `wc -c` size of the
-log to `$STATE/stall_size`. It writes the count of stall ends at that
-size to `$STATE/stalls`, so the count survives a resume. On a stall,
-start the watcher again. Only log growth counts as progress. GPU load
-alone never counts. When the watcher ends with a stall 3 times in a row
-and `wc -c` of the log did not change between those ends, abort the run
-(status `failed`). The third such end prints `STALL 3`. To abort, kill
-the process group, then start the watcher again. It sets `status` to
-`failed`:
+A stall is no new output in 10 polls in a row (5 minutes). Only log
+growth counts as progress. GPU load alone never counts. The watcher
+writes the `wc -c` size of the log to `$STATE/stall_size`. It writes the
+count of stalls at that size to `$STATE/stalls`, so the count survives
+a resume. At the first and the second stall, the watcher ends with exit
+code 2 and prints `STALL <n>`.
 
-```bash
-STATE=~/.cache/hpo/<target-id>; kill -- -"$(cat "$STATE/pid")"
-```
+On a stall, start the watcher again. At the third stall end without log
+growth, the watcher kills the run and the run ends `failed`.
 
 ## Resume
 
@@ -94,4 +91,4 @@ value in `$STATE/iter`.
    step 2.
 9. No state files and `git diff params/` shows a change: stash it
    with a message and go to step 2.
-10. No state files and no diff: go to step 10, then step 2.
+10. No state files and no diff: go to step 10.
