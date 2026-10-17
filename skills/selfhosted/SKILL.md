@@ -143,13 +143,12 @@ with a screenshot.
 ## Releases and CI
 
 - Pin actions as `git-conventions`, "CI workflows", says.
-- Dependabot updates actions, and pre-commit hooks follow
+- Dependabot updates actions. Pre-commit hooks follow
   `git-conventions`, "Pre-commit hooks". In service repos, Renovate
   (`.github/renovate.json`, a regex manager over the `*_image`
   defaults) opens image update PRs against `dev`.
-- The agent tags no service repo. The user tags them by hand.
-- The `home-server` core repo uses semver tags from `cz bump`; the user
-  tags it, like the service repos.
+- The user tags every repo by hand. The agent tags none.
+  `home-server` uses semver tags from `cz bump`.
 - A service repo that packages one upstream application uses the
   upstream version (for example `<major>`, then `<major>.1`). The other
   service repos use `v<semver>`, starting at `v1.0.0`.
