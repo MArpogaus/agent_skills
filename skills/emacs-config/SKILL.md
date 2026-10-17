@@ -25,7 +25,7 @@ metadata: {stack: emacs, requires: [dev-conventions, emacs-package, git-conventi
   suites here. A package under `packages/<name>` follows
   `emacs-package`.
 - **Check what you can, ask for the rest.** An Emacs in the sandbox can
-  byte-compile a tangled block and run batch probes. A claim about
+  byte-compile a block that you copy into a scratch file, and run batch probes. A claim about
   redisplay needs a real frame (`<test rig>/rig gui`). Where neither is
   available, validate with a paren and string balance script (mind `?\(`
   char literals, strings, comments). Then ask the user to eval and
