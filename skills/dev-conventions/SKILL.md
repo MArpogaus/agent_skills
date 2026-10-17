@@ -51,7 +51,7 @@ attribution and the report format.
 - **The user's uncommitted edits are sacred.** Before a branch switch
   or a reset, check for them. Also check for unpushed commits:
   `git log --oneline @{u}.. 2>/dev/null || git log --oneline --branches --not --remotes`.
-  Stash with a message. Never drop a stash.
+  Stash with a message. Never drop a stash of the user's edits.
 
 ## 1. Design principles
 
@@ -195,8 +195,8 @@ review your own changes. On review-only requests, change nothing.
 Unless the user turned reviews off, before the first commit in any
 repo except `<agenda repo>`, arm the monitor. Start one watcher per
 `REVIEW_SKIP` value, each for all repos that use that value. Run
-`tools/review-watch.sh REPO...` (relative to this skill's directory)
-with the monitor tool (Claude Code: `Monitor`) or as a polled
+`STATE=<state dir> tools/review-watch.sh REPO...` (relative to this
+skill's directory) with the monitor tool (Claude Code: `Monitor`) or as a polled
 background job. It watches the current branch (override: `BRANCH`).
 Re-arm a watcher when it times out. When a repo joins later, re-arm
 the watcher for its `REVIEW_SKIP` value with all repos of that value.
@@ -209,9 +209,10 @@ the watcher for its `REVIEW_SKIP` value with all repos of that value.
   the final round. In a repo where `.org` files hold code, set
   `REVIEW_SKIP='*.md'`.
 - The monitor keeps the last handed-out commit per repo in `$STATE`.
-  At the first arm in a session, make a new state directory:
-  `STATE=$(mkdir -p ~/.cache/review-watch && mktemp -d ~/.cache/review-watch/XXXXXX)`.
-  Pass the same `STATE` each time you re-arm a watcher in this session.
+  At the first arm in a session, make a new `<state dir>`:
+  `mkdir -p ~/.cache/review-watch && mktemp -d ~/.cache/review-watch/XXXXXX`.
+  Give the same `<state dir>` in the `STATE=` prefix each time you
+  re-arm a watcher in this session.
 
 ### 4.2 Run a round on each event
 
@@ -294,7 +295,7 @@ Autonomous:
   job ends or a milestone lands. Do not wait for "status?".
 - **Notification channel.** When the user named a notification
   channel, post there too and poll it for replies (`ntfy-channel`,
-  "Hard rules").
+  "3. Watch").
 - **Run independent work in parallel** by default, within the resource
   limits the user stated.
 - **Resume after limits** and relaunch failed subagents with the same
