@@ -31,7 +31,8 @@ first message whose hash appears in this session's commit output.
 - Never commit report and plan files: see `dev-conventions`,
   "2. Asking and acting" (`HANDOFF.md`), and its reference.md,
   "findings.md".
-- Edit a skill only when the user agrees to the change.
+- Step 6 proposes skill changes. Edit a skill there only when the user
+  agrees.
 
 ## 1. Background work
 
