@@ -164,6 +164,8 @@ running kernel.
 
 - Run code and tests with `.venv/bin/python`. Without `.venv`, use
   the system `python3`.
+- A tool that starts `python` itself (`dvc repro`, `make`) runs with
+  the project venv first on `PATH`: `PATH=$PWD/.venv/bin:$PATH dvc repro ...`.
 - Where the edit is part of the task, you may edit the dependency
   list in `pyproject.toml`. `uv lock` and `uv sync` are the user's.
 - `uv.lock` is committed. `.envrc` holds `export VIRTUAL_ENV=.venv`
