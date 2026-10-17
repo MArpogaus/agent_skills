@@ -71,8 +71,9 @@ with the Simplicity view.
 - Commit everything that belongs in history, as `git-conventions`
   requires. Report unpushed commits with the command in
   `dev-conventions`, "Hard rules".
-- Delete report and plan files when they are done. For open work, see
-  the hard rules (`HANDOFF.md`).
+- Never delete a report or plan file without the user's agreement;
+  list it under "Open". For open work, see the hard rules
+  (`HANDOFF.md`).
 
 ## 5. Agenda
 
