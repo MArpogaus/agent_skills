@@ -29,6 +29,29 @@ Elster help) before you rely on one. No value here is tax advice.
 | Health costs | Count only above the zumutbare Belastung (1 to 7 % of income). |
 | Household services | 20 % of the labour cost, max. 4,000 EUR; craftsmen 20 %, max. 1,200 EUR. Tenants need the amounts in the Nebenkostenabrechnung or a landlord certificate. No flat rate. |
 
+## DATEV MyTax folders
+
+The upload page offers these folders (English UI names, drag and drop,
+list or gallery view). Mirror them locally so the user can drag each
+folder in one step. Create only the folders a year needs.
+
+| Folder | Checklist section | Typical documents |
+|--------|-------------------|-------------------|
+| `Employee` | 2 (income, expenses) | Lohnsteuerbescheinigung, the overview, commute data, work equipment, literature, training, moving, union fees |
+| `Investments` | 3 | Bank tax certificates, investment income statements, dividend certificates |
+| `Insurance policies` | 5 (insurance) | Health and care insurance, disability, pension and life insurance statements |
+| `Special expenses & donations` | 5 (donations, education) | Donation receipts, party dues, first education or degree costs, church tax |
+| `Extraordinary expenses` | 5 (health, support) | Medical costs and refunds, support of dependents, care costs |
+| `Services by contractors and household services` | 6 | Craftsmen and household service invoices, operating cost statements |
+| `Children` | 1 | Personal data, child benefit, childcare costs |
+| `Pensions` | 4 | Pension notices, private pension statements, life insurance payments |
+| `Rentals` | 4 | Rental and purchase contracts, incidental purchase costs |
+| `Other income` | 4 | Divestitures, expense allowances, representatives' salary |
+| `Business & Self-employment` | (not in the employee checklist) | Profit statements, incoming and outgoing invoices, bank statements |
+
+Put the year's overview into `Employee` as `00_Uebersicht_<year>.pdf`,
+so it sorts first.
+
 ## Deadlines
 
 - Voluntary return (Antragsveranlagung): four years after the end of

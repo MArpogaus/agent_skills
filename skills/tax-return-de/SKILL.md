@@ -114,8 +114,8 @@ when a year has more than three tickets.
 ## 5. Stage the upload
 
 Create one folder per year with the portal's categories (DATEV MyTax:
-`Employee`, `Investments`, `Insurance policies`,
-`Special expenses & donations`, …). Put the overview first as
+the eleven folders and their mapping to the checklist are in
+`reference.md`, "DATEV MyTax folders"). Put the overview first as
 `00_Uebersicht_<year>.pdf`. Name receipts
 `YYYY-MM-DD_vendor_number.pdf`. Leave out what the overview does not
 claim, for example insurance documents when the cap is reached.
