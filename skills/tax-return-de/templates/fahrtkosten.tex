@@ -1,0 +1,19 @@
+% Tabelle der Tickets und Reisekosten eines Jahres, als Anlage zur Übersicht.
+% Alle Werte sind Beispiele. Bau: pdflatex fahrtkosten.tex
+\documentclass[10pt,a4paper,landscape]{article}
+\usepackage[margin=18mm]{geometry}
+\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}
+\usepackage{helvet}\renewcommand{\familydefault}{\sfdefault}
+\usepackage{booktabs,longtable}
+\pagestyle{empty}\setlength\parindent{0pt}
+\begin{document}
+{\Large\bfseries Fahrt- und Reisekosten 2024}\\[2mm]
+Max Mustermann. Quelle: Buchungsbestätigungen per E-Mail; Zahlung laut Bestätigung.\\[4mm]
+\begin{longtable}{llllrll}\toprule
+Datum & Strecke & Tarif & Auftrag & Betrag & Zahlung & Bemerkung\\\midrule
+05/2024 & Deutschlandticket-Abo & Monatskarte & <Abo-Nr.> & 49,00\,EUR & Lastschrift & \\
+09.09.2024 & BahnCard 25 & 2. Klasse & <Rechnung> & 59,90\,EUR & Überweisung & Rechnung liegt bei \\
+27.11.2024 & <Ort> $\to$ <Ort> & Super Sparpreis & <Auftrag> & 17,90\,EUR & Kreditkarte & \\
+\midrule & & & \textbf{Summe} & \textbf{126,80\,EUR} & & \\\bottomrule
+\end{longtable}
+\end{document}

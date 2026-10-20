@@ -1,0 +1,113 @@
+% Übersicht zur Einkommensteuererklärung eines Arbeitnehmers, ein Jahr.
+% Gliederung nach templates/checkliste.md. Alle Werte sind Beispiele.
+% Ersetze jede <...>-Stelle und jede Beispielzeile; lösche leere Abschnitte
+% nicht, sondern schreibe „keine“. Bau: pdflatex uebersicht.tex
+% Hinweis: T1 kennt kein €, ×, −: EUR, $\times$, -- verwenden.
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=20mm,top=18mm,bottom=18mm]{geometry}
+\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}
+\usepackage{helvet}\renewcommand{\familydefault}{\sfdefault}
+\usepackage{booktabs,tabularx,array,xcolor}
+\pagestyle{empty}\setlength\parindent{0pt}
+\renewcommand{\section}[1]{\par\vspace{11pt}{\large\bfseries #1}\par\nopagebreak\vspace{3pt}\nopagebreak}
+\renewcommand{\subsection}[1]{\par\vspace{7pt}{\bfseries #1}\par\nopagebreak\vspace{2pt}\nopagebreak}
+\renewcommand{\arraystretch}{1.2}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}p{24mm}}
+\newcommand{\jahr}{2024}
+\newcommand{\name}{Max Mustermann}
+\begin{document}
+{\LARGE\bfseries Einkommensteuer \jahr}\hfill{\color{gray}Übersicht nach Checkliste}\\[1mm]
+{\large \name}
+
+\section{1 Allgemeine Angaben}
+\begin{tabularx}{\textwidth}{@{}lX@{}}\toprule
+Familienstand & ledig, keine Kinder \\
+Tätigkeit & <Funktion, Arbeitgeber; weitere Tätigkeiten im Jahr> \\
+Wohnung & bis 06/\jahr: <Ort, Straße>\newline ab 07/\jahr: <Ort, Straße> \\
+Wohnortwechsel & 07/\jahr{} <alter Ort> $\to$ <neuer Ort> \\
+Lohnersatzleistungen & keine \\
+\bottomrule\end{tabularx}
+
+\section{2 Einkünfte aus nichtselbständiger Arbeit}
+\subsection{2.1 Einnahmen}
+\begin{tabularx}{\textwidth}{@{}lX@{}}\toprule
+Arbeitgeber & <Name>, 01.01.--31.12. \\
+Bruttoarbeitslohn & 50.000,00 EUR \\
+Lohnsteuer & 8.000,00 EUR \\
+Erste Tätigkeitsstätte & <Name, Straße, PLZ Ort> \\
+\bottomrule\end{tabularx}
+
+\subsection{2.2 Werbungskosten: Zusammenfassung}
+\begin{tabularx}{\textwidth}{@{}XR@{}}\toprule
+Homeoffice-Pauschale & 822,00 EUR \\
+Fahrten Wohnung -- erste Tätigkeitsstätte & 288,72 EUR \\
+Öffentliche Verkehrsmittel (Abo, BahnCard) & 59,90 EUR \\
+Arbeitsmittel, Software, Fachliteratur, Kontoführung & 323,95 EUR \\
+Umzugskosten (beruflich veranlasst) & 964,00 EUR \\
+\midrule \textbf{Werbungskosten gesamt} & \textbf{2.458,57 EUR} \\
+\bottomrule\end{tabularx}
+
+\subsection{Fahrten Wohnung -- erste Tätigkeitsstätte}
+\begin{tabularx}{\textwidth}{@{}lXR@{}}\toprule
+Termine & 15.--19.01.\jahr, 11.--15.03.\jahr{} & \\
+01--06/\jahr{} & 2 Anfahrten <Ort> -- <Ort> à 130,26 EUR (347 km) & 260,52 EUR \\
+ab 07/\jahr{} & ca. 47 Bürotage $\times$ 2 km $\times$ 0,30 EUR & 28,20 EUR \\
+\bottomrule\end{tabularx}
+
+\subsection{Öffentliche Verkehrsmittel}
+\begin{tabularx}{\textwidth}{@{}lXlR@{}}\toprule
+09.09.\jahr{} & BahnCard 25 & 2. Klasse, Rechnung <Nr.> & 59,90 EUR \\
+\midrule & \textbf{Summe} & & \textbf{59,90 EUR} \\
+\bottomrule\end{tabularx}
+
+\subsection{Homeoffice (kein häusliches Arbeitszimmer)}
+\begin{tabularx}{\textwidth}{@{}lXR@{}}\toprule
+01--06/\jahr{} & ca. 110 Arbeitstage -- 15 Urlaub -- 6 Tage am Arbeitsort & 89 Tage \\
+07--12/\jahr{} & 2--3 Tage pro Woche & 48 Tage \\
+\midrule & \textbf{137 Tage $\times$ 6 EUR} & \textbf{822,00 EUR} \\
+\bottomrule\end{tabularx}
+
+\subsection{Arbeitsmittel, Computer, Fachliteratur, Fortbildung}
+\begin{tabularx}{\textwidth}{@{}lXR@{}}\toprule
+27.02.\jahr{} & Fachbuch „<Titel>“ (<Händler>) & 38,07 EUR \\
+07.10.\jahr{} & Headset <Modell> & 205,00 EUR \\
+13.10.\jahr{} & Software-Abo <Name>, 1 Jahr & 64,88 EUR \\
+ & Kontoführungspauschale & 16,00 EUR \\
+\midrule & \textbf{Summe} & \textbf{323,95 EUR} \\
+\bottomrule\end{tabularx}
+
+\subsection{Umzugskosten (beruflich veranlasst)}
+\begin{tabularx}{\textwidth}{@{}lXR@{}}\toprule
+07/\jahr{} & <alter Ort> $\to$ <neuer Ort>, Fahrzeitersparnis über 1 Stunde täglich: Pauschale für sonstige Umzugsauslagen, Ledige & 964,00 EUR \\
+\bottomrule\end{tabularx}
+
+\subsection{Reisekosten: vom Arbeitgeber erstattet, nicht angesetzt}
+\begin{tabularx}{\textwidth}{@{}lX@{}}\toprule
+04.--06.03.\jahr{} & <Ort, Anlass> \\
+\bottomrule\end{tabularx}
+
+\subsection{Nicht zutreffend}
+\parbox{\textwidth}{Doppelte Haushaltsführung, Arbeitskleidung, Bewerbungskosten, Berufsverbände und Gewerkschaften, Mitarbeiterbewirtung.}
+
+\section{3 Kapitaleinkünfte}
+\begin{tabularx}{\textwidth}{@{}lXR@{}}\toprule
+<Bank> & Kapitalerträge 65,09 EUR, Kapitalertragsteuer 0,00 EUR; Bescheinigung liegt bei & \\
+\bottomrule\end{tabularx}
+
+\section{4 Sonderausgaben}
+\begin{tabularx}{\textwidth}{@{}lXR@{}}\toprule
+Rentenversicherung & Arbeitnehmeranteil laut Lohnsteuerbescheinigung & 4.650,00 EUR \\
+Kranken- und Pflegeversicherung & gesetzlich, laut Lohnsteuerbescheinigung & 5.100,00 EUR \\
+Arbeitslosenversicherung & laut Lohnsteuerbescheinigung & 650,00 EUR \\
+Weitere Versicherungen & nicht angegeben: Höchstbetrag durch Kranken- und Pflegeversicherung ausgeschöpft & \\
+Spenden & keine & \\
+Krankheitskosten, Unterhalt & keine & \\
+\bottomrule\end{tabularx}
+
+\section{5 Haushaltsnahe Dienstleistungen und Handwerker}
+\begin{tabularx}{\textwidth}{@{}X@{}}\toprule
+keine \\
+\bottomrule\end{tabularx}
+
+\vfill{\small\color{gray} Entfernungspauschale: erste 20 km $\times$ 0,30 EUR, ab km 21 $\times$ 0,38 EUR. Geräte und Software überwiegend beruflich genutzt. Belege liegen bei.}
+\end{document}

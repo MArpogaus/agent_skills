@@ -61,6 +61,7 @@ All skills are licensed under MIT: see =LICENSE=.
 | local-pi-session        | Unattended pi sessions: driver loop, heartbeat without cron, sub-agent audit, shell traps                             |
 | sandbox-env             | Dev tools for the agent in its own home: uv, micromamba with conda-forge, nix when present                            |
 | ntfy-channel            | Agent and user chat over an ntfy topic: resolve server, topic and title, post with a hidden token, watch without echo |
+| tax-return-de           | German tax return documents: receipts from mail, checklist, LaTeX overview per year, DATEV                            |
 
 ** Use of LLM Coding Tools
 
